@@ -1,0 +1,255 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A8BC331AD5559D31DA1594E8 /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3BAC2C9AC04084B90846 /* IO.cpp */; };
+		A8BC352A379A4668ACC32734 /* Ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC353B63D0969119694396 /* Ram.cpp */; };
+		A8BC357B28ED9C9E09D4CA07 /* PPU2C07.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A8BC3ACCD56D547A389473D5 /* PPU2C07.h */; };
+		A8BC38DBA0EE3F223671D2C6 /* Rom.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A8BC301FA0E7441C265E1FC0 /* Rom.h */; };
+		A8BC39B08DCDEFD5622CA7C4 /* CPU6502.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A8BC317E7389FCA2C89E6D94 /* CPU6502.h */; };
+		A8BC3AE4AE93B7472BD58EF0 /* Rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3C3F65CE579898665799 /* Rom.cpp */; };
+		A8BC3C1E9D5FB5ECF7EE906F /* PPU2C07.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC39655E61648393F7B15C /* PPU2C07.cpp */; };
+		A8BC3C4FA4F947F4E04A2C5A /* IO.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A8BC32A8338453C99F8D7F78 /* IO.h */; };
+		A8BC3CEFA3D5CE6E282EEFCE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3975777D5581F173463B /* main.cpp */; };
+		A8BC3E34A8E2A25B7F894FA2 /* Ram.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A8BC3890F2603E1F4B0B8CAB /* Ram.h */; };
+		A8BC3F96264F7851E335F527 /* CPU6502.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3B987931F98A9FE2574B /* CPU6502.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A8BC3E55EF43C7D4485C7532 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				A8BC38DBA0EE3F223671D2C6 /* Rom.h in CopyFiles */,
+				A8BC3C4FA4F947F4E04A2C5A /* IO.h in CopyFiles */,
+				A8BC3E34A8E2A25B7F894FA2 /* Ram.h in CopyFiles */,
+				A8BC39B08DCDEFD5622CA7C4 /* CPU6502.h in CopyFiles */,
+				A8BC357B28ED9C9E09D4CA07 /* PPU2C07.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		A8BC301FA0E7441C265E1FC0 /* Rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rom.h; sourceTree = "<group>"; };
+		A8BC317E7389FCA2C89E6D94 /* CPU6502.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPU6502.h; sourceTree = "<group>"; };
+		A8BC32A8338453C99F8D7F78 /* IO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IO.h; sourceTree = "<group>"; };
+		A8BC353B63D0969119694396 /* Ram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ram.cpp; sourceTree = "<group>"; };
+		A8BC3890F2603E1F4B0B8CAB /* Ram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ram.h; sourceTree = "<group>"; };
+		A8BC39655E61648393F7B15C /* PPU2C07.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PPU2C07.cpp; sourceTree = "<group>"; };
+		A8BC3975777D5581F173463B /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		A8BC3ACCD56D547A389473D5 /* PPU2C07.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPU2C07.h; sourceTree = "<group>"; };
+		A8BC3B987931F98A9FE2574B /* CPU6502.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CPU6502.cpp; sourceTree = "<group>"; };
+		A8BC3BAC2C9AC04084B90846 /* IO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IO.cpp; sourceTree = "<group>"; };
+		A8BC3BF450CCB2E399C5DB04 /* nestor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = nestor; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8BC3C3F65CE579898665799 /* Rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Rom.cpp; sourceTree = "<group>"; };
+		A8BC3E5D748A34B6D2ECE1F3 /* nestor.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = nestor.1; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A8BC3B6F80640B642656B83F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A8BC385C4E2AC7F7EA881094 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A8BC3BF450CCB2E399C5DB04 /* nestor */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A8BC3BEB0681EEB2C41A3618 /* nestor */ = {
+			isa = PBXGroup;
+			children = (
+				A8BC3975777D5581F173463B /* main.cpp */,
+				A8BC3E5D748A34B6D2ECE1F3 /* nestor.1 */,
+				A8BC3C3F65CE579898665799 /* Rom.cpp */,
+				A8BC301FA0E7441C265E1FC0 /* Rom.h */,
+				A8BC3BAC2C9AC04084B90846 /* IO.cpp */,
+				A8BC32A8338453C99F8D7F78 /* IO.h */,
+				A8BC353B63D0969119694396 /* Ram.cpp */,
+				A8BC3890F2603E1F4B0B8CAB /* Ram.h */,
+				A8BC3B987931F98A9FE2574B /* CPU6502.cpp */,
+				A8BC317E7389FCA2C89E6D94 /* CPU6502.h */,
+				A8BC39655E61648393F7B15C /* PPU2C07.cpp */,
+				A8BC3ACCD56D547A389473D5 /* PPU2C07.h */,
+			);
+			path = nestor;
+			sourceTree = "<group>";
+		};
+		A8BC3FF3C3CAF6B3844BA0E8 = {
+			isa = PBXGroup;
+			children = (
+				A8BC385C4E2AC7F7EA881094 /* Products */,
+				A8BC3BEB0681EEB2C41A3618 /* nestor */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A8BC3FECAC1D472A27192A21 /* nestor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A8BC3080B5B15FA2BBFDEC33 /* Build configuration list for PBXNativeTarget "nestor" */;
+			buildPhases = (
+				A8BC36FAADAC1313CB585BE8 /* Sources */,
+				A8BC3B6F80640B642656B83F /* Frameworks */,
+				A8BC3E55EF43C7D4485C7532 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = nestor;
+			productName = nestor;
+			productReference = A8BC3BF450CCB2E399C5DB04 /* nestor */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A8BC35B6C79DB1161A76D5A7 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = A8BC3C0A914857CC6C1D710B /* Build configuration list for PBXProject "nestor" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A8BC3FF3C3CAF6B3844BA0E8;
+			productRefGroup = A8BC385C4E2AC7F7EA881094 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A8BC3FECAC1D472A27192A21 /* nestor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A8BC36FAADAC1313CB585BE8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A8BC3CEFA3D5CE6E282EEFCE /* main.cpp in Sources */,
+				A8BC3AE4AE93B7472BD58EF0 /* Rom.cpp in Sources */,
+				A8BC331AD5559D31DA1594E8 /* IO.cpp in Sources */,
+				A8BC352A379A4668ACC32734 /* Ram.cpp in Sources */,
+				A8BC3F96264F7851E335F527 /* CPU6502.cpp in Sources */,
+				A8BC3C1E9D5FB5ECF7EE906F /* PPU2C07.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A8BC306FBB9C2843BA0F9661 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		A8BC3BB6880E1E70C934E159 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		A8BC3C892BF611F513901E95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A8BC3EF270E68B3E54649BBB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A8BC3080B5B15FA2BBFDEC33 /* Build configuration list for PBXNativeTarget "nestor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8BC3BB6880E1E70C934E159 /* Release */,
+				A8BC3C892BF611F513901E95 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		A8BC3C0A914857CC6C1D710B /* Build configuration list for PBXProject "nestor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8BC306FBB9C2843BA0F9661 /* Release */,
+				A8BC3EF270E68B3E54649BBB /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A8BC35B6C79DB1161A76D5A7 /* Project object */;
+}
