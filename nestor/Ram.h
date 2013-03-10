@@ -9,7 +9,7 @@
 #ifndef __Ram_H_
 #define __Ram_H_
 
-#include <iostream>
+#include <stdint.h>
 
 
 class Ram

@@ -9,7 +9,7 @@
 #ifndef __IO_H_
 #define __IO_H_
 
-#include <iostream>
+#include <stdint.h>
 
 class Ram;
 class Rom;
@@ -19,6 +19,8 @@ class IO {
 public:
     
     IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU);
+    
+    void SetButtonState(char inState) { mButtonState = inState; }
 
     void Tick();
     void Load(uint16_t inAddr, uint8_t* outValue);
@@ -32,12 +34,22 @@ public:
     static bool pushing;
 
 private:
-    Ram* mRam;
-    Rom* mRom;
-    PPU2C07* mPPU;
+    Ram*        mRam;
+    Rom*        mRom;
+    PPU2C07*    mPPU;
+
+    char        mButtonState;
+    uint8_t     mButtonReadMask;
     
-    bool mReset;
-    bool mNMI;
+    enum EDMAState{
+        READ, WRITE, INACTIVE
+    };
+    EDMAState   mDMAState;
+    uint16_t    mDMASrc;
+    uint8_t     mDMAValue;
+    
+    bool        mReset;
+    bool        mNMI;
 };
 
 #endif //__IO_H_

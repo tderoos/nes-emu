@@ -10,22 +10,25 @@
 #define __PPU2C07_H_
 
 #include <iostream>
+#include "Rom.h"
 
 
 class PPU2C07 {
 public:
-    PPU2C07();
+    PPU2C07(const Rom* inRom);
 
     void Tick();
-    void Scanline();
+    void Scanline(uint32_t* ioFrameBuffer);
     
-    bool GetNMI() const                 { return (mPPUStatus & 0x80) != 0 && mScanline == 241; }
+    bool GetNMI() const                                     { return (mPPUStatus & 0x80) != 0 && mScanline == 241; }
+    uint16_t GetScanline() const                            { return mScanline; }
 
     // Access
     void Load(uint16_t inAddr, uint8_t* outValue) const;
     void Store(uint16_t inAddr, uint8_t inValue);
 
 private:
+    const Rom* mRom;
     uint8_t mVRAM[0x4000];
     uint8_t mOAM[64*4];
 

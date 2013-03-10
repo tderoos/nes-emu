@@ -4,7 +4,7 @@
 // To change the template use AppCode | Preferences | File Templates.
 //
 
-
+#include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <mm_malloc.h>
@@ -51,7 +51,7 @@ char Rom::GetMapperID() const
 void Rom::Load(uint16_t inAddr, uint8_t* outValue) const
 {
     // Calculate offset - should take bank switching into account for 0x8000 - 0xC000 area
-    // 0xC000 should always be mapped to last bank. Current setup works for single bank.
+    // 0xC000 should always be mapped to last bank. Current setup works for one or two banks.
     
     uint16_t offset = 0x0010;
     int num_banks = GetNumPRGBanks();
@@ -70,6 +70,14 @@ void Rom::Load(uint16_t inAddr, uint8_t* outValue) const
 
     uint8_t * addr = mData + offset;
     *outValue = *addr;
+}
+
+const uint8_t*  Rom::GetCHRData(int inBank) const
+{
+    uint16_t offset = 0x0010;
+    int num_banks = GetNumPRGBanks();
+
+    return mData + offset + num_banks * 0x4000;
 }
 
 

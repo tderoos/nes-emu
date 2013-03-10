@@ -9,7 +9,7 @@
 #ifndef __Rom_H_
 #define __Rom_H_
 
-#include <iostream>
+#include <stdint.h>
 
 
 class Rom {
@@ -24,6 +24,8 @@ public:
     // Access
     void Load(uint16_t inAddr, uint8_t* outValue) const;
     void Store(uint16_t inAddr, uint8_t inValue);
+    
+    const uint8_t*  GetCHRData(int inBank) const;
 
 private:
     uint8_t* mData;

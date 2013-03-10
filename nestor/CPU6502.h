@@ -74,7 +74,6 @@ public:
     void        Handle01(uint8_t opcode);
     void        Handle10(uint8_t opcode);
 
-    bool        mOldMode;
     Status      mRegs;
     IO*         mIO;
     

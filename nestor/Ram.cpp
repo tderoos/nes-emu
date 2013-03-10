@@ -6,6 +6,8 @@
 
 
 #include "Ram.h"
+#include <stdlib.h>
+#include <memory.h>
 
 
 Ram::Ram(uint16_t inSize)

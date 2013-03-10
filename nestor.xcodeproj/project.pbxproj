@@ -7,6 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9338173516EA9A9800C8FCAC /* nestor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9338173316EA9A9800C8FCAC /* nestor.cpp */; };
+		9338173D16EB216100C8FCAC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9338173C16EB216100C8FCAC /* Cocoa.framework */; };
+		9338174716EB216100C8FCAC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9338174516EB216100C8FCAC /* InfoPlist.strings */; };
+		9338174916EB216100C8FCAC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9338174816EB216100C8FCAC /* main.m */; };
+		9338174D16EB216100C8FCAC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 9338174B16EB216100C8FCAC /* Credits.rtf */; };
+		9338175016EB216100C8FCAC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9338174F16EB216100C8FCAC /* AppDelegate.m */; };
+		9338175316EB216200C8FCAC /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9338175116EB216200C8FCAC /* MainMenu.xib */; };
+		9338175A16EB23B500C8FCAC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9338175916EB23B500C8FCAC /* OpenGL.framework */; };
+		9338175B16EB3D5100C8FCAC /* nesView.h in Sources */ = {isa = PBXBuildFile; fileRef = 9338175716EB22B000C8FCAC /* nesView.h */; };
+		9338175C16EB3D5100C8FCAC /* nesView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9338175816EB22B000C8FCAC /* nesView.mm */; };
+		9338175D16EB3E2500C8FCAC /* Rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3C3F65CE579898665799 /* Rom.cpp */; };
+		9338175E16EB3E2500C8FCAC /* Rom.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC301FA0E7441C265E1FC0 /* Rom.h */; };
+		9338175F16EB3E2500C8FCAC /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3BAC2C9AC04084B90846 /* IO.cpp */; };
+		9338176016EB3E2500C8FCAC /* IO.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC32A8338453C99F8D7F78 /* IO.h */; };
+		9338176116EB3E2500C8FCAC /* Ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC353B63D0969119694396 /* Ram.cpp */; };
+		9338176216EB3E2500C8FCAC /* Ram.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3890F2603E1F4B0B8CAB /* Ram.h */; };
+		9338176316EB3E2500C8FCAC /* CPU6502.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3B987931F98A9FE2574B /* CPU6502.cpp */; };
+		9338176416EB3E2500C8FCAC /* CPU6502.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC317E7389FCA2C89E6D94 /* CPU6502.h */; };
+		9338176516EB3E2500C8FCAC /* PPU2C07.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC39655E61648393F7B15C /* PPU2C07.cpp */; };
+		9338176616EB3E2500C8FCAC /* PPU2C07.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3ACCD56D547A389473D5 /* PPU2C07.h */; };
+		9338176716EB3E2500C8FCAC /* nestor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9338173316EA9A9800C8FCAC /* nestor.cpp */; };
+		9338176816EB3E2500C8FCAC /* nestor.h in Sources */ = {isa = PBXBuildFile; fileRef = 9338173416EA9A9800C8FCAC /* nestor.h */; };
 		A8BC331AD5559D31DA1594E8 /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3BAC2C9AC04084B90846 /* IO.cpp */; };
 		A8BC352A379A4668ACC32734 /* Ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC353B63D0969119694396 /* Ram.cpp */; };
 		A8BC357B28ED9C9E09D4CA07 /* PPU2C07.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A8BC3ACCD56D547A389473D5 /* PPU2C07.h */; };
@@ -38,6 +60,24 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9338173316EA9A9800C8FCAC /* nestor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nestor.cpp; sourceTree = "<group>"; };
+		9338173416EA9A9800C8FCAC /* nestor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nestor.h; sourceTree = "<group>"; };
+		9338173A16EB216100C8FCAC /* nestex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nestex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9338173C16EB216100C8FCAC /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		9338173F16EB216100C8FCAC /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		9338174016EB216100C8FCAC /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		9338174116EB216100C8FCAC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		9338174416EB216100C8FCAC /* nestex-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "nestex-Info.plist"; sourceTree = "<group>"; };
+		9338174616EB216100C8FCAC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		9338174816EB216100C8FCAC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		9338174A16EB216100C8FCAC /* nestex-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "nestex-Prefix.pch"; sourceTree = "<group>"; };
+		9338174C16EB216100C8FCAC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		9338174E16EB216100C8FCAC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		9338174F16EB216100C8FCAC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		9338175216EB216200C8FCAC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		9338175716EB22B000C8FCAC /* nesView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nesView.h; sourceTree = "<group>"; };
+		9338175816EB22B000C8FCAC /* nesView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = nesView.mm; sourceTree = "<group>"; };
+		9338175916EB23B500C8FCAC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		A8BC301FA0E7441C265E1FC0 /* Rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rom.h; sourceTree = "<group>"; };
 		A8BC317E7389FCA2C89E6D94 /* CPU6502.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPU6502.h; sourceTree = "<group>"; };
 		A8BC32A8338453C99F8D7F78 /* IO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IO.h; sourceTree = "<group>"; };
@@ -50,10 +90,18 @@
 		A8BC3BAC2C9AC04084B90846 /* IO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IO.cpp; sourceTree = "<group>"; };
 		A8BC3BF450CCB2E399C5DB04 /* nestor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = nestor; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8BC3C3F65CE579898665799 /* Rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Rom.cpp; sourceTree = "<group>"; };
-		A8BC3E5D748A34B6D2ECE1F3 /* nestor.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = nestor.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		9338173716EB216100C8FCAC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9338175A16EB23B500C8FCAC /* OpenGL.framework in Frameworks */,
+				9338173D16EB216100C8FCAC /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A8BC3B6F80640B642656B83F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -64,10 +112,56 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9338173B16EB216100C8FCAC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9338175916EB23B500C8FCAC /* OpenGL.framework */,
+				9338173C16EB216100C8FCAC /* Cocoa.framework */,
+				9338173E16EB216100C8FCAC /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9338173E16EB216100C8FCAC /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9338173F16EB216100C8FCAC /* AppKit.framework */,
+				9338174016EB216100C8FCAC /* CoreData.framework */,
+				9338174116EB216100C8FCAC /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		9338174216EB216100C8FCAC /* nestex */ = {
+			isa = PBXGroup;
+			children = (
+				9338174E16EB216100C8FCAC /* AppDelegate.h */,
+				9338174F16EB216100C8FCAC /* AppDelegate.m */,
+				9338175716EB22B000C8FCAC /* nesView.h */,
+				9338175816EB22B000C8FCAC /* nesView.mm */,
+				9338175116EB216200C8FCAC /* MainMenu.xib */,
+				9338174316EB216100C8FCAC /* Supporting Files */,
+			);
+			path = nestex;
+			sourceTree = "<group>";
+		};
+		9338174316EB216100C8FCAC /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				9338174416EB216100C8FCAC /* nestex-Info.plist */,
+				9338174516EB216100C8FCAC /* InfoPlist.strings */,
+				9338174816EB216100C8FCAC /* main.m */,
+				9338174A16EB216100C8FCAC /* nestex-Prefix.pch */,
+				9338174B16EB216100C8FCAC /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		A8BC385C4E2AC7F7EA881094 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				A8BC3BF450CCB2E399C5DB04 /* nestor */,
+				9338173A16EB216100C8FCAC /* nestex.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,7 +170,6 @@
 			isa = PBXGroup;
 			children = (
 				A8BC3975777D5581F173463B /* main.cpp */,
-				A8BC3E5D748A34B6D2ECE1F3 /* nestor.1 */,
 				A8BC3C3F65CE579898665799 /* Rom.cpp */,
 				A8BC301FA0E7441C265E1FC0 /* Rom.h */,
 				A8BC3BAC2C9AC04084B90846 /* IO.cpp */,
@@ -87,6 +180,8 @@
 				A8BC317E7389FCA2C89E6D94 /* CPU6502.h */,
 				A8BC39655E61648393F7B15C /* PPU2C07.cpp */,
 				A8BC3ACCD56D547A389473D5 /* PPU2C07.h */,
+				9338173316EA9A9800C8FCAC /* nestor.cpp */,
+				9338173416EA9A9800C8FCAC /* nestor.h */,
 			);
 			path = nestor;
 			sourceTree = "<group>";
@@ -94,6 +189,8 @@
 		A8BC3FF3C3CAF6B3844BA0E8 = {
 			isa = PBXGroup;
 			children = (
+				9338174216EB216100C8FCAC /* nestex */,
+				9338173B16EB216100C8FCAC /* Frameworks */,
 				A8BC385C4E2AC7F7EA881094 /* Products */,
 				A8BC3BEB0681EEB2C41A3618 /* nestor */,
 			);
@@ -102,6 +199,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9338173916EB216100C8FCAC /* nestex */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9338175416EB216200C8FCAC /* Build configuration list for PBXNativeTarget "nestex" */;
+			buildPhases = (
+				9338173616EB216100C8FCAC /* Sources */,
+				9338173716EB216100C8FCAC /* Frameworks */,
+				9338173816EB216100C8FCAC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = nestex;
+			productName = nestex;
+			productReference = 9338173A16EB216100C8FCAC /* nestex.app */;
+			productType = "com.apple.product-type.application";
+		};
 		A8BC3FECAC1D472A27192A21 /* nestor */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A8BC3080B5B15FA2BBFDEC33 /* Build configuration list for PBXNativeTarget "nestor" */;
@@ -137,11 +251,48 @@
 			projectRoot = "";
 			targets = (
 				A8BC3FECAC1D472A27192A21 /* nestor */,
+				9338173916EB216100C8FCAC /* nestex */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		9338173816EB216100C8FCAC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9338174716EB216100C8FCAC /* InfoPlist.strings in Resources */,
+				9338174D16EB216100C8FCAC /* Credits.rtf in Resources */,
+				9338175316EB216200C8FCAC /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		9338173616EB216100C8FCAC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9338175D16EB3E2500C8FCAC /* Rom.cpp in Sources */,
+				9338175E16EB3E2500C8FCAC /* Rom.h in Sources */,
+				9338175F16EB3E2500C8FCAC /* IO.cpp in Sources */,
+				9338176016EB3E2500C8FCAC /* IO.h in Sources */,
+				9338176116EB3E2500C8FCAC /* Ram.cpp in Sources */,
+				9338176216EB3E2500C8FCAC /* Ram.h in Sources */,
+				9338176316EB3E2500C8FCAC /* CPU6502.cpp in Sources */,
+				9338176416EB3E2500C8FCAC /* CPU6502.h in Sources */,
+				9338176516EB3E2500C8FCAC /* PPU2C07.cpp in Sources */,
+				9338176616EB3E2500C8FCAC /* PPU2C07.h in Sources */,
+				9338176716EB3E2500C8FCAC /* nestor.cpp in Sources */,
+				9338176816EB3E2500C8FCAC /* nestor.h in Sources */,
+				9338175B16EB3D5100C8FCAC /* nesView.h in Sources */,
+				9338175C16EB3D5100C8FCAC /* nesView.mm in Sources */,
+				9338174916EB216100C8FCAC /* main.m in Sources */,
+				9338175016EB216100C8FCAC /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A8BC36FAADAC1313CB585BE8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -152,12 +303,64 @@
 				A8BC352A379A4668ACC32734 /* Ram.cpp in Sources */,
 				A8BC3F96264F7851E335F527 /* CPU6502.cpp in Sources */,
 				A8BC3C1E9D5FB5ECF7EE906F /* PPU2C07.cpp in Sources */,
+				9338173516EA9A9800C8FCAC /* nestor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXVariantGroup section */
+		9338174516EB216100C8FCAC /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9338174616EB216100C8FCAC /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		9338174B16EB216100C8FCAC /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9338174C16EB216100C8FCAC /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		9338175116EB216200C8FCAC /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9338175216EB216200C8FCAC /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
+		9338175516EB216200C8FCAC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "nestex/nestex-Prefix.pch";
+				INFOPLIST_FILE = "nestex/nestex-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		9338175616EB216200C8FCAC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "nestex/nestex-Prefix.pch";
+				INFOPLIST_FILE = "nestex/nestex-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
 		A8BC306FBB9C2843BA0F9661 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -232,6 +435,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		9338175416EB216200C8FCAC /* Build configuration list for PBXNativeTarget "nestex" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9338175516EB216200C8FCAC /* Release */,
+				9338175616EB216200C8FCAC /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		A8BC3080B5B15FA2BBFDEC33 /* Build configuration list for PBXNativeTarget "nestor" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -239,6 +450,7 @@
 				A8BC3C892BF611F513901E95 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A8BC3C0A914857CC6C1D710B /* Build configuration list for PBXProject "nestor" */ = {
 			isa = XCConfigurationList;
