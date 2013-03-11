@@ -119,18 +119,19 @@ uint32_t swap(uint32_t inValue)
 
 void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
 {
-    mPPUStatus = mPPUStatus & (~0x40);
+    if (mScanline == 0)
+        mPPUStatus = mPPUStatus & (~0x40);
     
     if (mScanline < 240 && (mPPUMask & 0x08))
     {
-        const uint8_t* spr = ((mPPUCtrl & 0x80) ? 0x1000 : 0x0000) + mRom->GetCHRData(0);
+        const uint8_t* spr_tile = ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000) + mRom->GetCHRData(0);
         const uint8_t* chr = ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000) + mRom->GetCHRData(0);
         
         int y     = mScanline / 8;
         int sub_y = mScanline % 8;
         
-        uint16_t  addr       = (0x2000 + (mPPUStatus&0x03) * 0x0400) + (y*32);
-        uint16_t  attr_base  = (0x23c0 + (mPPUStatus&0x03) * 0x0400) + (y>>2)*8;
+        uint16_t  addr       = (0x2000 + (mPPUCtrl&0x03) * 0x0400) + (y*32);
+        uint16_t  attr_base  = (0x23c0 + (mPPUCtrl&0x03) * 0x0400) + (y>>2)*8;
         uint16_t  attr_shift = (y&2) ? 4 : 0;
         
         uint8_t sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
@@ -144,6 +145,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
             uint8_t mTileIndex;
             uint8_t mFlags;
             uint8_t mX;
+            uint8_t mPriority;
         };
         
         uint8_t num_spr_sl = 0;
@@ -151,7 +153,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         for (int i = 0; i < 64; ++i)
         {
             uint8_t spr_y = mOAM[i*4];
-            if (spr_y >= mScanline && spr_y < mScanline+sprite_h)
+            if (spr_y >= mScanline-8 && spr_y < mScanline-8+sprite_h)
             {
                 uint8_t spr_x = mOAM[i*4 + 3];
                 
@@ -162,13 +164,17 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                         break;
                 
                 if (idx < num_spr_sl)
-                    memmove(&sprites_sl[idx+1], &sprites_sl[idx], num_spr_sl-idx * sizeof(uint8_t));
+                    memmove(&(sprites_sl[idx+1]), &(sprites_sl[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
                 
-                sprites_sl[idx].mYOffset = spr_y - mScanline;
+                sprites_sl[idx].mYOffset = spr_y - (mScanline-8);
                 sprites_sl[idx].mTileIndex = mOAM[i*4 + 1];;
                 sprites_sl[idx].mFlags = mOAM[i*4 + 2];;
                 sprites_sl[idx].mX = spr_x;
+                sprites_sl[idx].mPriority = i;
 
+                if ((sprites_sl[idx].mFlags & 0x80) == 0)
+                    sprites_sl[idx].mYOffset = 7-sprites_sl[idx].mYOffset;
+                
                 num_spr_sl++;
             }
         }
@@ -179,69 +185,97 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         uint8_t tile_scroll_x = scroll_x >> 3;
         uint8_t fine_scroll_x = scroll_x & 7;
   
-        for (int x = 0; x < 32; ++x)
+        for (int draw_x = 0; draw_x < 32; ++draw_x)
         {
-            uint8_t name = mVRAM[addr++];
-            uint8_t attr = (mVRAM[attr_base + (x/4)] >> (attr_shift + ((x&2) ? 2 : 0))) & 3;
-            
-            uint8_t num_spr_tl = 0;
-            uint8_t x_start = x*8, x_end = x_start+8;
-            for (int s = spr_index; s < num_spr_sl; ++s)
+            uint8_t tile_x = tile_scroll_x + draw_x;
+            uint16_t addr_xor = 0;
+            if (tile_x >= 32)
             {
-                const ScanlineSprite& spr = sprites_sl[s];
-                
-                if (spr.mX+8 < x_start)
-                {
-                    spr_index++;
-                    continue;
-                }
-                
-                if (spr.mX > x_end)
-                    break;
-                
-                num_spr_tl++;
+                addr_xor = 0x0400;
+                tile_x -= 32;
             }
             
-//            name = y*32+x;
-
+            uint8_t name = mVRAM[(addr^addr_xor) + tile_x];
+            uint8_t attr = (mVRAM[(attr_base^addr_xor) + (tile_x/4)] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
+            
             // Fetch pattern
             uint8_t plane0 = chr[(name * 16) + sub_y];
             uint8_t plane1 = chr[(name * 16) + sub_y + 8];
             
-            for (int i = 7; i >= 0; --i)
+            const uint8_t from_x = (draw_x == 0  ?   fine_scroll_x : 0);
+            const uint8_t   to_x = (draw_x == 31 ? 8-fine_scroll_x : 8);
+            
+            for (int sx = from_x; sx < to_x; ++sx)
             {
-                uint8_t x_pos = x*8 + (7-i);
-                uint8_t spr_color = 0;
-                for (int s = 0; s < num_spr_tl; ++s)
+                uint8_t color = 0;
+                
+                // BG
+                uint8_t bit0 = (plane0 >> (7-sx)) & 1;
+                uint8_t bit1 = (plane1 >> (7-sx)) & 1;
+                uint8_t bg_color_idx = bit0 | (bit1<<1) ;
+                
+                if (bg_color_idx != 0)
+                    bg_color_idx += 4*attr;
+                
+                if (mPPUMask & 0x08)
+                    color = mVRAM[0x3F00 + bg_color_idx];
+
+                // Sprites
+                uint8_t x_pos = (draw_x*8) + sx - fine_scroll_x;
+                uint8_t prio = 0x0;
+
+                for (int s = spr_index; s < num_spr_sl; ++s)
                 {
-                    const ScanlineSprite& spr = sprites_sl[spr_index+s];
-                    if (x_pos >= spr.mX && x_pos < spr.mX+8)
+                    const ScanlineSprite& spr = sprites_sl[s];
+                    
+                    if (x_pos >= spr.mX + 8)
                     {
-                        spr_color = 1;
-                        mPPUStatus = mPPUStatus | 0x40;
+                        spr_index++;
+                        continue;
+                    }
+                    
+                    if (x_pos >= spr.mX)
+                    {
+                        // Fetch pattern
+                        uint8_t plane0 = spr_tile[(spr.mTileIndex * 16) + spr.mYOffset];
+                        uint8_t plane1 = spr_tile[(spr.mTileIndex * 16) + spr.mYOffset + 8];
+                        
+                        uint8_t shift = x_pos - spr.mX;
+                        
+                        if ((spr.mFlags&0x40) == 0)
+                            shift = 7 - shift;
+                        
+                        uint8_t color_idx = ((plane0>>shift) & 0x01) | (((plane1 >> shift) & 0x01)<<1);
+
+                        if (color_idx != 0 && spr.mPriority >= prio)
+                        {
+                            color_idx += (spr.mFlags & 0x03) * 4;
+                            
+                            if (bg_color_idx == 0 || (spr.mFlags & 0x20) == 0)
+                            {
+                                if ((mPPUMask & 0x10) != 0)
+                                    color = mVRAM[0x3F10 + color_idx];
+                                prio = spr.mPriority;
+                            }
+                            if (prio == 0 /*&& bg_color_idx != 0*/)
+                                mPPUStatus = mPPUStatus | 0x40;
+                        }
+//                        
+//                        if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
+//                            mPPUStatus = mPPUStatus | 0x40;
+
                     }
                 }
                 
-                uint8_t bit0 = (plane0 >> i) & 1;
-                uint8_t bit1 = (plane1 >> i) & 1;
-                uint8_t color_idx = bit0 | (bit1<<1) ;//| (attr << 2);
-                
-                if (color_idx != 0)
-                    color_idx += 4*attr;
-                else
-                    color_idx = color_idx;
-//                uint8_t color_idx = (bit0 | (bit1<<1)) + (16*attr);
-                
-                uint8_t color = mVRAM[0x3F00 + color_idx];
-                (*fb_addr++) = spr_color ? 0xFFFFFFFF : swap(palette[color]);
+                (*fb_addr++) = swap(palette[color]);
             }
         }
     }
 
     if (mScanline == 241)
         mPPUStatus = mPPUStatus | 0x80;
+    
     mScanline = (mScanline+1) % 260;
-
 }
 
 
@@ -254,7 +288,7 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
         case 2:
             *outValue = mPPUStatus;
             mPPUStatus = mPPUStatus & 0x7F;
-            mPPUScroll = 0;
+//            mPPUScroll = 0;
             mPPUAddr = 0;
             break;
 

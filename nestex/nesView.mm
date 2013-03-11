@@ -77,7 +77,7 @@ nestor* nes = NULL;
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, mFrameBuffer );
     
     glBegin(GL_QUADS);
-        glTexCoord2i(0,0); glVertex2i(-1,1);  //you should probably change does vertices.
+        glTexCoord2i(0,0); glVertex2i(-1,1);
         glTexCoord2i(0,1); glVertex2i(-1,-1);
         glTexCoord2i(1,1); glVertex2i(1,-1);
         glTexCoord2i(1,0); glVertex2i(1,1);
@@ -95,7 +95,7 @@ nestor* nes = NULL;
     // keep track of start/launch time
 //    [self setStartTime];
     // start animation timer
-    timer = [NSTimer timerWithTimeInterval:(1.0f/30.0f) target:self
+    timer = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self
                                   selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 
@@ -141,9 +141,9 @@ nestor* nes = NULL;
 
 //
 // Read # |    1      2      3      4      5      6      7      8
-//-------+---------------------------------------------------------
-//Button |    A      B   SELECT   START   UP    DOWN   LEFT  RIGHT
-
+// -------+---------------------------------------------------------
+// Button |    A      B   SELECT   START   UP    DOWN   LEFT  RIGHT
+//
 -(void)keyUp:(NSEvent*)event
 {
     int bit = 0;
@@ -157,7 +157,6 @@ nestor* nes = NULL;
         case 0:  bit = 1 << 6; break;
         case 2:  bit = 1 << 7; break;
     }
-    
     mButtonState = mButtonState & ~bit;
 }
 
@@ -175,7 +174,6 @@ nestor* nes = NULL;
         case 0:  bit = 1 << 6; break;
         case 2:  bit = 1 << 7; break;
     }
-    
     mButtonState = mButtonState | bit;
 }
 
