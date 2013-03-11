@@ -485,8 +485,8 @@ void CPU6502::Handle00(uint8_t opcode)
             BREAK();
     }
     
-    uint8_t cycles[] = { 2, 2, 0, 3, 0, 2, 0, 3 };
-    mRegs.mPC += cycles[am];
+    uint8_t instr_size[] = { 2, 2, 0, 3, 0, 2, 0, 3 };
+    mRegs.mPC += instr_size[am];
 }
 
 
@@ -540,16 +540,13 @@ void CPU6502::Handle01(uint8_t opcode)
         mIO->Store(ea, mRegs.mAcc);
     }
     
-    uint8_t cycles[] = { 2, 2, 2, 3, 2, 2, 3, 3 };
-    mRegs.mPC += cycles[am];
+    uint8_t instr_size[] = { 2, 2, 2, 3, 2, 2, 3, 3 };
+    mRegs.mPC += instr_size[am];
 }
 
 
 void CPU6502::Handle10(uint8_t opcode)
 {
-    if (opcode == 0x96)
-        opcode = opcode;
-    
     // Handle single byte instructions
     if ((opcode & 0x8F) == 0x8A)
     {
@@ -624,14 +621,16 @@ void CPU6502::Handle10(uint8_t opcode)
             break;
     }
     
-    uint8_t cycles[] = { 2, 2, 1, 3, 0, 2, 0, 3 };
-    mRegs.mPC += cycles[am];
+    uint8_t instr_size[] = { 2, 2, 1, 3, 0, 2, 0, 3 };
+    mRegs.mPC += instr_size[am];
 }
 
 
 void CPU6502::Tick()
 {
     bool irq = false;
+    
+    static bool tick = false;
     
     if (mIO->NMI() || irq || mIO->Reset())
     {
@@ -643,8 +642,13 @@ void CPU6502::Tick()
         
         mRegs.mPC = ReadAddr(addr, mIO);
         mRegs.mBreak = 0;
+        
+        tick = false;
     }
     
+//    tick = !tick;
+//    if (!tick)
+//        return;
     
     uint8_t opcode;
     mIO->Load(mRegs.mPC, &opcode);

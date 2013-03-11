@@ -35,8 +35,11 @@ private:
     uint16_t mScanline;
     
     // Internal registers
+    mutable bool mPPUAddrWriteLO;
+    
     uint8_t mPPUCtrl;
     uint8_t mPPUMask;
+    mutable uint8_t  mPPULoadBuffer;
     mutable uint8_t  mPPUStatus;
     mutable uint16_t mPPUAddr;
     mutable uint16_t mPPUScroll;

@@ -102,8 +102,9 @@ nestor* nes = NULL;
     // ensure timer fires during resize
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
     
-//    nes = new nestor("/Users/tderoos/Projects/nestor/nestest.nes");
-    nes = new nestor("/Users/tderoos/Projects/nestor/smb1.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/nestest.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
     
     mButtonState = 0;
 }

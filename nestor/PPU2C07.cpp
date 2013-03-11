@@ -4,77 +4,55 @@
 // To change the template use AppCode | Preferences | File Templates.
 //
 
+#include <stdint.h>
 
+/*
+const uint32_t palette[64] = {
+    0x808080, 0x0000BB, 0x3700BF, 0x8400A6,
+    0xBB006A, 0xB7001E, 0xB30000, 0x912600,
+    0x7B2B00, 0x003E00, 0x00480D, 0x003C22,
+    0x002F66, 0x000000, 0x050505, 0x050505,
+    
+    0xC8C8C8, 0x0059FF, 0x443CFF, 0xB733CC,
+    0xFF33AA, 0xFF375E, 0xFF371A, 0xD54B00,
+    0xC46200, 0x3C7B00, 0x1E8415, 0x009566,
+    0x0084C4, 0x111111, 0x090909, 0x090909,
+    
+    0xFFFFFF, 0x0095FF, 0x6F84FF, 0xD56FFF,
+    0xFF77CC, 0xFF6F99, 0xFF7B59, 0xFF915F,
+    0xFFA233, 0xA6BF00, 0x51D96A, 0x4DD5AE,
+    0x00D9FF, 0x666666, 0x0D0D0D, 0x0D0D0D,
+    
+    0xFFFFFF, 0x84BFFF, 0xBBBBFF, 0xD0BBFF,
+    0xFFBFEA, 0xFFBFCC, 0xFFC4B7, 0xFFCCAE,
+    0xFFD9A2, 0xCCE199, 0xAEEEB7, 0xAAF7EE,
+    0xB3EEFF, 0xDDDDDD, 0x111111, 0x111111
+};
+
+ /*/
 unsigned int palette[] =
 {
-    0x7C7C7CFF,
-    0x0000FCFF,
-    0x0000BCFF,
-    0x4428BCFF,
-    0x940084FF,
-    0xA80020FF,
-    0xA81000FF,
-    0x881400FF,
-    0x503000FF,
-    0x007800FF,
-    0x006800FF,
-    0x005800FF,
-    0x004058FF,
-    0x000000FF,
-    0x000000FF,
-    0x000000FF,
+    0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC,
+    0x940084, 0xA80020, 0xA81000, 0x881400,
+    0x503000, 0x007800, 0x006800, 0x005800,
+    0x004058, 0x000000, 0x000000, 0x000000,
 
-    0xBCBCBCFF,
-    0x0078F8FF,
-    0x0058F8FF,
-    0x6844FCFF,
-    0xD800CCFF,
-    0xE40058FF,
-    0xF83800FF,
-    0xE45C10FF,
-    0xAC7C00FF,
-    0x00B800FF,
-    0x00A800FF,
-    0x00A844FF,
-    0x008888FF,
-    0x000000FF,
-    0x000000FF,
-    0x000000FF,
+    0xBCBCBC, 0x0078F8, 0x0058F8, 0x6844FC,
+    0xD800CC, 0xE40058, 0xF83800, 0xE45C10,
+    0xAC7C00, 0x00B800, 0x00A800, 0x00A844,
+    0x008888, 0x000000, 0x000000, 0x000000,
    
-    0xF8F8F8FF,
-    0x3CBCFCFF,
-    0x6888FCFF,
-    0x9878F8FF,
-    0xF878F8FF,
-    0xF85898FF,
-    0xF87858FF,
-    0xFCA044FF,
-    0xF8B800FF,
-    0xB8F818FF,
-    0x58D854FF,
-    0x58F898FF,
-    0x00E8D8FF,
-    0x787878FF,
-    0x000000FF,
-    0x000000FF,
+    0xF8F8F8, 0x3CBCFC, 0x6888FC, 0x9878F8,
+    0xF878F8, 0xF85898, 0xF87858, 0xFCA044,
+    0xF8B800, 0xB8F818, 0x58D854, 0x58F898,
+    0x00E8D8, 0x787878, 0x000000, 0x000000,
 
-    0xFCFCFCFF,
-    0xA4E4FCFF,
-    0xB8B8F8FF,
-    0xD8B8F8FF,
-    0xF8B8F8FF,
-    0xF8A4C0FF,
-    0xF0D0B0FF,
-    0xFCE0A8FF,
-    0xF8D878FF,
-    0xD8F878FF,
-    0xB8F8B8FF,
-    0xB8F8D8FF,
-    0x00FCFCFF,
-    0xF8D8F8FF,
-    0x000000FF,
-    0x000000FF
+    0xFCFCFC, 0xA4E4FC, 0xB8B8F8, 0xD8B8F8,
+    0xF8B8F8, 0xF8A4C0, 0xF0D0B0, 0xFCE0A8,
+    0xF8D878, 0xD8F878, 0xB8F8B8, 0xB8F8D8,
+    0x00FCFC, 0xF8D8F8, 0x000000, 0x000000
 };
+//*/
 
 #include "PPU2C07.h"
 
@@ -97,6 +75,8 @@ PPU2C07::PPU2C07(const Rom* inRom)
     mPPUAddr = 0;
     mPPUScroll = 0;
     mOAMAddr = 0;
+    
+    mPPUAddrWriteLO = false;
 }
 
 void PPU2C07::Tick()
@@ -215,7 +195,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                 uint8_t bg_color_idx = bit0 | (bit1<<1) ;
                 
                 if (bg_color_idx != 0)
-                    bg_color_idx += 4*attr;
+                    bg_color_idx |= (attr<<2);
                 
                 if (mPPUMask & 0x08)
                     color = mVRAM[0x3F00 + bg_color_idx];
@@ -267,7 +247,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                     }
                 }
                 
-                (*fb_addr++) = swap(palette[color]);
+                (*fb_addr++) = swap((palette[color]) << 8);
             }
         }
     }
@@ -290,6 +270,7 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
             mPPUStatus = mPPUStatus & 0x7F;
 //            mPPUScroll = 0;
             mPPUAddr = 0;
+            mPPUAddrWriteLO = false;
             break;
 
         case 4:
@@ -297,7 +278,25 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
             break;
 
         case 7:
-            *outValue = mVRAM[mPPUAddr++];
+            
+            if (mPPUAddr > 0x3F00)
+            {
+                *outValue = mVRAM[mPPUAddr & 0x3FFF];
+            }
+            else
+            {
+                // Reads have a delay of one
+                *outValue = mPPULoadBuffer;
+
+                // Map low addresses on chr data
+                if (mPPUAddr < 0x2000)
+                    mPPULoadBuffer = mRom->GetCHRData(0)[mPPUAddr];
+
+                else
+                    mPPULoadBuffer = mVRAM[mPPUAddr & 0x3FFF];
+            }
+
+            mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
             break;
             
         default:
@@ -321,30 +320,52 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
             
         case 3:
             mOAMAddr = inValue;
-//            printf("OAMADDR : 0x%x\n", mOAMAddr);
             break;
 
         case 4:
-            mOAM[mOAMAddr] = inValue;
-//            printf("AOM[0x%x] = $%x\n", mOAMAddr, inValue);
-            mOAMAddr++;
+            mOAM[mOAMAddr++] = inValue;
             break;
 
         case 5:
             mPPUScroll = (mPPUScroll<<8) | inValue;
-//            printf("PPUSCROLL : 0x%x\n", mPPUScroll);
             break;
 
         case 6:
-            mPPUAddr = (mPPUAddr<<8) | (inValue);
-//            printf("PPUADDR : 0x%x\n", mPPUAddr);
-            break;
+            if (mPPUAddrWriteLO)
+                mPPUAddr = (mPPUAddr & 0xFF00) | inValue;
+
+            else
+                mPPUAddr = (mPPUAddr & 0x00FF) | inValue << 8;
             
+//            mPPUAddr = (mPPUAddr<<8) | (inValue);
+            mPPUAddrWriteLO = !mPPUAddrWriteLO;
+            break;
+
         case 7:
-            mVRAM[mPPUAddr & 0x3FFF] = inValue;
-//            printf("VRAM[0x%x] = $%x\n", mPPUAddr, inValue);
+        {
+            uint16_t ea = mPPUAddr&0x3FFF;
+
+            if (mPPUAddr >= 0x3320 && mPPUAddr <= 0x3FFF)
+                mPPUAddr = mPPUAddr;
+            
+            if (ea >= 0x2000 && ea < 0x3F00)
+                ea = ea & 0x2FFF;
+            
+//            if (ea == 0x3F04 || ea == 0x3F08 || ea == 0x3F0c || ea == 0x3F10 || ea == 0x3F14 || ea == 0x3F18 || ea == 0x3F1C)
+            if (ea == 0x3F10)
+                ea = 0x3f00;
+            
+            else if (ea >= 0x3F00)
+                ea = ea & 0x3F1F;
+            
+            if (ea != mPPUAddr)
+                mPPUAddr = mPPUAddr;
+            
+            mVRAM[ea] = inValue;
+
             mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
             break;
+        }
             
         default:
             BREAKPPU();
