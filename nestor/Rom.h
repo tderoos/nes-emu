@@ -16,29 +16,28 @@ class Mapper;
 
 class Rom {
 public:
+    // Construct and load
     Rom(const char* inFilename);
 
-    // Properties
-    char GetNumPRGBanks() const                 { return mNumPRG; }
-    char GetNumCHRBanks() const                 { return mNumCHR; }
-    char GetMapperID() const;
+    // Load
+    inline void Load(UInt16 inAddr, UInt8* outValue) const      { *outValue = mPRGData[inAddr & 0x7FFF]; };
+    const UInt8*  GetCHRData() const                            { return mCHRData; }
 
-    // Access
-    void Load(UInt16 inAddr, UInt8* outValue) const;
+    // Store
     void Store(UInt16 inAddr, UInt8 inValue);
     
-    const UInt8*  GetCHRData(int inBank) const;
 
 private:
-    UInt8 mNumPRG;
-    UInt8 mNumCHR;
-    UInt8 mMapperID;
-    
     bool  mSRam;
     bool  mSRamBattery;
     
     UInt8*  mData;
     Mapper* mMapper;
+    
+    // Remapped data - no remapping during normal runtime
+    // Kept up to date by the Mapper. 
+    UInt8   mPRGData[0x8000];
+    UInt8   mCHRData[0x2000];
 };
 
 #endif //__Rom_H_

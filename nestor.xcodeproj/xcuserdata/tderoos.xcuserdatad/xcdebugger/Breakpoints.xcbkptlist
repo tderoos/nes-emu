@@ -485,7 +485,7 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "No"
+         shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/CPU6502.cpp"
@@ -567,11 +567,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/Rom.cpp"
-         timestampString = "384819875.688497"
+         timestampString = "384855340.322309"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "94"
-         endingLineNumber = "94"
+         startingLineNumber = "48"
+         endingLineNumber = "48"
          landmarkName = "Rom::Store(UInt16 inAddr, UInt8 inValue)"
          landmarkType = "5">
       </FileBreakpoint>
@@ -586,71 +586,6 @@
          startingLineNumber = "646"
          endingLineNumber = "646"
          landmarkName = "CPU6502::Tick()"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/MMC1.h"
-         timestampString = "384824379.924669"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "40"
-         endingLineNumber = "40"
-         landmarkName = "Map(UInt16 inAddr)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/MMC1.h"
-         timestampString = "384824408.839225"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "45"
-         endingLineNumber = "45"
-         landmarkName = "Map(UInt16 inAddr)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/MMC1.h"
-         timestampString = "384824414.998146"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "54"
-         endingLineNumber = "54"
-         landmarkName = "Map(UInt16 inAddr)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/MMC1.h"
-         timestampString = "384824414.998146"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "56"
-         endingLineNumber = "56"
-         landmarkName = "Map(UInt16 inAddr)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/MMC1.h"
-         timestampString = "384824403.379368"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "47"
-         endingLineNumber = "47"
-         landmarkName = "Map(UInt16 inAddr)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -671,11 +606,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/MMC1.h"
-         timestampString = "384827660.937086"
+         timestampString = "384854448.61576"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "79"
-         endingLineNumber = "79"
+         startingLineNumber = "41"
+         endingLineNumber = "41"
          landmarkName = "Store(UInt16 inAddr, UInt8 inData)"
          landmarkType = "5">
       </FileBreakpoint>
@@ -684,11 +619,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/MMC1.h"
-         timestampString = "384827986.675781"
+         timestampString = "384854448.61576"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "70"
-         endingLineNumber = "70"
+         startingLineNumber = "31"
+         endingLineNumber = "31"
          landmarkName = "Store(UInt16 inAddr, UInt8 inData)"
          landmarkType = "5">
       </FileBreakpoint>

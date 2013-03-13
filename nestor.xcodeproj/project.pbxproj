@@ -86,6 +86,7 @@
 		93CEBBB116EFC2ED00CBDE87 /* types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mapper.cpp; sourceTree = "<group>"; };
 		93CEBBB416EFC44600CBDE87 /* MMC1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MMC1.h; sourceTree = "<group>"; };
+		93CEBBB816F068AD00CBDE87 /* NROM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NROM.h; sourceTree = "<group>"; };
 		A8BC301FA0E7441C265E1FC0 /* Rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rom.h; sourceTree = "<group>"; };
 		A8BC317E7389FCA2C89E6D94 /* CPU6502.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPU6502.h; sourceTree = "<group>"; };
 		A8BC32A8338453C99F8D7F78 /* IO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IO.h; sourceTree = "<group>"; };
@@ -171,6 +172,7 @@
 				93CEBBB016EFC2A800CBDE87 /* Mapper.h */,
 				93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */,
 				93CEBBB416EFC44600CBDE87 /* MMC1.h */,
+				93CEBBB816F068AD00CBDE87 /* NROM.h */,
 			);
 			name = Mapper;
 			sourceTree = "<group>";

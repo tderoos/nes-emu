@@ -110,8 +110,8 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
     
     if (mScanline < 240 && (mPPUMask & 0x08))
     {
-        const uint8_t* spr_tile = ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000) + mRom->GetCHRData(0);
-        const uint8_t* chr = ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000) + mRom->GetCHRData(0);
+        const uint8_t* spr_tile = ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000) + mRom->GetCHRData();
+        const uint8_t* chr = ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000) + mRom->GetCHRData();
         
         int y     = mScanline / 8;
         int sub_y = mScanline % 8;
@@ -304,7 +304,7 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
 
                 // Map low addresses on chr data
                 if (mPPUAddr < 0x2000)
-                    mPPULoadBuffer = mRom->GetCHRData(0)[mPPUAddr];
+                    mPPULoadBuffer = mRom->GetCHRData()[mPPUAddr];
 
                 else
                     mPPULoadBuffer = mVRAM[mPPUAddr & 0x3FFF];
