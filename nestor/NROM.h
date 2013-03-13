@@ -40,7 +40,8 @@ public:
         }
         
         // Chr data
-        memcpy(ioCHR, inData + mNumPRG * 0x4000, 0x2000);
+        if (mNumCHR != 0)
+            memcpy(ioCHR, inData + mNumPRG * 0x4000, 0x2000);
         
         mDirty = false;
     }

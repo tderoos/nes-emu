@@ -9,7 +9,7 @@
 #ifndef __IO_H_
 #define __IO_H_
 
-#include <stdint.h>
+#include "types.h"
 
 class Ram;
 class Rom;
@@ -20,33 +20,33 @@ public:
     
     IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU);
     
-    void SetButtonState(char inState) { mButtonState = inState; }
+    void    SetButtonState(char inState) { mButtonState = inState; }
 
-    void Tick();
-    void Load(uint16_t inAddr, uint8_t* outValue);
-    void Store(uint16_t inAddr, uint8_t inValue);
+    void    Tick();
+    void    Load(uint16_t inAddr, uint8_t* outValue);
+    void    Store(uint16_t inAddr, uint8_t inValue);
 
     void    SetNMI(bool inSet)   { mNMI = inSet; }
     
     bool    Reset() const        { return mReset; }
     bool    NMI() const          { return mNMI; }
     
-    static bool pushing;
-
 private:
     Ram*        mRam;
     Rom*        mRom;
     PPU2C07*    mPPU;
 
     char        mButtonState;
-    uint8_t     mButtonReadMask;
+    UInt8       mButtonReadMask;
     
     enum EDMAState{
         READ, WRITE, INACTIVE
     };
     EDMAState   mDMAState;
     uint16_t    mDMASrc;
-    uint8_t     mDMAValue;
+    UInt8       mDMAValue;
+    
+    UInt8       mPRGRam[0x2000];
     
     bool        mReset;
     bool        mNMI;

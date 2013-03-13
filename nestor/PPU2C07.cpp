@@ -77,12 +77,13 @@ void BREAKPPU()
 }
 
 
-PPU2C07::PPU2C07(const Rom* inRom)
+PPU2C07::PPU2C07(Rom* inRom)
 {
-    mRom = inRom;
     mScanline = 0;
     memset(mVRAM, 0, sizeof(mVRAM));
     memset(mOAM, 0, sizeof(mOAM));
+    
+    inRom->SetVRam(mVRAM);
     
     mPPUCtrl = 0;
     mPPUMask = 0;
@@ -110,11 +111,13 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
     
     if (mScanline < 240 && (mPPUMask & 0x08))
     {
-        const uint8_t* spr_tile = ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000) + mRom->GetCHRData();
-        const uint8_t* chr = ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000) + mRom->GetCHRData();
+        const uint8_t* spr_tile = mVRAM + ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000);
+        const uint8_t* chr      = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
         
-        int y     = mScanline / 8;
-        int sub_y = mScanline % 8;
+        int effective_sl = (mScanline + (mPPUScroll & 0xFF)) % 240;
+        
+        int y     = effective_sl / 8;
+        int sub_y = effective_sl % 8;
         
         uint16_t  addr       = (0x2000 + (mPPUCtrl&0x03) * 0x0400) + (y*32);
         uint16_t  attr_base  = (0x23c0 + (mPPUCtrl&0x03) * 0x0400) + (y>>2)*8;
@@ -122,7 +125,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         
         uint8_t sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
         
-        uint32_t* fb_addr   = ioFrameBuffer + (mScanline*256);
+        uint32_t* fb_addr   = ioFrameBuffer + (effective_sl*256);
         
         // Walk the OAM for sprites on this scanline
         struct ScanlineSprite
@@ -139,7 +142,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         for (int i = 0; i < 64; ++i)
         {
             uint8_t spr_y = mOAM[i*4];
-            if (spr_y >= mScanline-8 && spr_y < mScanline-8+sprite_h)
+            if (spr_y >= effective_sl-8 && spr_y < effective_sl-8+sprite_h)
             {
                 uint8_t spr_x = mOAM[i*4 + 3];
                 
@@ -152,7 +155,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                 if (idx < num_spr_sl)
                     memmove(&(sprites_sl[idx+1]), &(sprites_sl[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
                 
-                sprites_sl[idx].mYOffset = spr_y - (mScanline-8);
+                sprites_sl[idx].mYOffset = spr_y - (effective_sl-8);
                 sprites_sl[idx].mTileIndex = mOAM[i*4 + 1];;
                 sprites_sl[idx].mFlags = mOAM[i*4 + 2];;
                 sprites_sl[idx].mX = spr_x;
@@ -160,6 +163,13 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
 
                 if ((sprites_sl[idx].mFlags & 0x80) == 0)
                     sprites_sl[idx].mYOffset = 7-sprites_sl[idx].mYOffset;
+                
+//                if (sprite_h == 0x10)
+//                {
+//                    
+//                }
+//                else
+                
                 
                 num_spr_sl++;
             }
@@ -261,7 +271,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
     if (mScanline == 241)
         mPPUStatus = mPPUStatus | 0x80;
     
-    mScanline = (mScanline+1) % 260;
+    mScanline = (mScanline+1) % 262;
 }
 
 
@@ -301,13 +311,7 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
             {
                 // Reads have a delay of one
                 *outValue = mPPULoadBuffer;
-
-                // Map low addresses on chr data
-                if (mPPUAddr < 0x2000)
-                    mPPULoadBuffer = mRom->GetCHRData()[mPPUAddr];
-
-                else
-                    mPPULoadBuffer = mVRAM[mPPUAddr & 0x3FFF];
+                mPPULoadBuffer = mVRAM[mPPUAddr & 0x3FFF];
             }
 
             mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;

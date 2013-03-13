@@ -18,10 +18,10 @@ class Rom {
 public:
     // Construct and load
     Rom(const char* inFilename);
+    void            SetVRam(UInt8* mVRam);
 
     // Load
-    inline void Load(UInt16 inAddr, UInt8* outValue) const      { *outValue = mPRGData[inAddr & 0x7FFF]; };
-    const UInt8*  GetCHRData() const                            { return mCHRData; }
+    inline void     Load(UInt16 inAddr, UInt8* outValue) const    { *outValue = mPRGData[inAddr & 0x7FFF]; };
 
     // Store
     void Store(UInt16 inAddr, UInt8 inValue);
@@ -35,9 +35,9 @@ private:
     Mapper* mMapper;
     
     // Remapped data - no remapping during normal runtime
-    // Kept up to date by the Mapper. 
+    // Kept up to date by the Mapper.
     UInt8   mPRGData[0x8000];
-    UInt8   mCHRData[0x2000];
+    UInt8*  mCHRData;
 };
 
 #endif //__Rom_H_

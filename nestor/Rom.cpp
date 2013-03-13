@@ -14,7 +14,8 @@
 
 
 Rom::Rom(char const *inFilename) :
-    mData(NULL)
+    mData(NULL),
+    mCHRData(NULL)
 {
     int fd = -1;
     if ((fd = open(inFilename, O_RDONLY, 0)) != -1)
@@ -35,9 +36,17 @@ Rom::Rom(char const *inFilename) :
         printf("Loaded %s (PRG:%d CHR:%d MAP:%d SR:%d SRB:%d)\n", inFilename, num_prg, num_chr, mapper_id, (int)mSRam, (int)mSRamBattery);
         
         mMapper = Mapper::sCreate(mapper_id, num_prg, num_chr);
-        mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData);
     }
 }
+
+
+// Set VRam - allows mapper to update CHR page directly into VRam
+void Rom::SetVRam(UInt8* mVRam)
+{
+    mCHRData = mVRam;
+    mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData);
+}
+
 
 // Store are passed on to the mapper
 void Rom::Store(UInt16 inAddr, UInt8 inValue)

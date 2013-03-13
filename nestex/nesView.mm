@@ -106,10 +106,10 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
   
     
     mButtonState = 0;

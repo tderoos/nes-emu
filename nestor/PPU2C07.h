@@ -15,35 +15,37 @@
 
 class PPU2C07 {
 public:
-    PPU2C07(const Rom* inRom);
+    PPU2C07(Rom* inRom);
 
     void Tick();
-    void Scanline(uint32_t* ioFrameBuffer);
+    void Scanline(UInt32* ioFrameBuffer);
     
-    bool GetNMI() const                                     { return (mPPUStatus & 0x80) != 0 && mScanline == 241; }
-    uint16_t GetScanline() const                            { return mScanline; }
+    bool    GetNMI() const                                      { return (mPPUCtrl & 0x80) != 0 && mScanline == 241; }
+    UInt16  GetScanline() const                                 { return mScanline; }
 
     // Access
-    void Load(uint16_t inAddr, uint8_t* outValue) const;
-    void Store(uint16_t inAddr, uint8_t inValue);
+    void    Load(UInt16 inAddr, UInt8* outValue) const;
+    void    Store(UInt16 inAddr, UInt8 inValue);
 
 private:
-    const Rom* mRom;
-    uint8_t mVRAM[0x4000];
-    uint8_t mOAM[64*4];
-
-    uint16_t mScanline;
+    UInt8   mVRAM[0x4000];
+    UInt8   mOAM[64*4];
+    UInt8*  mCHRData;
+    
+    UInt16 mScanline;
     
     // Internal registers
     mutable bool mPPUAddrWriteLO;
     
-    uint8_t mPPUCtrl;
-    uint8_t mPPUMask;
-    mutable uint8_t  mPPULoadBuffer;
-    mutable uint8_t  mPPUStatus;
-    mutable uint16_t mPPUAddr;
-    mutable uint16_t mPPUScroll;
-    mutable uint8_t  mOAMAddr;
+    UInt8 mPPUCtrl;
+    UInt8 mPPUMask;
+    
+    
+    mutable UInt8  mPPULoadBuffer;
+    mutable UInt8  mPPUStatus;
+    mutable UInt16 mPPUAddr;
+    mutable UInt16 mPPUScroll;
+    mutable UInt8  mOAMAddr;
 };
 
 #endif //__PPU2C07_H_

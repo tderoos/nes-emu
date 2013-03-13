@@ -148,9 +148,7 @@ void SetRegister(CPU6502::ERegister inDst, uint8_t inValue, CPU6502::Status& ioS
 // Stack
 void Push(uint8_t inValue, CPU6502::Status& ioStatus, IO* ioIO)
 {
-    IO::pushing = true;
     ioIO->Store(0x0100 + ioStatus.mSP--, inValue);
-    IO::pushing = false;
 }
 
 void PushAddr(uint16_t inAddr, CPU6502::Status& ioStatus, IO* ioIO)
@@ -387,7 +385,6 @@ void CPU6502::Handle00(uint8_t opcode)
     {
         mRegs.mFlags = Pull(mRegs, mIO);
         PullPC(mRegs, mIO);
-        
         return;
     }
 
@@ -643,7 +640,7 @@ void CPU6502::Tick()
     
     static bool tick = false;
     
-    if (mIO->NMI() || irq || mIO->Reset())
+    if ((mIO->NMI() || irq || mIO->Reset()))
     {
         if (!mIO->Reset())
         {
@@ -656,16 +653,16 @@ void CPU6502::Tick()
         
         mRegs.mPC = ReadAddr(addr, mIO);
         mRegs.mBreak = 0;
-        
+       
         tick = false;
     }
     
-//    tick = !tick;
-//    if (!tick)
-//        return;
+    tick = !tick;
+    if (!tick)
+        return;
 
-    if (mRegs.mPC == 0x03a0)
-        BREAK();
+//    if (mRegs.mPC == 0x8002)
+//        BREAK();
     
     uint8_t opcode;
     mIO->Load(mRegs.mPC, &opcode);

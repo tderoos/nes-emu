@@ -83,23 +83,15 @@ void IO::Load(uint16_t inAddr, uint8_t* outValue)
     }
     else if (inAddr < 0x8000)
     {   // SRAM
+        *outValue = mPRGRam[inAddr-0x6000];
     }
     else
         mRom->Load(inAddr, outValue);
-    
-    static bool print = false;
-    
-    if (print && inAddr >= 0x2000 && inAddr < 0x2003)
-        printf("load 0x%x -> $%x\n", inAddr, *outValue);
 }
 
-bool IO::pushing = false;
 
 void IO::Store(uint16_t inAddr, uint8_t inValue)
 {
-//    if (inAddr < 0x0200 && inAddr >= 0x1F0 && !pushing)
-//        BREAK();
-    
     if (inAddr < 0x2000)
         mRam->Store(inAddr, inValue);
 
@@ -129,6 +121,7 @@ void IO::Store(uint16_t inAddr, uint8_t inValue)
     }
     else if (inAddr < 0x8000)
     {   // SRAM
+        mPRGRam[inAddr-0x6000] = inValue;
     }
     else
         mRom->Store(inAddr, inValue);

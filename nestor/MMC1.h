@@ -27,6 +27,10 @@ public:
 
     virtual void Store(UInt16 inAddr, UInt8 inData)
     {
+        // MMC1 uses a serial register write to update the mapping
+        // Registers a 5 bit wide, addres at write of the 5th bit
+        // determines tgt register. b0 of value is data, b7 is reset
+        
         // if not reset
         if ((inData & 0x80) == 0)
         {
@@ -76,17 +80,20 @@ public:
         }
         
         // Map CHR data
-        const UInt8* chr_start = inData + mNumPRG * 0x4000;
-        if ((mControl & 0x10) == 0)
+        if (mNumCHR != 0)
         {
-            // 8K Mode
-            memcpy(ioCHR, chr_start + mCHRReg0 * 0x1000, 0x2000);
-        }
-        else
-        {
-            // 4K Mode
-            memcpy(ioCHR,          chr_start + mCHRReg0 * 0x1000, 0x1000);
-            memcpy(ioCHR + 0x1000, chr_start + mCHRReg1 * 0x1000, 0x1000);
+            const UInt8* chr_start = inData + mNumPRG * 0x4000;
+            if ((mControl & 0x10) == 0)
+            {
+                // 8K Mode
+                memcpy(ioCHR, chr_start + (mCHRReg0&0xE) * 0x1000, 0x2000);
+            }
+            else
+            {
+                // 4K Mode
+                memcpy(ioCHR,          chr_start + mCHRReg0 * 0x1000, 0x1000);
+                memcpy(ioCHR + 0x1000, chr_start + mCHRReg1 * 0x1000, 0x1000);
+            }
         }
         
         mDirty = false;

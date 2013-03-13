@@ -26,11 +26,10 @@ void nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)
     
     mIO.SetButtonState(inButtonState);
     
+    int cycles = 0;
+    
     do
     {
-        mCPU.Tick();
-        mIO.Tick();
-        
         if (mClock > 113)
         {
             mPPU.Scanline(ioFrameBuffer);
@@ -39,7 +38,13 @@ void nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)
             mClock -= 113;
         }
         
+        mCPU.Tick();
+        mIO.Tick();
+
         mClock++;
+        cycles++;
     }
     while (!vblank);
+    
+    cycles = cycles;
 }
