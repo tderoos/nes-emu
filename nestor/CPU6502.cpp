@@ -9,13 +9,24 @@
 #include "IO.h"
 
 
-void CPU6502::BREAK() const
+
+// Debugging
+struct DebugTrace
+{
+    uint16_t mAddr;
+    uint8_t  mOp;
+};
+DebugTrace  sTrace[256];
+int         sTraceHead=0;
+
+
+void BREAK()
 {
     int i;
     for (i = 0; i < 256; ++i)
     {
-        int idx = (mTraceHead + i) % 256;
-        printf("0x%4x $%2x\n", mTrace[idx].mAddr, mTrace[idx].mOp);
+        int idx = (sTraceHead + i) % 256;
+        printf("0x%4x $%2x\n", sTrace[idx].mAddr, sTrace[idx].mOp);
     }
     
     i=0;
@@ -345,16 +356,16 @@ CPU6502::CPU6502(IO* inIO) :
     mRegs.mReserved = 1;
     mRegs.mPC       = 0x8000;
     mRegs.mRegZero  = 0;
-    
-    mTraceHead = 0;
-
-    memset(mHandlers, 0, sizeof(mHandlers));
+    mRegs.mSP       = 0xFF;
+    mRegs.mAcc      = 0;
+    mRegs.mX        = 0;
+    mRegs.mY        = 0;
 }
 
 
 void CPU6502::Handle00(uint8_t opcode)
 {
-    if (opcode == 0x00)
+    if (opcode == 0x00) // BRK
     {
         PushAddr(mRegs.mPC+1, mRegs, mIO);
         mRegs.mBreak = 1;
@@ -634,8 +645,11 @@ void CPU6502::Tick()
     
     if (mIO->NMI() || irq || mIO->Reset())
     {
-        PushAddr(mRegs.mPC, mRegs, mIO);
-        Push(mRegs.mFlags, mRegs, mIO);
+        if (!mIO->Reset())
+        {
+            PushAddr(mRegs.mPC, mRegs, mIO);
+            Push(mRegs.mFlags, mRegs, mIO);
+        }
         
         uint16_t addr = mIO->Reset() ? 0xFFFC :
                         mIO->NMI()   ? 0xFFFA : 0xFFFE;
@@ -649,13 +663,16 @@ void CPU6502::Tick()
 //    tick = !tick;
 //    if (!tick)
 //        return;
+
+    if (mRegs.mPC == 0x03a0)
+        BREAK();
     
     uint8_t opcode;
     mIO->Load(mRegs.mPC, &opcode);
     
-    mTrace[mTraceHead].mAddr = mRegs.mPC;
-    mTrace[mTraceHead].mOp   = opcode;
-    mTraceHead = (mTraceHead+1) % 256;
+    sTrace[sTraceHead].mAddr = mRegs.mPC;
+    sTrace[sTraceHead].mOp   = opcode;
+    sTraceHead = (sTraceHead+1) % 256;
     
     switch(opcode & 0x03)
     {

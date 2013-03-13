@@ -29,6 +29,10 @@
 		9338176616EB3E2500C8FCAC /* PPU2C07.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3ACCD56D547A389473D5 /* PPU2C07.h */; };
 		9338176716EB3E2500C8FCAC /* nestor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9338173316EA9A9800C8FCAC /* nestor.cpp */; };
 		9338176816EB3E2500C8FCAC /* nestor.h in Sources */ = {isa = PBXBuildFile; fileRef = 9338173416EA9A9800C8FCAC /* nestor.h */; };
+		93CEBBB316EFC3A000CBDE87 /* Mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */; };
+		93CEBBB516EFC48600CBDE87 /* Mapper.h in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB016EFC2A800CBDE87 /* Mapper.h */; };
+		93CEBBB616EFC48600CBDE87 /* Mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */; };
+		93CEBBB716EFC48600CBDE87 /* MMC1.h in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB416EFC44600CBDE87 /* MMC1.h */; };
 		A8BC331AD5559D31DA1594E8 /* IO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3BAC2C9AC04084B90846 /* IO.cpp */; };
 		A8BC352A379A4668ACC32734 /* Ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8BC353B63D0969119694396 /* Ram.cpp */; };
 		A8BC357B28ED9C9E09D4CA07 /* PPU2C07.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A8BC3ACCD56D547A389473D5 /* PPU2C07.h */; };
@@ -78,6 +82,10 @@
 		9338175716EB22B000C8FCAC /* nesView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nesView.h; sourceTree = "<group>"; };
 		9338175816EB22B000C8FCAC /* nesView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = nesView.mm; sourceTree = "<group>"; };
 		9338175916EB23B500C8FCAC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		93CEBBB016EFC2A800CBDE87 /* Mapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mapper.h; sourceTree = "<group>"; };
+		93CEBBB116EFC2ED00CBDE87 /* types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
+		93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mapper.cpp; sourceTree = "<group>"; };
+		93CEBBB416EFC44600CBDE87 /* MMC1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MMC1.h; sourceTree = "<group>"; };
 		A8BC301FA0E7441C265E1FC0 /* Rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rom.h; sourceTree = "<group>"; };
 		A8BC317E7389FCA2C89E6D94 /* CPU6502.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPU6502.h; sourceTree = "<group>"; };
 		A8BC32A8338453C99F8D7F78 /* IO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IO.h; sourceTree = "<group>"; };
@@ -157,6 +165,16 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		93CEBBAF16EFC27100CBDE87 /* Mapper */ = {
+			isa = PBXGroup;
+			children = (
+				93CEBBB016EFC2A800CBDE87 /* Mapper.h */,
+				93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */,
+				93CEBBB416EFC44600CBDE87 /* MMC1.h */,
+			);
+			name = Mapper;
+			sourceTree = "<group>";
+		};
 		A8BC385C4E2AC7F7EA881094 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -169,6 +187,7 @@
 		A8BC3BEB0681EEB2C41A3618 /* nestor */ = {
 			isa = PBXGroup;
 			children = (
+				93CEBBAF16EFC27100CBDE87 /* Mapper */,
 				A8BC3975777D5581F173463B /* main.cpp */,
 				A8BC3C3F65CE579898665799 /* Rom.cpp */,
 				A8BC301FA0E7441C265E1FC0 /* Rom.h */,
@@ -182,6 +201,7 @@
 				A8BC3ACCD56D547A389473D5 /* PPU2C07.h */,
 				9338173316EA9A9800C8FCAC /* nestor.cpp */,
 				9338173416EA9A9800C8FCAC /* nestor.h */,
+				93CEBBB116EFC2ED00CBDE87 /* types.h */,
 			);
 			path = nestor;
 			sourceTree = "<group>";
@@ -274,6 +294,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				93CEBBB516EFC48600CBDE87 /* Mapper.h in Sources */,
+				93CEBBB616EFC48600CBDE87 /* Mapper.cpp in Sources */,
+				93CEBBB716EFC48600CBDE87 /* MMC1.h in Sources */,
 				9338175D16EB3E2500C8FCAC /* Rom.cpp in Sources */,
 				9338175E16EB3E2500C8FCAC /* Rom.h in Sources */,
 				9338175F16EB3E2500C8FCAC /* IO.cpp in Sources */,
@@ -304,6 +327,7 @@
 				A8BC3F96264F7851E335F527 /* CPU6502.cpp in Sources */,
 				A8BC3C1E9D5FB5ECF7EE906F /* PPU2C07.cpp in Sources */,
 				9338173516EA9A9800C8FCAC /* nestor.cpp in Sources */,
+				93CEBBB316EFC3A000CBDE87 /* Mapper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -442,6 +466,7 @@
 				9338175616EB216200C8FCAC /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A8BC3080B5B15FA2BBFDEC33 /* Build configuration list for PBXNativeTarget "nestor" */ = {
 			isa = XCConfigurationList;

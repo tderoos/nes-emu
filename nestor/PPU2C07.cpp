@@ -54,6 +54,21 @@ unsigned int palette[] =
 };
 //*/
 
+
+
+uint32_t swap(uint32_t inValue)
+{
+    uint32_t result = 0;
+    
+    result = result | ((inValue << 24) & (0xFF << 24));
+    result = result | ((inValue <<  8) & (0xFF << 16));
+    result = result | ((inValue >>  8) & (0xFF <<  8));
+    result = result | ((inValue >> 24) & (0xFF <<  0));
+    
+    return result;
+}
+
+
 #include "PPU2C07.h"
 
 void BREAKPPU()
@@ -77,6 +92,9 @@ PPU2C07::PPU2C07(const Rom* inRom)
     mOAMAddr = 0;
     
     mPPUAddrWriteLO = false;
+    
+    for (int i = 0; i < 64; ++i)
+        palette[i] = swap(palette[i]<<8);
 }
 
 void PPU2C07::Tick()
@@ -84,18 +102,6 @@ void PPU2C07::Tick()
 //    mPPUStatus = 0x80;
 }
 
-
-uint32_t swap(uint32_t inValue)
-{
-    uint32_t result = 0;
-    
-    result = result | ((inValue << 24) & (0xFF << 24));
-    result = result | ((inValue <<  8) & (0xFF << 16));
-    result = result | ((inValue >>  8) & (0xFF <<  8));
-    result = result | ((inValue >> 24) & (0xFF <<  0));
-    
-    return result;
-}
 
 void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
 {
@@ -247,7 +253,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                     }
                 }
                 
-                (*fb_addr++) = swap((palette[color]) << 8);
+                (*fb_addr++) = palette[color];
             }
         }
     }
@@ -265,6 +271,14 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
     
     switch (idx)
     {
+        case 0:
+            *outValue = mPPUCtrl;
+            break;
+            
+        case 1:
+            *outValue = mPPUMask;
+            break;
+
         case 2:
             *outValue = mPPUStatus;
             mPPUStatus = mPPUStatus & 0x7F;

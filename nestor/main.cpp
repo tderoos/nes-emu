@@ -14,7 +14,7 @@ int main(int argc, const char * argv[])
     nestor nes("/Users/tderoos/Projects/nestor/nestest.nes");
     
     while (true)
-        nes.RunToVBlank();
+        nes.RunToVBlank(0, NULL);
   
     return 0;
 }

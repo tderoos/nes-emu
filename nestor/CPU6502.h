@@ -13,6 +13,8 @@
 
 class IO;
 
+void BREAK();
+
 
 class CPU6502 {
 
@@ -67,26 +69,12 @@ public:
         };
     };
 
-    typedef   void (*OpcodeHandler)(uint8_t inHi, Status& ioStatus, IO* ioIO);
-    OpcodeHandler mHandlers[16];
-    
     void        Handle00(uint8_t opcode);
     void        Handle01(uint8_t opcode);
     void        Handle10(uint8_t opcode);
 
     Status      mRegs;
     IO*         mIO;
-    
-    // Debugging
-    struct DebugTrace
-    {
-        uint16_t mAddr;
-        uint8_t  mOp;
-    };
-    
-    void BREAK() const;
-    DebugTrace  mTrace[256];
-    int         mTraceHead;
 };
 
 #endif //__CPU6502_H_

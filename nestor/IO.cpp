@@ -10,6 +10,8 @@
 #include "Ram.h"
 #include "PPU2C07.h"
 
+void BREAK();
+
 
 IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU) :
     mRam(inRam),
@@ -95,8 +97,8 @@ bool IO::pushing = false;
 
 void IO::Store(uint16_t inAddr, uint8_t inValue)
 {
-    if (inAddr < 0x0200 && inAddr >= 0x1F0 && !pushing)
-        inAddr = inAddr;
+//    if (inAddr < 0x0200 && inAddr >= 0x1F0 && !pushing)
+//        BREAK();
     
     if (inAddr < 0x2000)
         mRam->Store(inAddr, inValue);

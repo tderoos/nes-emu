@@ -9,7 +9,9 @@
 #ifndef __Rom_H_
 #define __Rom_H_
 
-#include <stdint.h>
+#include "types.h"
+
+class Mapper;
 
 
 class Rom {
@@ -17,18 +19,26 @@ public:
     Rom(const char* inFilename);
 
     // Properties
-    char GetNumPRGBanks() const;
-    char GetNumCHRBanks() const;
+    char GetNumPRGBanks() const                 { return mNumPRG; }
+    char GetNumCHRBanks() const                 { return mNumCHR; }
     char GetMapperID() const;
 
     // Access
-    void Load(uint16_t inAddr, uint8_t* outValue) const;
-    void Store(uint16_t inAddr, uint8_t inValue);
+    void Load(UInt16 inAddr, UInt8* outValue) const;
+    void Store(UInt16 inAddr, UInt8 inValue);
     
-    const uint8_t*  GetCHRData(int inBank) const;
+    const UInt8*  GetCHRData(int inBank) const;
 
 private:
-    uint8_t* mData;
+    UInt8 mNumPRG;
+    UInt8 mNumCHR;
+    UInt8 mMapperID;
+    
+    bool  mSRam;
+    bool  mSRamBattery;
+    
+    UInt8*  mData;
+    Mapper* mMapper;
 };
 
 #endif //__Rom_H_
