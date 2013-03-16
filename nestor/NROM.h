@@ -26,7 +26,7 @@ public:
     }
     
     
-    virtual void UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR) const
+    virtual void UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
     {
         if (mNumPRG == 1)
         {
@@ -42,6 +42,9 @@ public:
         // Chr data
         if (mNumCHR != 0)
             memcpy(ioCHR, inData + mNumPRG * 0x4000, 0x2000);
+        
+        // Follow rom VRam settings
+        *outMappedLayout = inRomLayout;
         
         mDirty = false;
     }

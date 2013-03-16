@@ -11,6 +11,16 @@
 
 #include "types.h"
 
+// Rom info
+enum EVRamLayout
+{
+    VERTICAL,
+    HORIZONTAL,
+    FOUR_SCREEN,
+    SINGLE_LOWER,
+    SINGLE_UPPER
+};
+
 class Mapper
 {
 public:
@@ -24,7 +34,7 @@ public:
     inline bool     IsDirty() const         { return mDirty; }
     
     virtual void    Store(UInt16 inAddr, UInt8 inData) = 0;
-    virtual void    UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR) const = 0;
+    virtual void    UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const = 0;
     
 protected:
     UInt8           mNumPRG;

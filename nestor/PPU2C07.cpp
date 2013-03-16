@@ -54,6 +54,26 @@ unsigned int palette[] =
 };
 //*/
 
+static const unsigned char BitReverseTable256[] =
+{
+    0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0, 0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0,
+    0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8, 0x18, 0x98, 0x58, 0xD8, 0x38, 0xB8, 0x78, 0xF8,
+    0x04, 0x84, 0x44, 0xC4, 0x24, 0xA4, 0x64, 0xE4, 0x14, 0x94, 0x54, 0xD4, 0x34, 0xB4, 0x74, 0xF4,
+    0x0C, 0x8C, 0x4C, 0xCC, 0x2C, 0xAC, 0x6C, 0xEC, 0x1C, 0x9C, 0x5C, 0xDC, 0x3C, 0xBC, 0x7C, 0xFC,
+    0x02, 0x82, 0x42, 0xC2, 0x22, 0xA2, 0x62, 0xE2, 0x12, 0x92, 0x52, 0xD2, 0x32, 0xB2, 0x72, 0xF2,
+    0x0A, 0x8A, 0x4A, 0xCA, 0x2A, 0xAA, 0x6A, 0xEA, 0x1A, 0x9A, 0x5A, 0xDA, 0x3A, 0xBA, 0x7A, 0xFA,
+    0x06, 0x86, 0x46, 0xC6, 0x26, 0xA6, 0x66, 0xE6, 0x16, 0x96, 0x56, 0xD6, 0x36, 0xB6, 0x76, 0xF6,
+    0x0E, 0x8E, 0x4E, 0xCE, 0x2E, 0xAE, 0x6E, 0xEE, 0x1E, 0x9E, 0x5E, 0xDE, 0x3E, 0xBE, 0x7E, 0xFE,
+    0x01, 0x81, 0x41, 0xC1, 0x21, 0xA1, 0x61, 0xE1, 0x11, 0x91, 0x51, 0xD1, 0x31, 0xB1, 0x71, 0xF1,
+    0x09, 0x89, 0x49, 0xC9, 0x29, 0xA9, 0x69, 0xE9, 0x19, 0x99, 0x59, 0xD9, 0x39, 0xB9, 0x79, 0xF9,
+    0x05, 0x85, 0x45, 0xC5, 0x25, 0xA5, 0x65, 0xE5, 0x15, 0x95, 0x55, 0xD5, 0x35, 0xB5, 0x75, 0xF5,
+    0x0D, 0x8D, 0x4D, 0xCD, 0x2D, 0xAD, 0x6D, 0xED, 0x1D, 0x9D, 0x5D, 0xDD, 0x3D, 0xBD, 0x7D, 0xFD,
+    0x03, 0x83, 0x43, 0xC3, 0x23, 0xA3, 0x63, 0xE3, 0x13, 0x93, 0x53, 0xD3, 0x33, 0xB3, 0x73, 0xF3,
+    0x0B, 0x8B, 0x4B, 0xCB, 0x2B, 0xAB, 0x6B, 0xEB, 0x1B, 0x9B, 0x5B, 0xDB, 0x3B, 0xBB, 0x7B, 0xFB,
+    0x07, 0x87, 0x47, 0xC7, 0x27, 0xA7, 0x67, 0xE7, 0x17, 0x97, 0x57, 0xD7, 0x37, 0xB7, 0x77, 0xF7,
+    0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF, 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
+};
+
 
 
 uint32_t swap(uint32_t inValue)
@@ -73,7 +93,7 @@ uint32_t swap(uint32_t inValue)
 
 void BREAKPPU()
 {
-    
+  
 }
 
 
@@ -82,9 +102,10 @@ PPU2C07::PPU2C07(Rom* inRom)
     mScanline = 0;
     memset(mVRAM, 0, sizeof(mVRAM));
     memset(mOAM, 0, sizeof(mOAM));
-    
+
+    mRom = inRom;
     inRom->SetVRam(mVRAM);
-    
+
     mPPUCtrl = 0;
     mPPUMask = 0;
     mPPUStatus = 0;
@@ -98,21 +119,254 @@ PPU2C07::PPU2C07(Rom* inRom)
         palette[i] = swap(palette[i]<<8);
 }
 
-void PPU2C07::Tick()
+
+
+void PPU2C07::UpdateMirroring()
 {
-//    mPPUStatus = 0x80;
+    switch (mRom->GetVRamMirroring())
+    {
+        case VERTICAL: 
+            mNameTable[0] = 0x2000;
+            mNameTable[1] = 0x2000;
+            mNameTable[2] = 0x2400;
+            mNameTable[3] = 0x2400;
+            break;
+
+        case HORIZONTAL:
+            mNameTable[0] = 0x2000;
+            mNameTable[1] = 0x2400;
+            mNameTable[2] = 0x2000;
+            mNameTable[3] = 0x2400;
+            break;
+     
+        case SINGLE_LOWER:
+            mNameTable[0] = 0x2000;
+            mNameTable[1] = 0x2000;
+            mNameTable[2] = 0x2000;
+            mNameTable[3] = 0x2000;
+            break;
+
+        case SINGLE_UPPER:
+            mNameTable[0] = 0x2400;
+            mNameTable[1] = 0x2400;
+            mNameTable[2] = 0x2400;
+            mNameTable[3] = 0x2400;
+            break;
+
+        case FOUR_SCREEN:
+            mNameTable[0] = 0x2000;
+            mNameTable[1] = 0x2400;
+            mNameTable[2] = 0x2800;
+            mNameTable[3] = 0x2C00;
+            break;
+    }
+}
+
+
+int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
+{
+    // Determine sprite height
+    UInt8 sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
+
+    const UInt8* spr_tile = mVRAM + ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000);
+
+    UInt8 num_spr_sl = 0;
+    for (int i = 0; i < 64; ++i)
+    {
+        uint8_t spr_y = mOAM[i*4];
+        
+        if (spr_y+sprite_h >= mScanline && spr_y < mScanline)
+        {
+            uint8_t spr_x = mOAM[i*4 + 3];
+
+            // Sorted insert
+            int idx = 0;
+            for (idx = 0; idx < num_spr_sl; idx++)
+                if (spr_x < ioSprites[idx].mX)
+                    break;
+
+            if (idx < num_spr_sl)
+                memmove(&(ioSprites[idx+1]), &(ioSprites[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
+
+            UInt8 y_offset = spr_y - (mScanline-sprite_h);
+            UInt8 tile_idx = mOAM[i*4 + 1];
+            UInt8 flags    = mOAM[i*4 + 2];
+            
+            ioSprites[idx].mX = spr_x;
+            ioSprites[idx].mPriority   = i;
+            ioSprites[idx].mPalette    = flags & 0x03;
+            ioSprites[idx].mForeGround = (flags & 0x20) == 0;
+            
+            if ((flags & 0x80) == 0)
+                y_offset = (sprite_h-1)-y_offset;
+
+            const UInt8* src_tile;
+            if (sprite_h == 16)
+            {
+                src_tile = mVRAM + ((tile_idx & 0x01) ? 0x1000 : 0x0000);
+                tile_idx = tile_idx & 0xFE;
+            }
+            else
+                src_tile = spr_tile;
+            
+            ioSprites[idx].mPlane0 = src_tile[tile_idx * 16 + y_offset];
+            ioSprites[idx].mPlane1 = src_tile[tile_idx * 16 + y_offset + 8];
+            
+            if ((flags & 0x40) == 0)
+            {
+                ioSprites[idx].mPlane0 = BitReverseTable256[ioSprites[idx].mPlane0];
+                ioSprites[idx].mPlane1 = BitReverseTable256[ioSprites[idx].mPlane1];
+            }
+            
+            num_spr_sl++;
+        }
+    }
+    
+    return num_spr_sl;
 }
 
 
 void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
 {
     if (mScanline == 0)
+    {
         mPPUStatus = mPPUStatus & (~0x40);
+        UpdateMirroring();
+    }
+
+    
+#if 1
     
     if (mScanline < 240 && (mPPUMask & 0x08))
     {
-        const uint8_t* spr_tile = mVRAM + ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000);
-        const uint8_t* chr      = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
+        // Get sprites for this scanline
+        ScanlineSprite sprites_sl[64];
+        UInt8 num_spr_sl = FetchScanlineSprites(sprites_sl);
+        
+        UInt32*      fb_addr  = ioFrameBuffer + (mScanline*256);
+        const UInt8* chr_tile = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
+        
+        UInt8 base_nametable = mPPUCtrl & 0x3;
+        
+        // Determine Y
+        int scrolled_y = mScanline + mPPUScroll & 0xFF;
+        int tile_y     = scrolled_y / 8;
+        int sub_y      = scrolled_y % 8;
+        UInt8  attr_shift = (tile_y&2) ? 4 : 0;
+
+        // Clamp tile_y and adjust nametable if tile_y out of bounds.
+        if (tile_y >= 29)
+        {
+            base_nametable = base_nametable ^ 0x02;
+            tile_y -= 29;
+        }
+
+        // Determine X
+        UInt8 scroll_x = mPPUScroll >> 8;
+        int from_x = scroll_x & 7;
+        int tile_x = scroll_x >> 3;
+        
+        int spr_index = 0;
+        
+        for (int slx = 0; slx < 256; )
+        {
+            // Clamp tile_x and adjust nametable if tile_x out of bounds.
+            base_nametable = base_nametable ^ (tile_x >> 5);
+            tile_x         = tile_x & 0x1F;
+
+            // Get nametable address
+            UInt8* name_table = mVRAM + mNameTable[base_nametable];
+            UInt8* attr_table = name_table + 0x3c0;
+            
+            // Fetch name and attr
+            UInt8 name =  name_table[tile_x      + tile_y*32    ];
+            UInt8 attr = (attr_table[(tile_x>>2) + (tile_y>>2)*8] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
+
+            // Fetch pattern
+            UInt8 plane0 = chr_tile[(name * 16) + sub_y];
+            UInt8 plane1 = chr_tile[(name * 16) + sub_y + 8];
+            
+            for (int tx = from_x; tx < 8 && slx < 256; ++tx, ++slx)
+            {
+                uint8_t color = 0;
+                
+                // BG
+                uint8_t bit0 = (plane0 >> (7-tx)) & 1;
+                uint8_t bit1 = (plane1 >> (7-tx)) & 1;
+                uint8_t bg_color_idx = bit0 | (bit1<<1) ;
+
+                if (bg_color_idx != 0)
+                    bg_color_idx |= (attr<<2);
+                
+                if (mPPUMask & 0x08)
+                    color = mVRAM[0x3F00 + bg_color_idx];
+
+                uint8_t prio = 0xFF;
+                for (int s = spr_index; s < num_spr_sl; ++s)
+                {
+                    const ScanlineSprite& spr = sprites_sl[s];
+                    
+                    if (slx < spr.mX)
+                        break;
+
+                    if (slx >= spr.mX + 8)
+                    {
+                        spr_index++;
+                        continue;
+                    }
+                    
+                    if (slx >= spr.mX)
+                    {
+                        // Shift pattern bits to get color idx
+                        uint8_t shift     = slx - spr.mX;
+                        uint8_t color_idx = ((spr.mPlane0>>shift) & 0x01) | (((spr.mPlane1 >> shift) & 0x01)<<1);
+                        
+                        if (color_idx != 0 && spr.mPriority < prio)
+                        {
+                            color_idx += spr.mPalette * 4;
+                            
+                            if (bg_color_idx == 0 || spr.mForeGround)
+                            {
+                                if ((mPPUMask & 0x10) != 0)
+                                    color = mVRAM[0x3F10 + color_idx];
+                                prio = spr.mPriority;
+                            }
+                            
+                            if (spr.mPriority == 0)// && bg_color_idx != 0)
+                                mPPUStatus = mPPUStatus | 0x40;
+                        }
+//
+//                        if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
+//                            mPPUStatus = mPPUStatus | 0x40;
+                        
+                    }
+                }
+                
+                (*fb_addr++) = palette[color];
+            }
+            
+            // Reset x for next iteration
+            from_x = 0;
+            tile_x++;
+        }
+    }
+    
+    else if (mScanline == 241)
+        mPPUStatus = mPPUStatus | 0x80;
+    
+    mScanline = (mScanline+1) % 262;
+}
+
+
+#else
+
+
+    if (mScanline < 240 && (mPPUMask & 0x08))
+    {
+        UInt32*      fb_addr  = ioFrameBuffer + (mScanline*256);
+
+        const UInt8* spr_tile = mVRAM + ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000);
+        const UInt8* chr      = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
         
         int effective_sl = (mScanline + (mPPUScroll & 0xFF)) % 240;
         
@@ -125,16 +379,16 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         
         uint8_t sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
         
-        uint32_t* fb_addr   = ioFrameBuffer + (effective_sl*256);
         
         // Walk the OAM for sprites on this scanline
         struct ScanlineSprite
         {
-            uint8_t mYOffset;
-            uint8_t mTileIndex;
-            uint8_t mFlags;
-            uint8_t mX;
-            uint8_t mPriority;
+            UInt8 mYOffset;
+            UInt8 mTileIndex;
+            UInt8 mFlags;
+            UInt8 mX;
+            UInt8 mPriority;
+            const UInt8* mSrc;
         };
         
         uint8_t num_spr_sl = 0;
@@ -142,7 +396,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         for (int i = 0; i < 64; ++i)
         {
             uint8_t spr_y = mOAM[i*4];
-            if (spr_y >= effective_sl-8 && spr_y < effective_sl-8+sprite_h)
+            if (spr_y+sprite_h >= effective_sl && spr_y < effective_sl)
             {
                 uint8_t spr_x = mOAM[i*4 + 3];
                 
@@ -155,21 +409,23 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                 if (idx < num_spr_sl)
                     memmove(&(sprites_sl[idx+1]), &(sprites_sl[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
                 
-                sprites_sl[idx].mYOffset = spr_y - (effective_sl-8);
-                sprites_sl[idx].mTileIndex = mOAM[i*4 + 1];;
-                sprites_sl[idx].mFlags = mOAM[i*4 + 2];;
+                sprites_sl[idx].mYOffset = spr_y - (effective_sl-sprite_h);
+                sprites_sl[idx].mTileIndex = mOAM[i*4 + 1];
+                sprites_sl[idx].mFlags = mOAM[i*4 + 2];
                 sprites_sl[idx].mX = spr_x;
                 sprites_sl[idx].mPriority = i;
 
                 if ((sprites_sl[idx].mFlags & 0x80) == 0)
-                    sprites_sl[idx].mYOffset = 7-sprites_sl[idx].mYOffset;
+                    sprites_sl[idx].mYOffset = sprite_h-1-sprites_sl[idx].mYOffset;
                 
-//                if (sprite_h == 0x10)
-//                {
-//                    
-//                }
-//                else
-                
+                if (sprite_h == 0x10)
+                {
+                    UInt8 tile_idx = sprites_sl[idx].mTileIndex;
+                    sprites_sl[idx].mSrc = mVRAM + ((tile_idx & 0x01) ? 0x1000 : 0x0000);
+                    sprites_sl[idx].mTileIndex = tile_idx & 0xFE;
+                }
+                else
+                    sprites_sl[idx].mSrc = spr_tile;
                 
                 num_spr_sl++;
             }
@@ -232,9 +488,12 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                     
                     if (x_pos >= spr.mX)
                     {
+                        if (spr.mPriority==0)
+                            s = s;
+                        
                         // Fetch pattern
-                        uint8_t plane0 = spr_tile[(spr.mTileIndex * 16) + spr.mYOffset];
-                        uint8_t plane1 = spr_tile[(spr.mTileIndex * 16) + spr.mYOffset + 8];
+                        uint8_t plane0 = spr.mSrc[(spr.mTileIndex * 16) + spr.mYOffset];
+                        uint8_t plane1 = spr.mSrc[(spr.mTileIndex * 16) + spr.mYOffset + 8];
                         
                         uint8_t shift = x_pos - spr.mX;
                         
@@ -253,7 +512,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                                     color = mVRAM[0x3F10 + color_idx];
                                 prio = spr.mPriority;
                             }
-                            if (prio == 0 /*&& bg_color_idx != 0*/)
+                            if (prio == 0) //&& bg_color_idx != 0)
                                 mPPUStatus = mPPUStatus | 0x40;
                         }
 //                        
@@ -268,12 +527,14 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         }
     }
 
-    if (mScanline == 241)
+    else if (mScanline == 241)
         mPPUStatus = mPPUStatus | 0x80;
     
     mScanline = (mScanline+1) % 262;
 }
 
+
+#endif
 
 void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
 {
@@ -311,7 +572,16 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
             {
                 // Reads have a delay of one
                 *outValue = mPPULoadBuffer;
-                mPPULoadBuffer = mVRAM[mPPUAddr & 0x3FFF];
+                
+                UInt16 ea = mPPUAddr & 0x3FFF;
+                if ((ea & 0xF000) == 0x2000)
+//                if (ea >= 0x2000 && ea < 0x3000)
+                {
+                    UInt8 name_table_idx = (ea >> 10) & 3;
+                    ea = mNameTable[name_table_idx] + (ea & 0x3FF);
+                }
+
+                mPPULoadBuffer = mVRAM[ea];
             }
 
             mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
@@ -363,11 +633,12 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
         {
             uint16_t ea = mPPUAddr&0x3FFF;
 
-            if (mPPUAddr >= 0x3320 && mPPUAddr <= 0x3FFF)
-                mPPUAddr = mPPUAddr;
-            
-            if (ea >= 0x2000 && ea < 0x3F00)
-                ea = ea & 0x2FFF;
+            if ((ea & 0xF000) == 0x2000)
+//            if (ea >= 0x2000 && ea < 0x3000)
+            {
+                UInt8 name_table_idx = (ea >> 10) & 3;
+                ea = mNameTable[name_table_idx] + (ea & 0x3FF);
+            }
             
 //            if (ea == 0x3F04 || ea == 0x3F08 || ea == 0x3F0c || ea == 0x3F10 || ea == 0x3F14 || ea == 0x3F18 || ea == 0x3F1C)
             if (ea == 0x3F10)
@@ -375,9 +646,6 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
             
             else if (ea >= 0x3F00)
                 ea = ea & 0x3F1F;
-            
-            if (ea != mPPUAddr)
-                mPPUAddr = mPPUAddr;
             
             mVRAM[ea] = inValue;
 

@@ -57,7 +57,7 @@ public:
         }
     }
     
-    virtual void UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR) const
+    virtual void UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
     {
         // Map PRG data
         UInt8 bank_idx = mPRGReg&0x0F;
@@ -95,6 +95,19 @@ public:
                 memcpy(ioCHR + 0x1000, chr_start + mCHRReg1 * 0x1000, 0x1000);
             }
         }
+        
+        if (inRomLayout != FOUR_SCREEN)
+        {
+            switch(mControl&0x03)
+            {
+                case 0: *outMappedLayout = SINGLE_LOWER; break;
+                case 1: *outMappedLayout = SINGLE_UPPER; break;
+                case 2: *outMappedLayout = VERTICAL;     break;
+                case 3: *outMappedLayout = HORIZONTAL;   break;
+            }
+        }
+        else
+            *outMappedLayout = inRomLayout;
         
         mDirty = false;
     }

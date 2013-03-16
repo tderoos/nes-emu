@@ -134,19 +134,6 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384762456.464417"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "76"
-         endingLineNumber = "76"
-         landmarkName = "BREAKPPU()"
-         landmarkType = "7">
-      </FileBreakpoint>
-      <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
@@ -371,19 +358,6 @@
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "136"
-         endingLineNumber = "136"
-         landmarkName = "PPU2C07::Scanline(uint32_t* ioFrameBuffer)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
          filePath = "nestex/nesView.mm"
          timestampString = "384829598.654958"
          startingColumnNumber = "9223372036854775807"
@@ -404,32 +378,6 @@
          startingLineNumber = "128"
          endingLineNumber = "128"
          landmarkName = "-animationTimer:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "140"
-         endingLineNumber = "140"
-         landmarkName = "PPU2C07::Scanline(uint32_t* ioFrameBuffer)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "156"
-         endingLineNumber = "156"
-         landmarkName = "PPU2C07::Scanline(uint32_t* ioFrameBuffer)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -463,77 +411,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
+         timestampString = "385115588.796096"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "373"
-         endingLineNumber = "373"
+         startingLineNumber = "643"
+         endingLineNumber = "643"
          landmarkName = "PPU2C07::Store(uint16_t inAddr, uint8_t inValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "199"
-         endingLineNumber = "199"
-         landmarkName = "PPU2C07::Scanline(uint32_t* ioFrameBuffer)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384857238.107942"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "114"
-         endingLineNumber = "114"
-         landmarkName = "PPU2C07::Scanline(uint32_t* ioFrameBuffer)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "360"
-         endingLineNumber = "360"
-         landmarkName = "PPU2C07::Store(uint16_t inAddr, uint8_t inValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "365"
-         endingLineNumber = "365"
-         landmarkName = "PPU2C07::Store(uint16_t inAddr, uint8_t inValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/Rom.cpp"
-         timestampString = "384857128.271753"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "57"
-         endingLineNumber = "57"
-         landmarkName = "Rom::Store(UInt16 inAddr, UInt8 inValue)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -580,11 +463,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859623.084569"
+         timestampString = "385115588.796096"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "375"
-         endingLineNumber = "375"
+         startingLineNumber = "650"
+         endingLineNumber = "650"
          landmarkName = "PPU2C07::Store(uint16_t inAddr, uint8_t inValue)"
          landmarkType = "5">
       </FileBreakpoint>
@@ -593,25 +476,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/Rom.cpp"
-         timestampString = "384858555.015761"
+         timestampString = "384982338.502644"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "38"
-         endingLineNumber = "38"
+         startingLineNumber = "48"
+         endingLineNumber = "48"
          landmarkName = "Rom::Rom(char const *inFilename)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384859655.802706"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "117"
-         endingLineNumber = "117"
-         landmarkName = "PPU2C07::Scanline(uint32_t* ioFrameBuffer)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -676,11 +546,11 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "68"
          endingLineNumber = "68"
-         landmarkName = "UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR)"
+         landmarkName = "UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
+         shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/MMC1.h"
@@ -689,7 +559,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "72"
          endingLineNumber = "72"
-         landmarkName = "UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR)"
+         landmarkName = "UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -702,7 +572,55 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "77"
          endingLineNumber = "77"
-         landmarkName = "UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR)"
+         landmarkName = "UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "nestor/PPU2C07.cpp"
+         timestampString = "384990682.251819"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "96"
+         endingLineNumber = "96"
+         landmarkName = "BREAKPPU()"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "nestor/PPU2C07.cpp"
+         timestampString = "385115588.796096"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "516"
+         endingLineNumber = "516">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "nestor/PPU2C07.cpp"
+         timestampString = "385115588.796096"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "492"
+         endingLineNumber = "492">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "nestor/PPU2C07.cpp"
+         timestampString = "385115588.796096"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "636"
+         endingLineNumber = "636"
+         landmarkName = "PPU2C07::Store(uint16_t inAddr, uint8_t inValue)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -710,11 +628,37 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/PPU2C07.cpp"
-         timestampString = "384897288.362181"
+         timestampString = "385115588.796096"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "128"
-         endingLineNumber = "128"
+         startingLineNumber = "580"
+         endingLineNumber = "580"
+         landmarkName = "PPU2C07::Load(uint16_t inAddr, uint8_t* outValue)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "nestor/PPU2C07.cpp"
+         timestampString = "385115588.796096"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "639"
+         endingLineNumber = "639"
+         landmarkName = "PPU2C07::Store(uint16_t inAddr, uint8_t inValue)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "nestor/PPU2C07.cpp"
+         timestampString = "385115606.554709"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "243"
+         endingLineNumber = "243"
          landmarkName = "PPU2C07::Scanline(uint32_t* ioFrameBuffer)"
          landmarkType = "5">
       </FileBreakpoint>

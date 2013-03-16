@@ -95,7 +95,7 @@ nestor* nes = NULL;
     // keep track of start/launch time
 //    [self setStartTime];
     // start animation timer
-    timer = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self
+    timer = [NSTimer timerWithTimeInterval:(1.0f/30.0f) target:self
                                   selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 
@@ -106,8 +106,8 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
   

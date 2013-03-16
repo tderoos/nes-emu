@@ -27,13 +27,23 @@ Rom::Rom(char const *inFilename) :
         UInt8 num_prg = mData[4];
         UInt8 num_chr = mData[5];
         
+        
+        
         UInt8 mapper_id = mData[6] >> 4;
         mapper_id       = mapper_id | (mData[7] & 0xF0);
         
         mSRam        = (mData[10] & 0x10) != 0;
         mSRamBattery = (mData[6]  & 0x02) != 0;
         
-        printf("Loaded %s (PRG:%d CHR:%d MAP:%d SR:%d SRB:%d)\n", inFilename, num_prg, num_chr, mapper_id, (int)mSRam, (int)mSRamBattery);
+        switch(mData[6]&9)
+        {
+            case 0: mVRamMirrorRom = VERTICAL;     break;
+            case 1: mVRamMirrorRom = HORIZONTAL;   break;
+            case 8: mVRamMirrorRom = FOUR_SCREEN;  break;
+        }
+        mVRamMirrorMapped = mVRamMirrorRom;
+
+        printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRL:%d SR:%d SRB:%d)\n", inFilename, num_prg, num_chr, mapper_id, (int)GetVRamMirroring(), (int)mSRam, (int)mSRamBattery);
         
         mMapper = Mapper::sCreate(mapper_id, num_prg, num_chr);
     }
@@ -44,7 +54,7 @@ Rom::Rom(char const *inFilename) :
 void Rom::SetVRam(UInt8* mVRam)
 {
     mCHRData = mVRam;
-    mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData);
+    mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 }
 
 
@@ -54,7 +64,7 @@ void Rom::Store(UInt16 inAddr, UInt8 inValue)
     mMapper->Store(inAddr, inValue);
     
     if (mMapper->IsDirty())
-        mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData);
+        mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 }
 
 
