@@ -113,6 +113,11 @@ PPU2C07::PPU2C07(Rom* inRom)
     mPPUScroll = 0;
     mOAMAddr = 0;
     
+    mV = 0;
+    mT = 0;
+    mX = 0;
+    mW = 0;
+    
     mPPUAddrWriteLO = false;
     
     for (int i = 0; i < 64; ++i)
@@ -125,7 +130,7 @@ void PPU2C07::UpdateMirroring()
 {
     switch (mRom->GetVRamMirroring())
     {
-        case VERTICAL: 
+        case VERTICAL:
             mNameTable[0] = 0x2000;
             mNameTable[1] = 0x2000;
             mNameTable[2] = 0x2400;
@@ -237,6 +242,8 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
     
 #if 1
     
+    UInt16 fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
+
     if (mScanline < 240 && (mPPUMask & 0x08))
     {
         // Get sprites for this scanline
@@ -268,6 +275,17 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         
         int spr_index = 0;
         
+        if (mScanline == 0)
+            mV = mT;
+        else
+        {
+            UInt16 mask = 0x041F;
+            mV &= ~mask;
+            mV |= mT & mask;
+        }
+//        sub_y = 0;
+
+        fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
         for (int slx = 0; slx < 256; )
         {
             // Clamp tile_x and adjust nametable if tile_x out of bounds.
@@ -275,18 +293,27 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
             tile_x         = tile_x & 0x1F;
 
             // Get nametable address
-            UInt8* name_table = mVRAM + mNameTable[base_nametable];
-            UInt8* attr_table = name_table + 0x3c0;
+            UInt8* name_table_old = mVRAM + mNameTable[base_nametable];
+            UInt8* attr_table_old = name_table_old + 0x3c0;
+            
+            UInt8 nti = (mV & 0xFFF) >> 10;
+            
+            UInt16 name_table_addr = (mNameTable[nti] + (mV & 0x03FF));
+//            UInt8* name_table = mVRAM + (mNameTable[nti] + (mV & 0x03FF));
+//            UInt8* attr_table = mVRAM + (0x23C0 | (mV & 0x0C00) | ((mV >> 4) & 0x38) | ((mV >> 2) & 0x07));
             
             // Fetch name and attr
-            UInt8 name =  name_table[tile_x      + tile_y*32    ];
-            UInt8 attr = (attr_table[(tile_x>>2) + (tile_y>>2)*8] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
+//            UInt8 name = *name_table;//   name_table[tile_x      + tile_y*32    ];//
+//            UInt8 attr = *attr_table;//(attr_table[(tile_x>>2) + (tile_y>>2)*8] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
 
-            // Fetch pattern
-            UInt8 plane0 = chr_tile[(name * 16) + sub_y];
-            UInt8 plane1 = chr_tile[(name * 16) + sub_y + 8];
+            UInt8 name = mVRAM[name_table_addr];
             
-            for (int tx = from_x; tx < 8 && slx < 256; ++tx, ++slx)
+            // Fetch pattern
+            UInt8 plane0 = chr_tile[(name * 16) + fine_y];
+            UInt8 plane1 = chr_tile[(name * 16) + fine_y + 8];
+            
+//            for (int tx = from_x; tx < 8 && slx < 256; ++tx, ++slx)
+            UInt8 tx = mX;
             {
                 uint8_t color = 0;
                 
@@ -295,8 +322,8 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                 uint8_t bit1 = (plane1 >> (7-tx)) & 1;
                 uint8_t bg_color_idx = bit0 | (bit1<<1) ;
 
-                if (bg_color_idx != 0)
-                    bg_color_idx |= (attr<<2);
+//                if (bg_color_idx != 0)
+//                    bg_color_idx |= (attr<<2);
                 
                 if (mPPUMask & 0x08)
                     color = mVRAM[0x3F00 + bg_color_idx];
@@ -341,8 +368,29 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                         
                     }
                 }
+                slx++;
                 
                 (*fb_addr++) = palette[color];
+                
+                // Incerement X
+                if (mX == 7)
+                {
+                    // Increment coarse X
+                    UInt16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
+                    coarse_x++;
+                    if (coarse_x == 32)
+                    {
+                        coarse_x = 0;
+                        mV ^= 0x01 << ENameTableShiftTgt;   // switch horizontal nametable
+                    }
+                    
+                    mV &= ~EScrollXCoarseMaskTgt;
+                    mV |= coarse_x << EScrollXCoarseShiftTgt;
+
+                    mX = 0;
+                }
+                else
+                    mX++;
             }
             
             // Reset x for next iteration
@@ -350,9 +398,45 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
             tile_x++;
         }
     }
-    
     else if (mScanline == 241)
         mPPUStatus = mPPUStatus | 0x80;
+  
+    // Increment Y
+    UInt16 coarse_y = (mV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
+    if (fine_y ==7)
+    {
+        fine_y = 0;
+        
+        if (coarse_y == 29)
+        {
+            coarse_y = 0;
+            mV ^= 0x02 << ENameTableShiftTgt;   // switch vertical nametable
+        }
+        else if (coarse_y == 31)
+        {
+            coarse_y = 0;
+        }
+        else
+            coarse_y++;
+    }
+    else
+        fine_y++;
+    
+    // Store Y in V
+    mV &= ~(EScrollYCoarseMaskTgt | EScrollYFineMaskTgt);
+    mV |= (coarse_y << EScrollYCoarseShiftTgt) | (fine_y << EScrollYFineShiftTgt);
+
+//    if (mScanline == 261)
+//    {
+//        mV = mT;
+//    }
+//    else if (mScanline > 261)
+//    {
+//        UInt16 mask = 0x041F;
+//        mV &= ~mask;
+//        mV |= mT & mask;
+//    }
+    
     
     mScanline = (mScanline+1) % 262;
 }
@@ -556,6 +640,9 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
 //            mPPUScroll = 0;
             mPPUAddr = 0;
             mPPUAddrWriteLO = false;
+            
+            mW = 0;
+            
             break;
 
         case 4:
@@ -600,6 +687,9 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
     {
         case 0:
             mPPUCtrl = inValue;
+            
+            mT = mT & ~ENameTableMaskTgt;
+            mT = mT | ((inValue & ENameTableMaskSrc) << ENameTableShiftTgt);
             break;
             
         case 1:
@@ -616,9 +706,49 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
 
         case 5:
             mPPUScroll = (mPPUScroll<<8) | inValue;
+            
+            if (mW == 0)
+            {
+                // Coarse x to T
+                mT = mT & ~EScrollXCoarseMaskTgt;
+                mT = mT | ((inValue & EScrollXCoarseMaskSrc) >> EScrollXCoarseShiftSrc) << EScrollXCoarseShiftTgt;
+
+                // Fine x to X
+                mX = inValue & EScrollXFineMaskSrc;
+
+                mW = 1;
+            }
+            else
+            {
+                // Coarse y to T
+                mT = mT & ~EScrollYCoarseMaskTgt;
+                mT = mT | ((inValue & EScrollYCoarseMaskSrc) >> EScrollYCoarseShiftSrc) << EScrollYCoarseShiftTgt;
+                
+                // Fine y to T
+                mT = mT & ~EScrollYFineMaskTgt;
+                mT = mT | ((inValue & EScrollYFineMaskSrc)) << EScrollYFineShiftTgt;
+
+                mW = 0;
+            }
+        
             break;
 
         case 6:
+
+            if (mW == 0)
+            {
+                mT = mT & ~EAddrLoMaskTgt;
+                mT = mT | ((inValue & EAddrLoMaskSrc) >> EAddrLoShiftSrc) << EAddrLoShiftTgt;
+                mW = 1;
+            }
+            else
+            {
+                mT = mT & ~EAddrHiMaskTgt;
+                mT = mT | ((inValue & EAddrHiMaskSrc) >> EAddrHiShiftSrc) << EAddrHiShiftTgt;
+                mV = mT;
+                mW = 0;
+            }
+            
             if (mPPUAddrWriteLO)
                 mPPUAddr = (mPPUAddr & 0xFF00) | inValue;
 
@@ -634,21 +764,24 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
             uint16_t ea = mPPUAddr&0x3FFF;
 
             if ((ea & 0xF000) == 0x2000)
-//            if (ea >= 0x2000 && ea < 0x3000)
             {
                 UInt8 name_table_idx = (ea >> 10) & 3;
                 ea = mNameTable[name_table_idx] + (ea & 0x3FF);
+                mVRAM[ea] = inValue;
             }
             
 //            if (ea == 0x3F04 || ea == 0x3F08 || ea == 0x3F0c || ea == 0x3F10 || ea == 0x3F14 || ea == 0x3F18 || ea == 0x3F1C)
-            if (ea == 0x3F10)
-                ea = 0x3f00;
+            else
+            {
+                if (ea == 0x3F10)
+                    ea = 0x3f00;
             
-            else if (ea >= 0x3F00)
-                ea = ea & 0x3F1F;
+                else if (ea >= 0x3F00)
+                    ea = ea & 0x3F1F;
             
-            mVRAM[ea] = inValue;
-
+                mVRAM[ea] = inValue;
+            }
+            
             mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
             break;
         }

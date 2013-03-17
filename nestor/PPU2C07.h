@@ -57,6 +57,46 @@ private:
     UInt8 mPPUCtrl;
     UInt8 mPPUMask;
     
+    // Loopy scrolling
+    // http://wiki.nesdev.com/w/index.php/The_skinny_on_NES_scrolling
+    mutable UInt16 mV;              // Current VRam (15b)
+    mutable UInt16 mT;              // Temp VRam (15b)
+    mutable UInt8  mX;              // Fine X (3b)
+    mutable UInt8  mW;              // Write toggle (1b)
+    
+    enum
+    {
+        ENameTableShiftSrc  = 0,
+        ENameTableMaskSrc   = (0x3 << ENameTableShiftSrc),
+        ENameTableShiftTgt  = 10,
+        ENameTableMaskTgt   = (0x3 << ENameTableShiftTgt),
+        
+        EScrollXFineMaskSrc    = 0x7,
+        EScrollXCoarseShiftSrc = 3,
+        EScrollXCoarseMaskSrc  = 0x1F << EScrollXCoarseShiftSrc,
+        EScrollXCoarseShiftTgt = 0,
+        EScrollXCoarseMaskTgt  = 0x1F << EScrollXCoarseShiftTgt,
+        
+        EScrollYFineMaskSrc    = 0x7,
+        EScrollYFineShiftTgt   = 12,
+        EScrollYFineMaskTgt    = EScrollYFineMaskSrc << EScrollYFineShiftTgt,
+        
+        EScrollYCoarseShiftSrc = 3,
+        EScrollYCoarseMaskSrc  = 0x1F << EScrollYCoarseShiftSrc,
+        EScrollYCoarseShiftTgt = 5,
+        EScrollYCoarseMaskTgt  = 0x1F << EScrollYCoarseShiftTgt,
+
+        EAddrLoShiftSrc        = 0,
+        EAddrLoMaskSrc         = 0x3F << EAddrLoShiftSrc,
+        EAddrLoShiftTgt        = 8,
+        EAddrLoMaskTgt         = 0xFF << EAddrLoShiftTgt,
+
+        EAddrHiShiftSrc        = 0,
+        EAddrHiMaskSrc         = 0xFF << EAddrLoShiftSrc,
+        EAddrHiShiftTgt        = 0,
+        EAddrHiMaskTgt         = 0xFF << EAddrLoShiftTgt
+    };
+    
     mutable UInt8  mPPULoadBuffer;
     mutable UInt8  mPPUStatus;
     mutable UInt16 mPPUAddr;
