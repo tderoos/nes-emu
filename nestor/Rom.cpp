@@ -37,13 +37,13 @@ Rom::Rom(char const *inFilename) :
         
         switch(mData[6]&9)
         {
-            case 0: mVRamMirrorRom = VERTICAL;     break;
-            case 1: mVRamMirrorRom = HORIZONTAL;   break;
-            case 8: mVRamMirrorRom = FOUR_SCREEN;  break;
+            case 0: mVRamMirrorRom = HORIZONTAL;    break;
+            case 1: mVRamMirrorRom = VERTICAL;      break;
+            case 8: mVRamMirrorRom = FOUR_SCREEN;   break;
         }
         mVRamMirrorMapped = mVRamMirrorRom;
 
-        printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRL:%d SR:%d SRB:%d)\n", inFilename, num_prg, num_chr, mapper_id, (int)GetVRamMirroring(), (int)mSRam, (int)mSRamBattery);
+        printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRM:%d SR:%d SRB:%d)\n", inFilename, num_prg, num_chr, mapper_id, (int)GetVRamMirroring(), (int)mSRam, (int)mSRamBattery);
         
         mMapper = Mapper::sCreate(mapper_id, num_prg, num_chr);
     }

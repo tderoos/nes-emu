@@ -130,14 +130,14 @@ void PPU2C07::UpdateMirroring()
 {
     switch (mRom->GetVRamMirroring())
     {
-        case VERTICAL:
+        case HORIZONTAL:
             mNameTable[0] = 0x2000;
             mNameTable[1] = 0x2000;
             mNameTable[2] = 0x2400;
             mNameTable[3] = 0x2400;
             break;
 
-        case HORIZONTAL:
+        case VERTICAL:
             mNameTable[0] = 0x2000;
             mNameTable[1] = 0x2400;
             mNameTable[2] = 0x2000;
@@ -237,76 +237,47 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
     {
         mPPUStatus = mPPUStatus & (~0x40);
         UpdateMirroring();
+        mV = mT;
     }
 
+    UInt16 mask = 0x041F;
+    mV &= ~mask;
+    mV |= mT & mask;
     
-#if 1
+    
+    UInt16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
+    UInt16 coarse_y = (mV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
     
     UInt16 fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
+    UInt8  attr_shift = (coarse_y&2) ? 4 : 0;
 
     if (mScanline < 240 && (mPPUMask & 0x08))
     {
         // Get sprites for this scanline
+        int spr_index = 0;
         ScanlineSprite sprites_sl[64];
         UInt8 num_spr_sl = FetchScanlineSprites(sprites_sl);
         
         UInt32*      fb_addr  = ioFrameBuffer + (mScanline*256);
         const UInt8* chr_tile = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
         
-        UInt8 base_nametable = mPPUCtrl & 0x3;
-        
-        // Determine Y
-        int scrolled_y = mScanline + mPPUScroll & 0xFF;
-        int tile_y     = scrolled_y / 8;
-        int sub_y      = scrolled_y % 8;
-        UInt8  attr_shift = (tile_y&2) ? 4 : 0;
-
-        // Clamp tile_y and adjust nametable if tile_y out of bounds.
-        if (tile_y >= 29)
-        {
-            base_nametable = base_nametable ^ 0x02;
-            tile_y -= 29;
-        }
-
-        // Determine X
-        UInt8 scroll_x = mPPUScroll >> 8;
-        int from_x = scroll_x & 7;
-        int tile_x = scroll_x >> 3;
-        
-        int spr_index = 0;
-        
-        if (mScanline == 0)
-            mV = mT;
-        else
-        {
-            UInt16 mask = 0x041F;
-            mV &= ~mask;
-            mV |= mT & mask;
-        }
-//        sub_y = 0;
-
-        fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
         for (int slx = 0; slx < 256; )
         {
-            // Clamp tile_x and adjust nametable if tile_x out of bounds.
-            base_nametable = base_nametable ^ (tile_x >> 5);
-            tile_x         = tile_x & 0x1F;
+            UInt16 name_table_base = mNameTable[(mV & 0xFFF) >> 10];
 
-            // Get nametable address
-            UInt8* name_table_old = mVRAM + mNameTable[base_nametable];
-            UInt8* attr_table_old = name_table_old + 0x3c0;
-            
-            UInt8 nti = (mV & 0xFFF) >> 10;
-            
-            UInt16 name_table_addr = (mNameTable[nti] + (mV & 0x03FF));
-//            UInt8* name_table = mVRAM + (mNameTable[nti] + (mV & 0x03FF));
-//            UInt8* attr_table = mVRAM + (0x23C0 | (mV & 0x0C00) | ((mV >> 4) & 0x38) | ((mV >> 2) & 0x07));
-            
             // Fetch name and attr
+            UInt8 name =  mVRAM[name_table_base + (mV & 0x03FF)];
+            UInt8 attr = (mVRAM[name_table_base + 0x03C0 + ((coarse_y>>2)*8 + (coarse_x>>2))] >> (attr_shift + ((coarse_x&2) ? 2 : 0))) & 3;
+            
+//            UInt8* name_table = mVRAM + name_table_base + (mV & 0x03FF);
+//            UInt8* attr_table = mVRAM + (0x23C0 | (mV & 0x0C00) | ((mV >> 4) & 0x38) | ((mV >> 2) & 0x07));
+//                               
+//                               
+//                               uint8_t attr = (mVRAM[(attr_base^addr_xor) + (tile_x/4)] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
+//                               
+//            
 //            UInt8 name = *name_table;//   name_table[tile_x      + tile_y*32    ];//
-//            UInt8 attr = *attr_table;//(attr_table[(tile_x>>2) + (tile_y>>2)*8] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
-
-            UInt8 name = mVRAM[name_table_addr];
+//            UInt8 attr = ((*attr_table) >> (attr_shift + ((coarse_x&2) ? 2 : 0))) & 3;//(attr_table[(tile_x>>2) + (tile_y>>2)*8] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
             
             // Fetch pattern
             UInt8 plane0 = chr_tile[(name * 16) + fine_y];
@@ -322,8 +293,8 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                 uint8_t bit1 = (plane1 >> (7-tx)) & 1;
                 uint8_t bg_color_idx = bit0 | (bit1<<1) ;
 
-//                if (bg_color_idx != 0)
-//                    bg_color_idx |= (attr<<2);
+                if (bg_color_idx != 0)
+                    bg_color_idx |= (attr<<2);
                 
                 if (mPPUMask & 0x08)
                     color = mVRAM[0x3F00 + bg_color_idx];
@@ -376,7 +347,6 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                 if (mX == 7)
                 {
                     // Increment coarse X
-                    UInt16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
                     coarse_x++;
                     if (coarse_x == 32)
                     {
@@ -392,17 +362,12 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                 else
                     mX++;
             }
-            
-            // Reset x for next iteration
-            from_x = 0;
-            tile_x++;
         }
     }
     else if (mScanline == 241)
         mPPUStatus = mPPUStatus | 0x80;
   
     // Increment Y
-    UInt16 coarse_y = (mV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
     if (fine_y ==7)
     {
         fine_y = 0;
@@ -426,199 +391,9 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
     mV &= ~(EScrollYCoarseMaskTgt | EScrollYFineMaskTgt);
     mV |= (coarse_y << EScrollYCoarseShiftTgt) | (fine_y << EScrollYFineShiftTgt);
 
-//    if (mScanline == 261)
-//    {
-//        mV = mT;
-//    }
-//    else if (mScanline > 261)
-//    {
-//        UInt16 mask = 0x041F;
-//        mV &= ~mask;
-//        mV |= mT & mask;
-//    }
-    
-    
     mScanline = (mScanline+1) % 262;
 }
 
-
-#else
-
-
-    if (mScanline < 240 && (mPPUMask & 0x08))
-    {
-        UInt32*      fb_addr  = ioFrameBuffer + (mScanline*256);
-
-        const UInt8* spr_tile = mVRAM + ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000);
-        const UInt8* chr      = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
-        
-        int effective_sl = (mScanline + (mPPUScroll & 0xFF)) % 240;
-        
-        int y     = effective_sl / 8;
-        int sub_y = effective_sl % 8;
-        
-        uint16_t  addr       = (0x2000 + (mPPUCtrl&0x03) * 0x0400) + (y*32);
-        uint16_t  attr_base  = (0x23c0 + (mPPUCtrl&0x03) * 0x0400) + (y>>2)*8;
-        uint16_t  attr_shift = (y&2) ? 4 : 0;
-        
-        uint8_t sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
-        
-        
-        // Walk the OAM for sprites on this scanline
-        struct ScanlineSprite
-        {
-            UInt8 mYOffset;
-            UInt8 mTileIndex;
-            UInt8 mFlags;
-            UInt8 mX;
-            UInt8 mPriority;
-            const UInt8* mSrc;
-        };
-        
-        uint8_t num_spr_sl = 0;
-        ScanlineSprite sprites_sl[64];
-        for (int i = 0; i < 64; ++i)
-        {
-            uint8_t spr_y = mOAM[i*4];
-            if (spr_y+sprite_h >= effective_sl && spr_y < effective_sl)
-            {
-                uint8_t spr_x = mOAM[i*4 + 3];
-                
-                // Sorted insert
-                int idx = 0;
-                for (idx = 0; idx < num_spr_sl; idx++)
-                    if (spr_x < sprites_sl[idx].mX)
-                        break;
-                
-                if (idx < num_spr_sl)
-                    memmove(&(sprites_sl[idx+1]), &(sprites_sl[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
-                
-                sprites_sl[idx].mYOffset = spr_y - (effective_sl-sprite_h);
-                sprites_sl[idx].mTileIndex = mOAM[i*4 + 1];
-                sprites_sl[idx].mFlags = mOAM[i*4 + 2];
-                sprites_sl[idx].mX = spr_x;
-                sprites_sl[idx].mPriority = i;
-
-                if ((sprites_sl[idx].mFlags & 0x80) == 0)
-                    sprites_sl[idx].mYOffset = sprite_h-1-sprites_sl[idx].mYOffset;
-                
-                if (sprite_h == 0x10)
-                {
-                    UInt8 tile_idx = sprites_sl[idx].mTileIndex;
-                    sprites_sl[idx].mSrc = mVRAM + ((tile_idx & 0x01) ? 0x1000 : 0x0000);
-                    sprites_sl[idx].mTileIndex = tile_idx & 0xFE;
-                }
-                else
-                    sprites_sl[idx].mSrc = spr_tile;
-                
-                num_spr_sl++;
-            }
-        }
-        
-        uint8_t spr_index = 0;
-        
-        uint8_t scroll_x = mPPUScroll >> 8;
-        uint8_t tile_scroll_x = scroll_x >> 3;
-        uint8_t fine_scroll_x = scroll_x & 7;
-  
-        for (int draw_x = 0; draw_x < 32; ++draw_x)
-        {
-            uint8_t tile_x = tile_scroll_x + draw_x;
-            uint16_t addr_xor = 0;
-            if (tile_x >= 32)
-            {
-                addr_xor = 0x0400;
-                tile_x -= 32;
-            }
-            
-            uint8_t name = mVRAM[(addr^addr_xor) + tile_x];
-            uint8_t attr = (mVRAM[(attr_base^addr_xor) + (tile_x/4)] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
-            
-            // Fetch pattern
-            uint8_t plane0 = chr[(name * 16) + sub_y];
-            uint8_t plane1 = chr[(name * 16) + sub_y + 8];
-            
-            const uint8_t from_x = (draw_x == 0  ?   fine_scroll_x : 0);
-            const uint8_t   to_x = (draw_x == 31 ? 8-fine_scroll_x : 8);
-            
-            for (int sx = from_x; sx < to_x; ++sx)
-            {
-                uint8_t color = 0;
-                
-                // BG
-                uint8_t bit0 = (plane0 >> (7-sx)) & 1;
-                uint8_t bit1 = (plane1 >> (7-sx)) & 1;
-                uint8_t bg_color_idx = bit0 | (bit1<<1) ;
-                
-                if (bg_color_idx != 0)
-                    bg_color_idx |= (attr<<2);
-                
-                if (mPPUMask & 0x08)
-                    color = mVRAM[0x3F00 + bg_color_idx];
-
-                // Sprites
-                uint8_t x_pos = (draw_x*8) + sx - fine_scroll_x;
-                uint8_t prio = 0x0;
-
-                for (int s = spr_index; s < num_spr_sl; ++s)
-                {
-                    const ScanlineSprite& spr = sprites_sl[s];
-                    
-                    if (x_pos >= spr.mX + 8)
-                    {
-                        spr_index++;
-                        continue;
-                    }
-                    
-                    if (x_pos >= spr.mX)
-                    {
-                        if (spr.mPriority==0)
-                            s = s;
-                        
-                        // Fetch pattern
-                        uint8_t plane0 = spr.mSrc[(spr.mTileIndex * 16) + spr.mYOffset];
-                        uint8_t plane1 = spr.mSrc[(spr.mTileIndex * 16) + spr.mYOffset + 8];
-                        
-                        uint8_t shift = x_pos - spr.mX;
-                        
-                        if ((spr.mFlags&0x40) == 0)
-                            shift = 7 - shift;
-                        
-                        uint8_t color_idx = ((plane0>>shift) & 0x01) | (((plane1 >> shift) & 0x01)<<1);
-
-                        if (color_idx != 0 && spr.mPriority >= prio)
-                        {
-                            color_idx += (spr.mFlags & 0x03) * 4;
-                            
-                            if (bg_color_idx == 0 || (spr.mFlags & 0x20) == 0)
-                            {
-                                if ((mPPUMask & 0x10) != 0)
-                                    color = mVRAM[0x3F10 + color_idx];
-                                prio = spr.mPriority;
-                            }
-                            if (prio == 0) //&& bg_color_idx != 0)
-                                mPPUStatus = mPPUStatus | 0x40;
-                        }
-//                        
-//                        if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
-//                            mPPUStatus = mPPUStatus | 0x40;
-
-                    }
-                }
-                
-                (*fb_addr++) = palette[color];
-            }
-        }
-    }
-
-    else if (mScanline == 241)
-        mPPUStatus = mPPUStatus | 0x80;
-    
-    mScanline = (mScanline+1) % 262;
-}
-
-
-#endif
 
 void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
 {
