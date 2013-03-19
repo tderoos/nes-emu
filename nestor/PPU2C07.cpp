@@ -110,7 +110,6 @@ PPU2C07::PPU2C07(Rom* inRom)
     mPPUMask = 0;
     mPPUStatus = 0;
     mPPUAddr = 0;
-    mPPUScroll = 0;
     mOAMAddr = 0;
     
     mV = 0;
@@ -244,7 +243,6 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
     mV &= ~mask;
     mV |= mT & mask;
     
-    
     UInt16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
     UInt16 coarse_y = (mV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
     
@@ -268,16 +266,6 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
             // Fetch name and attr
             UInt8 name =  mVRAM[name_table_base + (mV & 0x03FF)];
             UInt8 attr = (mVRAM[name_table_base + 0x03C0 + ((coarse_y>>2)*8 + (coarse_x>>2))] >> (attr_shift + ((coarse_x&2) ? 2 : 0))) & 3;
-            
-//            UInt8* name_table = mVRAM + name_table_base + (mV & 0x03FF);
-//            UInt8* attr_table = mVRAM + (0x23C0 | (mV & 0x0C00) | ((mV >> 4) & 0x38) | ((mV >> 2) & 0x07));
-//                               
-//                               
-//                               uint8_t attr = (mVRAM[(attr_base^addr_xor) + (tile_x/4)] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
-//                               
-//            
-//            UInt8 name = *name_table;//   name_table[tile_x      + tile_y*32    ];//
-//            UInt8 attr = ((*attr_table) >> (attr_shift + ((coarse_x&2) ? 2 : 0))) & 3;//(attr_table[(tile_x>>2) + (tile_y>>2)*8] >> (attr_shift + ((tile_x&2) ? 2 : 0))) & 3;
             
             // Fetch pattern
             UInt8 plane0 = chr_tile[(name * 16) + fine_y];
@@ -330,7 +318,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
                                 prio = spr.mPriority;
                             }
                             
-                            if (spr.mPriority == 0)// && bg_color_idx != 0)
+                            if (spr.mPriority == 0 && bg_color_idx != 0)
                                 mPPUStatus = mPPUStatus | 0x40;
                         }
 //
@@ -412,7 +400,6 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
         case 2:
             *outValue = mPPUStatus;
             mPPUStatus = mPPUStatus & 0x7F;
-//            mPPUScroll = 0;
             mPPUAddr = 0;
             mPPUAddrWriteLO = false;
             
@@ -480,8 +467,6 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
             break;
 
         case 5:
-            mPPUScroll = (mPPUScroll<<8) | inValue;
-            
             if (mW == 0)
             {
                 // Coarse x to T
