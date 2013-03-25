@@ -8,90 +8,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/CPU6502.cpp"
-         timestampString = "385249550.361532"
+         timestampString = "385856647.737054"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "683"
-         endingLineNumber = "683"
+         startingLineNumber = "681"
+         endingLineNumber = "681"
          landmarkName = "CPU6502::Tick()"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/IO.cpp"
-         timestampString = "384809777.317565"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "79"
-         endingLineNumber = "79"
-         landmarkName = "IO::Load(uint16_t inAddr, uint8_t* outValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/IO.cpp"
-         timestampString = "384809777.317565"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "82"
-         endingLineNumber = "82"
-         landmarkName = "IO::Load(uint16_t inAddr, uint8_t* outValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/IO.cpp"
-         timestampString = "384891409.376529"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "87"
-         endingLineNumber = "87"
-         landmarkName = "IO::Load(uint16_t inAddr, uint8_t* outValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/IO.cpp"
-         timestampString = "384896620.281814"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "117"
-         endingLineNumber = "117"
-         landmarkName = "IO::Store(uint16_t inAddr, uint8_t inValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/IO.cpp"
-         timestampString = "384896620.281814"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "120"
-         endingLineNumber = "120"
-         landmarkName = "IO::Store(uint16_t inAddr, uint8_t inValue)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/IO.cpp"
-         timestampString = "384896620.281814"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "123"
-         endingLineNumber = "123"
-         landmarkName = "IO::Store(uint16_t inAddr, uint8_t inValue)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -157,19 +79,6 @@
          startingLineNumber = "613"
          endingLineNumber = "613"
          landmarkName = "CPU6502::Handle10(uint8_t opcode)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "nestor/IO.cpp"
-         timestampString = "384896620.281814"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "112"
-         endingLineNumber = "112"
-         landmarkName = "IO::Store(uint16_t inAddr, uint8_t inValue)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -385,11 +294,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/CPU6502.cpp"
-         timestampString = "385249550.361532"
+         timestampString = "385856647.737054"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "670"
-         endingLineNumber = "670"
+         startingLineNumber = "668"
+         endingLineNumber = "668"
          landmarkName = "CPU6502::Tick()"
          landmarkType = "5">
       </FileBreakpoint>
@@ -423,19 +332,6 @@
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "nestor/CPU6502.cpp"
-         timestampString = "384891409.376529"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "643"
-         endingLineNumber = "643"
-         landmarkName = "CPU6502::Tick()"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
          filePath = "nestor/PPU2C07.cpp"
          timestampString = "385251661.754295"
          startingColumnNumber = "9223372036854775807"
@@ -450,11 +346,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/CPU6502.cpp"
-         timestampString = "384891409.376529"
+         timestampString = "385856647.737054"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "654"
-         endingLineNumber = "654"
+         startingLineNumber = "652"
+         endingLineNumber = "652"
          landmarkName = "CPU6502::Tick()"
          landmarkType = "5">
       </FileBreakpoint>
@@ -463,11 +359,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/nestor.cpp"
-         timestampString = "384864860.221426"
+         timestampString = "385856647.737054"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "49"
-         endingLineNumber = "49"
+         startingLineNumber = "67"
+         endingLineNumber = "67"
          landmarkName = "nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)"
          landmarkType = "5">
       </FileBreakpoint>
@@ -476,11 +372,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/nestor.cpp"
-         timestampString = "384863792.837051"
+         timestampString = "385856647.737054"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "29"
-         endingLineNumber = "29"
+         startingLineNumber = "36"
+         endingLineNumber = "36"
          landmarkName = "nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)"
          landmarkType = "5">
       </FileBreakpoint>
@@ -489,11 +385,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "nestor/nestor.cpp"
-         timestampString = "384864860.221426"
+         timestampString = "385856647.737054"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "38"
-         endingLineNumber = "38"
+         startingLineNumber = "45"
+         endingLineNumber = "45"
          landmarkName = "nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)"
          landmarkType = "5">
       </FileBreakpoint>

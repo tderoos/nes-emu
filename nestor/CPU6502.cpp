@@ -636,11 +636,9 @@ void CPU6502::Handle10(uint8_t opcode)
 
 void CPU6502::Tick()
 {
-    bool irq = false;
-    
     static bool tick = false;
     
-    if ((mIO->NMI() || irq || mIO->Reset()))
+    if ((mIO->NMI() || mIO->IRQ() || mIO->Reset()))
     {
         if (!mIO->Reset())
         {

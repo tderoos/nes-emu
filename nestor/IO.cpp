@@ -9,14 +9,16 @@
 #include "Rom.h"
 #include "Ram.h"
 #include "PPU2C07.h"
+#include "APU.h"
 
 void BREAK();
 
 
-IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU) :
+IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU) :
     mRam(inRam),
     mRom(inRom),
     mPPU(inPPU),
+    mAPU(inAPU),
 
     mButtonState(0),
     mButtonReadMask(0),
@@ -25,7 +27,9 @@ IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU) :
     mDMASrc(0x0000),
     mDMAValue(0),
 
-    mReset(true)
+    mReset(true),
+    mNMI(false),
+    mIRQ(false)
 {
 }
 
@@ -75,8 +79,10 @@ void IO::Load(uint16_t inAddr, uint8_t* outValue)
         *outValue = 0x40;
     
     
-    else if (inAddr < 0x4020)
-    {   // APU
+    else if (inAddr < 0x4018)
+    {
+        // APU
+        mAPU->Load(inAddr, outValue);
     }
     else if (inAddr < 0x6000)
     {   // EROM
@@ -113,9 +119,11 @@ void IO::Store(uint16_t inAddr, uint8_t inValue)
             mButtonReadMask = 1;
     }
     
-    else if (inAddr < 0x4020)
+    else if (inAddr < 0x4018)
     {   // APU
+        mAPU->Store(inAddr, inValue);
     }
+    
     else if (inAddr < 0x6000)
     {   // EROM
     }

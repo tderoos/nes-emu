@@ -29,6 +29,8 @@
 		9338176616EB3E2500C8FCAC /* PPU2C07.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3ACCD56D547A389473D5 /* PPU2C07.h */; };
 		9338176716EB3E2500C8FCAC /* nestor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9338173316EA9A9800C8FCAC /* nestor.cpp */; };
 		9338176816EB3E2500C8FCAC /* nestor.h in Sources */ = {isa = PBXBuildFile; fileRef = 9338173416EA9A9800C8FCAC /* nestor.h */; };
+		937BB0EA16F910B000F8F003 /* APU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937BB0E816F910B000F8F003 /* APU.cpp */; };
+		937BB0EB16F9133F00F8F003 /* APU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937BB0E816F910B000F8F003 /* APU.cpp */; };
 		93CEBBB316EFC3A000CBDE87 /* Mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */; };
 		93CEBBB516EFC48600CBDE87 /* Mapper.h in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB016EFC2A800CBDE87 /* Mapper.h */; };
 		93CEBBB616EFC48600CBDE87 /* Mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */; };
@@ -82,6 +84,8 @@
 		9338175716EB22B000C8FCAC /* nesView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nesView.h; sourceTree = "<group>"; };
 		9338175816EB22B000C8FCAC /* nesView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = nesView.mm; sourceTree = "<group>"; };
 		9338175916EB23B500C8FCAC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		937BB0E816F910B000F8F003 /* APU.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = APU.cpp; sourceTree = "<group>"; };
+		937BB0E916F910B000F8F003 /* APU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APU.h; sourceTree = "<group>"; };
 		93CEBBB016EFC2A800CBDE87 /* Mapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mapper.h; sourceTree = "<group>"; };
 		93CEBBB116EFC2ED00CBDE87 /* types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mapper.cpp; sourceTree = "<group>"; };
@@ -204,6 +208,8 @@
 				9338173316EA9A9800C8FCAC /* nestor.cpp */,
 				9338173416EA9A9800C8FCAC /* nestor.h */,
 				93CEBBB116EFC2ED00CBDE87 /* types.h */,
+				937BB0E816F910B000F8F003 /* APU.cpp */,
+				937BB0E916F910B000F8F003 /* APU.h */,
 			);
 			path = nestor;
 			sourceTree = "<group>";
@@ -303,6 +309,7 @@
 				9338175E16EB3E2500C8FCAC /* Rom.h in Sources */,
 				9338175F16EB3E2500C8FCAC /* IO.cpp in Sources */,
 				9338176016EB3E2500C8FCAC /* IO.h in Sources */,
+				937BB0EB16F9133F00F8F003 /* APU.cpp in Sources */,
 				9338176116EB3E2500C8FCAC /* Ram.cpp in Sources */,
 				9338176216EB3E2500C8FCAC /* Ram.h in Sources */,
 				9338176316EB3E2500C8FCAC /* CPU6502.cpp in Sources */,
@@ -330,6 +337,7 @@
 				A8BC3C1E9D5FB5ECF7EE906F /* PPU2C07.cpp in Sources */,
 				9338173516EA9A9800C8FCAC /* nestor.cpp in Sources */,
 				93CEBBB316EFC3A000CBDE87 /* Mapper.cpp in Sources */,
+				937BB0EA16F910B000F8F003 /* APU.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

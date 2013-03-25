@@ -9,13 +9,20 @@
 #include "nestor.h"
 
 
+const UInt32 kCPUUpdateClock   = 0;
+const UInt32 kPPUScanlineClock = 113;
+const UInt32 kAPUUpdateClock   = 7458;
+
+
 nestor::nestor(const char* inRom) :
     mRom(inRom),
     mRam(0x8000),
     mPPU(&mRom),
-    mIO(&mRam, &mRom, &mPPU),
+    mIO(&mRam, &mRom, &mPPU, &mAPU),
     mCPU(&mIO),
-    mClock(0)
+    mClockToCPU(0),
+    mClockToPPU(kPPUScanlineClock),
+    mClockToAPU(kAPUUpdateClock)
 {
 }
 
@@ -30,21 +37,34 @@ void nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)
     
     do
     {
-        if (mClock > 113)
+        if (mClockToPPU-- == 0)
         {
             mPPU.Scanline(ioFrameBuffer);
             mIO.SetNMI(mPPU.GetNMI());
             vblank = mPPU.GetScanline() == 241;
-            mClock -= 113;
+            mClockToPPU = kPPUScanlineClock;
         }
         
-        mCPU.Tick();
+        if (mClockToAPU-- == 0)
+        {
+            mAPU.Update();
+//            mIO.SetIRQ(mAPU.GetInterrupt());
+            mClockToAPU = kAPUUpdateClock;
+        }
+
+        if (mClockToCPU-- == 0)
+        {
+            mCPU.Tick();
+            mClockToCPU = kCPUUpdateClock;
+        }
+        
         mIO.Tick();
 
-        mClock++;
         cycles++;
     }
     while (!vblank);
     
     cycles = cycles;
 }
+
+//7458.333333333333333

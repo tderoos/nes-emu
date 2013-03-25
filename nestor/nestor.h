@@ -16,6 +16,7 @@
 #include "IO.h"
 #include "CPU6502.h"
 #include "PPU2C07.h"
+#include "APU.h"
 
 
 class nestor
@@ -29,9 +30,14 @@ private:
     Rom         mRom;
     Ram         mRam;
     PPU2C07     mPPU;
+    APU         mAPU;
     IO          mIO;
     CPU6502     mCPU;
-    uint32_t    mClock;
+    
+    UInt32      mClockToCPU;
+    UInt32      mClockToPPU;
+    UInt32      mClockToAPU;
+    
 };
 
 #endif /* defined(__nestor__nestor__) */
