@@ -27,11 +27,8 @@ public:
     void    Load(uint16_t inAddr, uint8_t* outValue);
     void    Store(uint16_t inAddr, uint8_t inValue);
 
-    void    SetNMI(bool inSet)          { mNMI = inSet; }
-
-    bool    Reset() const               { return mReset; }
     bool    IRQ() const;
-    bool    NMI() const                 { return mNMI; }
+    bool    NMI() const;
     
 private:
     Ram*        mRam;
@@ -50,10 +47,6 @@ private:
     UInt8       mDMAValue;
     
     UInt8       mPRGRam[0x2000];
-    
-    bool        mReset;
-    bool        mNMI;
-    bool        mIRQ;
 };
 
 #endif //__IO_H_

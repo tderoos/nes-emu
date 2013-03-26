@@ -365,6 +365,9 @@ CPU6502::CPU6502(IO* inIO) :
     mRegs.mY        = 0;
     
     mInstrTimer     = 0;
+    
+    mReset          = true;
+    mNMI            = true;
 }
 
 
@@ -675,31 +678,40 @@ UInt8 CPU6502::Handle10(uint8_t opcode)
 }
 
 
-static bool sEnableLog = false;
-static int  sClock     = 0;
+static bool sEnableTrace = false;
 
-void CPU6502::Tick()
+
+inline bool sTriggerNMI(bool inValue, bool& ioOldvalue)
 {
-    if ((mIO->Reset() || mIO->NMI() || (mRegs.mInterrupt == 0 && mIO->IRQ())))
+    bool trigger = ioOldvalue && !inValue;
+    ioOldvalue = inValue;
+    return trigger;
+}
+
+void CPU6502::Tick(UInt16 inPPUClock)
+{
+    bool trigger_nmi = !mReset && sTriggerNMI(mIO->NMI(), mNMI);
+    if (mReset || trigger_nmi || (mRegs.mInterrupt == 0 && mIO->IRQ()))
     {
-        if (!mIO->Reset())
+        if (!mReset)
         {
             PushAddr(mRegs.mPC, mRegs, mIO);
             Push(mRegs.mFlags, mRegs, mIO);
         }
         
-        UInt16 addr = mIO->Reset() ? 0xFFFC :
-                      mIO->NMI()   ? 0xFFFA : 0xFFFE;
+        UInt16 addr = mReset      ? 0xFFFC :
+                      trigger_nmi ? 0xFFFA : 0xFFFE;
         
         mRegs.mPC = ReadAddr(addr, mIO);
         mRegs.mBreak = 0;
         mInstrTimer = 0;
         
-//        if (mIO->Reset())
+//        if (mReset)
 //            mRegs.mPC = 0xC000;
+        mReset = false;
     }
     
-    if (mInstrTimer-- == 0)
+    if (mInstrTimer-- <= 1)
     {
         UInt8 opcode;
         mIO->Load(mRegs.mPC, &opcode);
@@ -708,8 +720,8 @@ void CPU6502::Tick()
         sTrace[sTraceHead].mOp   = opcode;
         sTraceHead = (sTraceHead+1) % 256;
 
-        if (sEnableLog)
-            printf("%3d 0x%x\n", sClock, opcode);
+        if (sEnableTrace)
+            printf("%3d 0x%x\n", inPPUClock, opcode);
         
         switch(opcode & 0x03)
         {
@@ -720,7 +732,5 @@ void CPU6502::Tick()
             default:
                 BREAK();
         }
-        
-        sClock += 3*mInstrTimer;
     }
 }

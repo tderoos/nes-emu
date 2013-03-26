@@ -25,11 +25,7 @@ IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU) :
 
     mDMAState(INACTIVE),
     mDMASrc(0x0000),
-    mDMAValue(0),
-
-    mReset(true),
-    mNMI(false),
-    mIRQ(false)
+    mDMAValue(0)
 {
 }
 
@@ -41,11 +37,14 @@ bool IO::IRQ() const
 }
 
 
+bool IO::NMI() const
+{
+    return mPPU->GetNMI();
+}
+
+
 void IO::Tick()
 {
-    mReset = false;
-    mNMI   = false;
-    
     switch (mDMAState)
     {
         case READ:

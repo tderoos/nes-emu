@@ -100,8 +100,11 @@ void BREAKPPU()
 PPU2C07::PPU2C07(Rom* inRom)
 {
     mScanline = 0;
+    mClock    = 0;
     memset(mVRAM, 0, sizeof(mVRAM));
     memset(mOAM, 0, sizeof(mOAM));
+    
+    
 
     mRom = inRom;
     inRom->SetVRam(mVRAM);
@@ -126,7 +129,16 @@ PPU2C07::PPU2C07(Rom* inRom)
 
 void PPU2C07::Tick()
 {
-    
+    mClock += 3;
+    if (mClock > 340)
+    {
+        // Clear vblank flag
+        if (mScanline == 0)
+            mPPUStatus = mPPUStatus & 0x7F;
+        
+        mClock -= 341;
+        Scanline();
+    }
 }
 
 
@@ -236,7 +248,7 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
 }
 
 
-void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
+void PPU2C07::Scanline()
 {
     if (mScanline == 0)
     {
@@ -262,7 +274,7 @@ void PPU2C07::Scanline(uint32_t* ioFrameBuffer)
         ScanlineSprite sprites_sl[64];
         UInt8 num_spr_sl = FetchScanlineSprites(sprites_sl);
         
-        UInt32*      fb_addr  = ioFrameBuffer + (mScanline*256);
+        UInt32*      fb_addr  = mFrameBuffer + (mScanline*256);
         const UInt8* chr_tile = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
         
         for (int slx = 0; slx < 256; )

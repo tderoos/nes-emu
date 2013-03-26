@@ -95,7 +95,7 @@ nestor* nes = NULL;
     // keep track of start/launch time
 //    [self setStartTime];
     // start animation timer
-    timer = [NSTimer timerWithTimeInterval:(1.0f/30.0f) target:self
+    timer = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self
                                   selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 

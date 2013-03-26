@@ -21,7 +21,7 @@ class CPU6502 {
 
 public:
     CPU6502(IO* inIO);
-    void Tick();
+    void Tick(UInt16 inPPUClock);
 
 //private:
 
@@ -73,6 +73,9 @@ public:
     UInt8       Handle00(uint8_t opcode);
     UInt8       Handle01(uint8_t opcode);
     UInt8       Handle10(uint8_t opcode);
+    
+    bool        mReset;
+    bool        mNMI;
 
     UInt8       mInstrTimer;
     Status      mRegs;

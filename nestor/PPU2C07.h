@@ -16,12 +16,15 @@
 class PPU2C07 {
 public:
             PPU2C07(Rom* inRom);
+    void    SetFrameBuffer(UInt32* inFrameBuffer)               { mFrameBuffer = inFrameBuffer; }
 
     void    Tick();
-    void    Scanline(UInt32* ioFrameBuffer);
+    void    Scanline();
     
-    bool    GetNMI() const                                      { return (mPPUCtrl & 0x80) != 0 && mScanline == 241; }
+    bool    GetNMI() const                                      { return !((mPPUCtrl & 0x80) != 0 && (mPPUStatus & 0x80) != 0); }
     UInt16  GetScanline() const                                 { return mScanline; }
+    UInt16  GetClock() const                                    { return mClock; }
+    bool    SwapBuffer() const                                  { return mScanline == 241 && mClock < 3; }
 
     // Access
     void    Load(UInt16 inAddr, UInt8* outValue) const;
@@ -44,6 +47,9 @@ private:
     int         FetchScanlineSprites(ScanlineSprite* ioSprites);
     
     const Rom*  mRom;
+    UInt32*     mFrameBuffer;
+    UInt16      mClock;
+
     
     UInt8       mVRAM[0x4000];
     UInt8       mOAM[64*4];

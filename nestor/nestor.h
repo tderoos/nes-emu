@@ -33,11 +33,6 @@ private:
     APU         mAPU;
     IO          mIO;
     CPU6502     mCPU;
-    
-    UInt32      mClockToCPU;
-    UInt32      mClockToPPU;
-    UInt32      mClockToAPU;
-    
 };
 
 #endif /* defined(__nestor__nestor__) */
