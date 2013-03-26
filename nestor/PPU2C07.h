@@ -17,6 +17,7 @@ class PPU2C07 {
 public:
             PPU2C07(Rom* inRom);
 
+    void    Tick();
     void    Scanline(UInt32* ioFrameBuffer);
     
     bool    GetNMI() const                                      { return (mPPUCtrl & 0x80) != 0 && mScanline == 241; }

@@ -53,6 +53,7 @@ const UInt16 kNoisePeriodTable[] =
 };
 
 APU::APU() :
+    mAPUClock(1),
     mSequencerClock(0),
     mMode(0),
     mInterrupt(false)
@@ -60,45 +61,56 @@ APU::APU() :
 }
 
 
-void APU::Update()
+void APU::Tick()
 {
-    UpdateSequencer();
+    if (--mAPUClock == 0)
+        UpdateSequencer();
 }
 
+
+UInt16 kSequencerTimers[] =
+{
+    // 4 step, NTSC
+    7456, 7458, 7458, 7458, 0,
+
+    // 5 step NTSC
+    7458, 7456, 7458, 7458, 7452
+    
+    // TODO: PAL
+};
 
 
 void APU::UpdateSequencer()
 {
     // Update the sequencer
-    UInt8 mod = (mMode & 0x80) ? 5 : 4;
+    bool mode_5_step = (mMode & 0x80) != 0;
+    UInt8 mod = mode_5_step ? 5 : 4;
     
-    mSequencerClock = (mSequencerClock + 1) % mod;
-    
-    switch (mSequencerClock)
+    if (mSequencerClock != 4)
     {
-        case 0:
-            ClockEnvelope();
-            break;
-            
-        case 1:
-            ClockEnvelope();
-            ClockLength();
-            break;
-        case 2:
-            ClockEnvelope();
-            break;
-
-        case 3:
-            ClockEnvelope();
-            ClockLength();
-            
-            if ((mMode & 0xC0) == 0)
-                SetInterrupt();
-            break;
-
-        case 4:
-            break;
+        ClockEnvelope();
+        
+        switch (mSequencerClock)
+        {
+            case 0:
+            case 2:
+                if (mode_5_step)
+                    ClockLength();
+                break;
+                
+            case 1:
+            case 3:
+                if (!mode_5_step)
+                    ClockLength();
+                break;
+        }
+        
+        if (mSequencerClock == 3 && (mMode & 0xC0) == 0)
+            SetInterrupt();
     }
+    
+    mAPUClock = kSequencerTimers[mSequencerClock + (mode_5_step?5:0)];
+    mSequencerClock = (mSequencerClock + 1) % mod;
 }
 
 
@@ -172,7 +184,9 @@ void APU::Store(UInt16 inAddr, UInt8 inValue)
         mMode = inValue;
         mSequencerClock = 0;
         if (mMode & 0x80)
-            UpdateSequencer();
+            mAPUClock = 1;
+        else
+            mAPUClock = 7459;
         
         // Clear the frame interrupt flag when the interrupt is disabled 
         if ((mMode & 0x40))

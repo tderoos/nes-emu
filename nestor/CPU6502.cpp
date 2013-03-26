@@ -33,6 +33,11 @@ void BREAK()
 }
 
 
+inline bool sAddrOnSamePage(UInt16 inA, UInt16 inB)
+{
+    return (inA & 0xFF00) == (inB & 0xFF00);
+}
+
 
 
 uint16_t ReadAddr(uint16_t inAddr, IO* ioIO)
@@ -358,10 +363,12 @@ CPU6502::CPU6502(IO* inIO) :
     mRegs.mAcc      = 0;
     mRegs.mX        = 0;
     mRegs.mY        = 0;
+    
+    mInstrTimer     = 0;
 }
 
 
-void CPU6502::Handle00(uint8_t opcode)
+UInt8 CPU6502::Handle00(uint8_t opcode)
 {
     if (opcode == 0x00) // BRK
     {
@@ -371,42 +378,42 @@ void CPU6502::Handle00(uint8_t opcode)
         mRegs.mInterrupt = 1;
         mRegs.mPC = ReadAddr(0xFFFE, mIO);
 
-        return;
+        return 7;
     }
     
     if (opcode == 0x20) // JSR
     {
         PushAddr(mRegs.mPC+2, mRegs, mIO);
         mRegs.mPC = ReadAddr(mRegs.mPC+1, mIO);
-        return;
+        return 6;
     }
     
     if (opcode == 0x40) // RTI
     {
         mRegs.mFlags = Pull(mRegs, mIO);
         PullPC(mRegs, mIO);
-        return;
+        return 6;
     }
 
     if (opcode == 0x60) // RTS
     {
         PullPC(mRegs, mIO);
         mRegs.mPC += 1;
-        return;
+        return 6;
     }
     
     // Handle jump
     if (opcode == 0x4C)
     {
         mRegs.mPC = GetEAAbs(mRegs, mIO, CPU6502::ZERO);
-        return;
+        return 3;
     }
     
     if (opcode == 0x6C)
     {
         uint16_t addr = ReadAddr(mRegs.mPC+1, mIO);
         mRegs.mPC = ReadAddrWrapped(addr, mIO);
-        return;
+        return 5;
     }
     
     // Branches
@@ -422,40 +429,52 @@ void CPU6502::Handle00(uint8_t opcode)
             case 3: flag = mRegs.mZero;     break;
         }
 
+        UInt8 cycles = 2;
+        
         if (cmp == flag)
-            mRegs.mPC += ReadOffsetSigned(mRegs.mPC+1, mIO);
+        {
+            int8_t offset = ReadOffsetSigned(mRegs.mPC+1, mIO);
+            mRegs.mPC += 2;
+            
+            UInt16 tgt = mRegs.mPC + offset;
+            cycles += sAddrOnSamePage(mRegs.mPC, tgt) ? 1 : 2;
+            mRegs.mPC = tgt;
+        }
+        else
+            mRegs.mPC += 2;
 
-        mRegs.mPC += 2;
-        return;
+        return cycles;
     }
     
     // 0x?8
     if ((opcode & 0x0F) == 0x08)
     {
+        UInt8 cycles = 2;
+        
         switch (opcode >> 4)
         {
-            case 0x1: mRegs.mCarry = 0;                                     break;        // CLC
-            case 0x3: mRegs.mCarry = 1;                                     break;        // SEC
-            case 0x5: mRegs.mInterrupt = 0;                                 break;        // CLI
-            case 0x7: mRegs.mInterrupt = 1;                                 break;        // SEI
-            case 0xB: mRegs.mOverflow = 0;                                  break;        // CLV
-            case 0xD: mRegs.mDecimal = 0;                                   break;        // CLD
-            case 0xF: mRegs.mDecimal = 1;                                   break;        // SED
+            case 0x1: mRegs.mCarry = 0;                                                     break;        // CLC
+            case 0x3: mRegs.mCarry = 1;                                                     break;        // SEC
+            case 0x5: mRegs.mInterrupt = 0;                                                 break;        // CLI
+            case 0x7: mRegs.mInterrupt = 1;                                                 break;        // SEI
+            case 0xB: mRegs.mOverflow = 0;                                                  break;        // CLV
+            case 0xD: mRegs.mDecimal = 0;                                                   break;        // CLD
+            case 0xF: mRegs.mDecimal = 1;                                                   break;        // SED
 
-            case 0x0: Push(mRegs.mFlags|0x30, mRegs, mIO);                  break;        // PHP
-            case 0x2: mRegs.mFlags = Pull(mRegs, mIO);                      break;        // PLP
-            case 0x4: Push(mRegs.mAcc, mRegs, mIO);                         break;        // PHA
-            case 0x6: SetRegister(CPU6502::A, Pull(mRegs, mIO), mRegs);     break;        // PLA
+            case 0x0: Push(mRegs.mFlags|0x30, mRegs, mIO);              cycles += 1;        break;        // PHP
+            case 0x2: mRegs.mFlags = Pull(mRegs, mIO);                  cycles += 2;        break;        // PLP
+            case 0x4: Push(mRegs.mAcc, mRegs, mIO);                     cycles += 1;        break;        // PHA
+            case 0x6: SetRegister(CPU6502::A, Pull(mRegs, mIO), mRegs); cycles += 2;        break;        // PLA
 
-            case 0x8: SetRegister(CPU6502::Y, mRegs.mY-1, mRegs);           break;        // DEY
-            case 0x9: SetRegister(CPU6502::A, mRegs.mY, mRegs);             break;        // TYA
-            case 0xA: SetRegister(CPU6502::Y, mRegs.mAcc, mRegs);           break;        // TAY
-            case 0xC: SetRegister(CPU6502::Y, mRegs.mY+1, mRegs);           break;        // INY
-            case 0xE: SetRegister(CPU6502::X, mRegs.mX+1, mRegs);           break;        // INX
+            case 0x8: SetRegister(CPU6502::Y, mRegs.mY-1, mRegs);                           break;        // DEY
+            case 0x9: SetRegister(CPU6502::A, mRegs.mY, mRegs);                             break;        // TYA
+            case 0xA: SetRegister(CPU6502::Y, mRegs.mAcc, mRegs);                           break;        // TAY
+            case 0xC: SetRegister(CPU6502::Y, mRegs.mY+1, mRegs);                           break;        // INY
+            case 0xE: SetRegister(CPU6502::X, mRegs.mX+1, mRegs);                           break;        // INX
         }
 
         mRegs.mPC += 1;
-        return;
+        return cycles;
     }
     
     // Else decode
@@ -465,13 +484,15 @@ void CPU6502::Handle00(uint8_t opcode)
     uint16_t ea;
     uint8_t oper;
     
+    UInt8 cycles = 2;
+    
     switch (am)
     {
-        case 0: oper = LoadOperImm(mRegs, mIO);            break;              // #imm
-        case 1: ea = GetEAZpg(mRegs, mIO, CPU6502::ZERO);  break;              // zpg
-        case 3: ea = GetEAAbs(mRegs, mIO, CPU6502::ZERO);  break;              // abs
-        case 5: ea = GetEAZpg(mRegs, mIO, CPU6502::X);     break;              // zpg,X
-        case 7: ea = GetEAAbs(mRegs, mIO, CPU6502::X);     break;              // abs,X
+        case 0: oper = LoadOperImm(mRegs, mIO);                                             break;              // #imm
+        case 1: ea = GetEAZpg(mRegs, mIO, CPU6502::ZERO);               cycles += 1;        break;              // zpg
+        case 3: ea = GetEAAbs(mRegs, mIO, CPU6502::ZERO);               cycles += 2;        break;              // abs
+        case 5: ea = GetEAZpg(mRegs, mIO, CPU6502::X);                  cycles += 2;        break;              // zpg,X
+        case 7: ea = GetEAAbs(mRegs, mIO, CPU6502::X);                  cycles += 2;        break;              // abs,X ADD PAGE BOUND CYCLE! 
             
         default:
             ea = -1; oper = 0;
@@ -495,13 +516,17 @@ void CPU6502::Handle00(uint8_t opcode)
     
     uint8_t instr_size[] = { 2, 2, 0, 3, 0, 2, 0, 3 };
     mRegs.mPC += instr_size[am];
+    
+    return cycles;
 }
 
 
-void CPU6502::Handle01(uint8_t opcode)
+UInt8 CPU6502::Handle01(uint8_t opcode)
 {
-    uint8_t am = (opcode >> 2) & 7;
-    uint8_t op = (opcode >> 5) & 7;
+    UInt8 am = (opcode >> 2) & 7;
+    UInt8 op = (opcode >> 5) & 7;
+    
+    UInt8 cycles = 0;
     
     if (op != 4)
     {
@@ -509,14 +534,14 @@ void CPU6502::Handle01(uint8_t opcode)
         
         switch (am)
         {
-            case 0: oper = LoadOperInd(mRegs, mIO, CPU6502::X);     break;              // (zpg,X)
-            case 1: oper = LoadOperZpg(mRegs, mIO, CPU6502::ZERO);  break;              // zpg
-            case 2: oper = LoadOperImm(mRegs, mIO);                 break;              // #imm
-            case 3: oper = LoadOperAbs(mRegs, mIO, CPU6502::ZERO);  break;              // abs
-            case 4: oper = LoadOperInd(mRegs, mIO, CPU6502::Y);     break;              // (zpg),Y
-            case 5: oper = LoadOperZpg(mRegs, mIO, CPU6502::X);     break;              // zpg,X
-            case 6: oper = LoadOperAbs(mRegs, mIO, CPU6502::Y);     break;              // abs,Y
-            case 7: oper = LoadOperAbs(mRegs, mIO, CPU6502::X);     break;              // abs,X
+            case 0: oper = LoadOperInd(mRegs, mIO, CPU6502::X);         cycles = 6;     break;              // (zpg,X)
+            case 1: oper = LoadOperZpg(mRegs, mIO, CPU6502::ZERO);      cycles = 3;     break;              // zpg
+            case 2: oper = LoadOperImm(mRegs, mIO);                     cycles = 2;     break;              // #imm
+            case 3: oper = LoadOperAbs(mRegs, mIO, CPU6502::ZERO);      cycles = 4;     break;              // abs
+            case 4: oper = LoadOperInd(mRegs, mIO, CPU6502::Y);         cycles = 5;     break;              // (zpg),Y << PAGE BOUNDARY
+            case 5: oper = LoadOperZpg(mRegs, mIO, CPU6502::X);         cycles = 4;     break;              // zpg,X
+            case 6: oper = LoadOperAbs(mRegs, mIO, CPU6502::Y);         cycles = 4;     break;              // abs,Y << PAGE BOUNDARY
+            case 7: oper = LoadOperAbs(mRegs, mIO, CPU6502::X);         cycles = 4;     break;              // abs,X << PAGE BOUNDARY
         }
         
         switch (op)
@@ -535,14 +560,14 @@ void CPU6502::Handle01(uint8_t opcode)
         uint16_t ea;
         switch (am)
         {
-            case 0: ea = GetEAZpgInd(mRegs, mIO, CPU6502::X);  break;              // (zpg,X)
-            case 1: ea = GetEAZpg(mRegs, mIO, CPU6502::ZERO);  break;              // zpg
-            case 2: ea = -1; BREAK();                          break;              // Illegal
-            case 3: ea = GetEAAbs(mRegs, mIO, CPU6502::ZERO);  break;              // abs
-            case 4: ea = GetEAZpgInd(mRegs, mIO, CPU6502::Y);  break;              // (zpg),Y
-            case 5: ea = GetEAZpg(mRegs, mIO, CPU6502::X);     break;              // zpg,X
-            case 6: ea = GetEAAbs(mRegs, mIO, CPU6502::Y);     break;              // abs,Y
-            case 7: ea = GetEAAbs(mRegs, mIO, CPU6502::X);     break;              // abs,X
+            case 0: ea = GetEAZpgInd(mRegs, mIO, CPU6502::X);   cycles = 6;     break;              // (zpg,X)
+            case 1: ea = GetEAZpg(mRegs, mIO, CPU6502::ZERO);   cycles = 3;     break;              // zpg
+            case 2: ea = -1; BREAK();                                           break;              // Illegal
+            case 3: ea = GetEAAbs(mRegs, mIO, CPU6502::ZERO);   cycles = 4;     break;              // abs
+            case 4: ea = GetEAZpgInd(mRegs, mIO, CPU6502::Y);   cycles = 6;     break;              // (zpg),Y
+            case 5: ea = GetEAZpg(mRegs, mIO, CPU6502::X);      cycles = 4;     break;              // zpg,X
+            case 6: ea = GetEAAbs(mRegs, mIO, CPU6502::Y);      cycles = 5;     break;              // abs,Y
+            case 7: ea = GetEAAbs(mRegs, mIO, CPU6502::X);      cycles = 5;     break;              // abs,X
         }
         
         mIO->Store(ea, mRegs.mAcc);
@@ -550,10 +575,12 @@ void CPU6502::Handle01(uint8_t opcode)
     
     uint8_t instr_size[] = { 2, 2, 2, 3, 2, 2, 3, 3 };
     mRegs.mPC += instr_size[am];
+    
+    return cycles;
 }
 
 
-void CPU6502::Handle10(uint8_t opcode)
+UInt8 CPU6502::Handle10(uint8_t opcode)
 {
     // Handle single byte instructions
     if ((opcode & 0x8F) == 0x8A)
@@ -572,7 +599,7 @@ void CPU6502::Handle10(uint8_t opcode)
         }
         
         mRegs.mPC+=1;
-        return;
+        return 2;
     }
     
     // Else decode
@@ -585,14 +612,19 @@ void CPU6502::Handle10(uint8_t opcode)
     // Select offset reg - normally X, except LDX and STX
     ERegister offset_reg = ((op&6)==4) ? CPU6502::Y : CPU6502::X;
 
+    
+    UInt8 page_boundary_cycles = 0;
+    UInt8 op_cycles = 2;
+    UInt8 lc = 0, sc = 0;       // Load/Store cycles
+    
     switch (am)
     {
-        case 0: oper = LoadOperImm(mRegs, mIO);            break;              // #imm
-        case 1: ea = GetEAZpg(mRegs, mIO, CPU6502::ZERO);  break;              // zpg
-        case 2: oper = mRegs.mAcc;                         break;              // acc
-        case 3: ea = GetEAAbs(mRegs, mIO, CPU6502::ZERO);  break;              // abs
-        case 5: ea = GetEAZpg(mRegs, mIO, offset_reg);     break;              // zpg,X / apg,Y (STX&LDX)
-        case 7: ea = GetEAAbs(mRegs, mIO, offset_reg);     break;              // abs,X / abs,Y
+        case 0: oper = LoadOperImm(mRegs, mIO);                                     break;              // #imm
+        case 1: ea = GetEAZpg(mRegs, mIO, CPU6502::ZERO);  lc=1; sc=1;              break;              // zpg
+        case 2: oper = mRegs.mAcc;                                                  break;              // acc
+        case 3: ea = GetEAAbs(mRegs, mIO, CPU6502::ZERO);  lc=2; sc=2;              break;              // abs
+        case 5: ea = GetEAZpg(mRegs, mIO, offset_reg);     lc=1; sc=1; op_cycles++; break;              // zpg,X / apg,Y (STX&LDX)
+        case 7: ea = GetEAAbs(mRegs, mIO, offset_reg);     lc=2; sc=2; op_cycles++; break;              // abs,X / abs,Y  <<< PAGE BOUNDARY
             
         default:
             ea = -1; oper = 0;
@@ -600,7 +632,11 @@ void CPU6502::Handle10(uint8_t opcode)
     }
     
     if (am != 0 && am != 2 && op != 4)
+    {
         mIO->Load(ea, &oper);
+        op_cycles += lc;
+        sc = 2;             // When doing a load, it takes at least 2 cycles to store in same op
+    }
     
     switch (op)
     {
@@ -625,20 +661,26 @@ void CPU6502::Handle10(uint8_t opcode)
         case 5:
         case 7:
             if (op != 5)
+            {
                 mIO->Store(ea, oper);
+                op_cycles += sc;
+            }
             break;
     }
     
-    uint8_t instr_size[] = { 2, 2, 1, 3, 0, 2, 0, 3 };
+    UInt8 instr_size[] = { 2, 2, 1, 3, 0, 2, 0, 3 };
     mRegs.mPC += instr_size[am];
+        
+    return op_cycles + page_boundary_cycles;
 }
 
 
+static bool sEnableLog = false;
+static int  sClock     = 0;
+
 void CPU6502::Tick()
 {
-    static bool tick = false;
-    
-    if ((mIO->NMI() || mIO->IRQ() || mIO->Reset()))
+    if ((mIO->Reset() || mIO->NMI() || (mRegs.mInterrupt == 0 && mIO->IRQ())))
     {
         if (!mIO->Reset())
         {
@@ -646,36 +688,39 @@ void CPU6502::Tick()
             Push(mRegs.mFlags, mRegs, mIO);
         }
         
-        uint16_t addr = mIO->Reset() ? 0xFFFC :
-                        mIO->NMI()   ? 0xFFFA : 0xFFFE;
+        UInt16 addr = mIO->Reset() ? 0xFFFC :
+                      mIO->NMI()   ? 0xFFFA : 0xFFFE;
         
         mRegs.mPC = ReadAddr(addr, mIO);
         mRegs.mBreak = 0;
-       
-        tick = false;
+        mInstrTimer = 0;
+        
+//        if (mIO->Reset())
+//            mRegs.mPC = 0xC000;
     }
     
-    tick = !tick;
-    if (!tick)
-        return;
-
-//    if (mRegs.mPC == 0x8002)
-//        BREAK();
-    
-    uint8_t opcode;
-    mIO->Load(mRegs.mPC, &opcode);
-    
-    sTrace[sTraceHead].mAddr = mRegs.mPC;
-    sTrace[sTraceHead].mOp   = opcode;
-    sTraceHead = (sTraceHead+1) % 256;
-    
-    switch(opcode & 0x03)
+    if (mInstrTimer-- == 0)
     {
-        case 0x00:          Handle00(opcode); break;
-        case 0x01:          Handle01(opcode); break;
-        case 0x02:          Handle10(opcode); break;
-            
-        default:
-            BREAK();
+        UInt8 opcode;
+        mIO->Load(mRegs.mPC, &opcode);
+        
+        sTrace[sTraceHead].mAddr = mRegs.mPC;
+        sTrace[sTraceHead].mOp   = opcode;
+        sTraceHead = (sTraceHead+1) % 256;
+
+        if (sEnableLog)
+            printf("%3d 0x%x\n", sClock, opcode);
+        
+        switch(opcode & 0x03)
+        {
+            case 0x00: mInstrTimer = Handle00(opcode); break;
+            case 0x01: mInstrTimer = Handle01(opcode); break;
+            case 0x02: mInstrTimer = Handle10(opcode); break;
+                
+            default:
+                BREAK();
+        }
+        
+        sClock += 3*mInstrTimer;
     }
 }

@@ -34,6 +34,13 @@ IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU) :
 }
 
 
+
+bool IO::IRQ() const
+{
+    return mAPU->GetInterrupt();
+}
+
+
 void IO::Tick()
 {
     mReset = false;

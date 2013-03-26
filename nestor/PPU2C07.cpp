@@ -124,6 +124,12 @@ PPU2C07::PPU2C07(Rom* inRom)
 }
 
 
+void PPU2C07::Tick()
+{
+    
+}
+
+
 
 void PPU2C07::UpdateMirroring()
 {
@@ -408,7 +414,7 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
             break;
 
         case 4:
-            *outValue = mOAM[mOAMAddr++];
+            *outValue = mOAM[mOAMAddr];
             break;
 
         case 7:

@@ -10,6 +10,7 @@
 #define __CPU6502_H_
 
 #include <iostream>
+#include "types.h"
 
 class IO;
 
@@ -24,7 +25,7 @@ public:
 
 //private:
 
-    uint8_t Load(uint16_t inAddr);
+    UInt8   Load(uint16_t inAddr);
     void    Store(uint16_t inAddr, uint8_t inValue);
 
     enum ERegister
@@ -38,41 +39,42 @@ public:
 
     struct Status
     {
-        uint16_t mPC;
+        UInt16 mPC;
 
         union
         {
             struct {
-                uint8_t  mSP;
-                uint8_t  mAcc;
-                uint8_t  mX;
-                uint8_t  mY;
-                uint8_t  mRegZero;
+                UInt8  mSP;
+                UInt8  mAcc;
+                UInt8  mX;
+                UInt8  mY;
+                UInt8  mRegZero;
             };
-            uint8_t mReg[5];
+            UInt8 mReg[5];
         };
 
         union
         {
             struct
             {
-                uint8_t mCarry      : 1;
-                uint8_t mZero       : 1;
-                uint8_t mInterrupt  : 1;
-                uint8_t mDecimal    : 1;
-                uint8_t mBreak      : 1;
-                uint8_t mReserved   : 1;
-                uint8_t mOverflow   : 1;
-                uint8_t mNeg        : 1;
+                UInt8 mCarry      : 1;
+                UInt8 mZero       : 1;
+                UInt8 mInterrupt  : 1;
+                UInt8 mDecimal    : 1;
+                UInt8 mBreak      : 1;
+                UInt8 mReserved   : 1;
+                UInt8 mOverflow   : 1;
+                UInt8 mNeg        : 1;
             };
-            uint8_t mFlags;
+            UInt8 mFlags;
         };
     };
 
-    void        Handle00(uint8_t opcode);
-    void        Handle01(uint8_t opcode);
-    void        Handle10(uint8_t opcode);
+    UInt8       Handle00(uint8_t opcode);
+    UInt8       Handle01(uint8_t opcode);
+    UInt8       Handle10(uint8_t opcode);
 
+    UInt8       mInstrTimer;
     Status      mRegs;
     IO*         mIO;
 };

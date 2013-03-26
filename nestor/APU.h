@@ -18,14 +18,14 @@ class APU
 {
 public:
             APU();
-    void    Update();
+    void    Tick();
     
     // Access
     void    Load(UInt16 inAddr, UInt8* outValue) const;
     void    Store(UInt16 inAddr, UInt8 inValue);
     
     // Interrupt
-    bool    GetInterrupt()                                  { return mInterrupt; }
+    bool    GetInterrupt() const                            { return mInterrupt; }
     void    SetInterrupt()                                  { mInterrupt = true; }
     void    ClearInterrupt()                                { mInterrupt = false; }
     
@@ -104,6 +104,7 @@ private:
 
     UInt8   mRegisters[NUM_APU_REGISTERS];
     
+    UInt16  mAPUClock;
     UInt8   mMode;
     UInt8   mSequencerClock;
     mutable bool    mInterrupt;

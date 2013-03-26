@@ -28,10 +28,9 @@ public:
     void    Store(uint16_t inAddr, uint8_t inValue);
 
     void    SetNMI(bool inSet)          { mNMI = inSet; }
-    void    SetIRQ(bool inSet)          { mIRQ = inSet; }
-    
+
     bool    Reset() const               { return mReset; }
-    bool    IRQ()                  { bool value = mIRQ; mIRQ = false; return value; }
+    bool    IRQ() const;
     bool    NMI() const                 { return mNMI; }
     
 private:

@@ -103,7 +103,7 @@ nestor* nes = NULL;
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
     
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/nestest.nes");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
@@ -112,6 +112,11 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/instr_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/apu_test.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05.len_timing_mode0.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vbl_clear_time.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vram_access.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/sprite_ram.nes");
+
   
     
     mButtonState = 0;
