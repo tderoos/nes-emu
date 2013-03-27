@@ -64,7 +64,7 @@ void IO::Tick()
 
 
 
-void IO::Load(uint16_t inAddr, uint8_t* outValue)
+void IO::Load(uint16 inAddr, uint8* outValue)
 {
     if (inAddr < 0x2000)
         mRam->Load(inAddr, outValue);
@@ -102,7 +102,7 @@ void IO::Load(uint16_t inAddr, uint8_t* outValue)
 }
 
 
-void IO::Store(uint16_t inAddr, uint8_t inValue)
+void IO::Store(uint16 inAddr, uint8 inValue)
 {
     if (inAddr < 0x2000)
         mRam->Store(inAddr, inValue);

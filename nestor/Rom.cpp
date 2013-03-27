@@ -22,14 +22,14 @@ Rom::Rom(char const *inFilename) :
     {
         struct stat file_stats;
         fstat(fd, &file_stats);
-        mData = (uint8_t *) mmap(NULL, file_stats.st_size, PROT_READ, MAP_FILE|MAP_PRIVATE, fd, 0);
+        mData = (uint8 *) mmap(NULL, file_stats.st_size, PROT_READ, MAP_FILE|MAP_PRIVATE, fd, 0);
         
-        UInt8 num_prg = mData[4];
-        UInt8 num_chr = mData[5];
+        uint8 num_prg = mData[4];
+        uint8 num_chr = mData[5];
         
         
         
-        UInt8 mapper_id = mData[6] >> 4;
+        uint8 mapper_id = mData[6] >> 4;
         mapper_id       = mapper_id | (mData[7] & 0xF0);
         
         mSRam        = (mData[10] & 0x10) != 0;
@@ -51,7 +51,7 @@ Rom::Rom(char const *inFilename) :
 
 
 // Set VRam - allows mapper to update CHR page directly into VRam
-void Rom::SetVRam(UInt8* mVRam)
+void Rom::SetVRam(uint8* mVRam)
 {
     mCHRData = mVRam;
     mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
@@ -59,7 +59,7 @@ void Rom::SetVRam(UInt8* mVRam)
 
 
 // Store are passed on to the mapper
-void Rom::Store(UInt16 inAddr, UInt8 inValue)
+void Rom::Store(uint16 inAddr, uint8 inValue)
 {
     mMapper->Store(inAddr, inValue);
     

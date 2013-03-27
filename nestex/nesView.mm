@@ -101,21 +101,34 @@ nestor* nes = NULL;
 
     // ensure timer fires during resize
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
-    
+
+
+// Passed Tests (correct timing - small difference in SP and interrupt flag)
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/nestest.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
+
+// Failed tests
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/instr_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/apu_test.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05.len_timing_mode0.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vbl_clear_time.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vram_access.nes");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/sprite_ram.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/sprite_ram.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/ppu_vbl_nmi.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/scrolltest_scroll.nes");
+    
+// Working games
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
+
+// Broken games
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");        ///< Scrolling (PPU or timing)
+    
+// Unsupported (mapper)
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Super Off-Road (E) [!].nes");
 
   
     

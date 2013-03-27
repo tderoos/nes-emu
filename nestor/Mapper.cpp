@@ -11,7 +11,7 @@
 #include "MMC1.h"
 
 
-Mapper* Mapper::sCreate(UInt8 inType, UInt8 inNumPRG, UInt8 inNumCHR)
+Mapper* Mapper::sCreate(uint8 inType, uint8 inNumPRG, uint8 inNumCHR)
 {
     switch (inType)
     {

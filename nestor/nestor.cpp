@@ -9,8 +9,6 @@
 #include "nestor.h"
 
 
-const UInt32 kPPUScanlineClock = 113;
-
 
 nestor::nestor(const char* inRom) :
     mRom(inRom),
@@ -22,7 +20,7 @@ nestor::nestor(const char* inRom) :
 }
 
 
-void nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)
+void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer)
 {
     mIO.SetButtonState(inButtonState);
     mPPU.SetFrameBuffer(ioFrameBuffer);
@@ -31,7 +29,7 @@ void nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)
     
     do
     {
-        mCPU.Tick(mPPU.GetClock());
+        mCPU.Tick(mPPU.GetClock());//, mPPU.GetScanline());
         mPPU.Tick();
         mAPU.Tick();
         mIO.Tick();

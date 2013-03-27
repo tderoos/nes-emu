@@ -21,12 +21,12 @@ class CPU6502 {
 
 public:
     CPU6502(IO* inIO);
-    void Tick(UInt16 inPPUClock);
+    void Tick(uint16 inPPUClock);
 
 //private:
 
-    UInt8   Load(uint16_t inAddr);
-    void    Store(uint16_t inAddr, uint8_t inValue);
+    uint8   Load(uint16 inAddr);
+    void    Store(uint16 inAddr, uint8 inValue);
 
     enum ERegister
     {
@@ -39,45 +39,45 @@ public:
 
     struct Status
     {
-        UInt16 mPC;
+        uint16 mPC;
 
         union
         {
             struct {
-                UInt8  mSP;
-                UInt8  mAcc;
-                UInt8  mX;
-                UInt8  mY;
-                UInt8  mRegZero;
+                uint8  mSP;
+                uint8  mAcc;
+                uint8  mX;
+                uint8  mY;
+                uint8  mRegZero;
             };
-            UInt8 mReg[5];
+            uint8 mReg[5];
         };
 
         union
         {
             struct
             {
-                UInt8 mCarry      : 1;
-                UInt8 mZero       : 1;
-                UInt8 mInterrupt  : 1;
-                UInt8 mDecimal    : 1;
-                UInt8 mBreak      : 1;
-                UInt8 mReserved   : 1;
-                UInt8 mOverflow   : 1;
-                UInt8 mNeg        : 1;
+                uint8 mCarry      : 1;
+                uint8 mZero       : 1;
+                uint8 mInterrupt  : 1;
+                uint8 mDecimal    : 1;
+                uint8 mBreak      : 1;
+                uint8 mReserved   : 1;
+                uint8 mOverflow   : 1;
+                uint8 mNeg        : 1;
             };
-            UInt8 mFlags;
+            uint8 mFlags;
         };
     };
 
-    UInt8       Handle00(uint8_t opcode);
-    UInt8       Handle01(uint8_t opcode);
-    UInt8       Handle10(uint8_t opcode);
+    uint8       Handle00(uint8 opcode);
+    uint8       Handle01(uint8 opcode);
+    uint8       Handle10(uint8 opcode);
     
     bool        mReset;
     bool        mNMI;
 
-    UInt8       mInstrTimer;
+    uint8       mInstrTimer;
     Status      mRegs;
     IO*         mIO;
 };

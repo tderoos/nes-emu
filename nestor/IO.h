@@ -24,8 +24,8 @@ public:
     void    SetButtonState(char inState) { mButtonState = inState; }
 
     void    Tick();
-    void    Load(uint16_t inAddr, uint8_t* outValue);
-    void    Store(uint16_t inAddr, uint8_t inValue);
+    void    Load(uint16 inAddr, uint8* outValue);
+    void    Store(uint16 inAddr, uint8 inValue);
 
     bool    IRQ() const;
     bool    NMI() const;
@@ -37,16 +37,16 @@ private:
     APU*        mAPU;
 
     char        mButtonState;
-    UInt8       mButtonReadMask;
+    uint8       mButtonReadMask;
     
     enum EDMAState{
         READ, WRITE, INACTIVE
     };
     EDMAState   mDMAState;
-    uint16_t    mDMASrc;
-    UInt8       mDMAValue;
+    uint16      mDMASrc;
+    uint8       mDMAValue;
     
-    UInt8       mPRGRam[0x2000];
+    uint8       mPRGRam[0x2000];
 };
 
 #endif //__IO_H_

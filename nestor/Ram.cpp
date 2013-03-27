@@ -10,8 +10,8 @@
 #include <memory.h>
 
 
-Ram::Ram(uint16_t inSize)
+Ram::Ram(uint16 inSize)
 {
-    mData = (uint8_t *) malloc(inSize);
+    mData = (uint8 *) malloc(inSize);
     memset(mData, 0xFFFFFFFF, inSize);
 }

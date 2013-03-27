@@ -15,18 +15,18 @@
 class NROM : public Mapper
 {
 public:
-    NROM(UInt8 inNumPRG, UInt8 inNumCHR) : Mapper(inNumPRG, inNumCHR)
+    NROM(uint8 inNumPRG, uint8 inNumCHR) : Mapper(inNumPRG, inNumCHR)
     {
     }
 
     
-    virtual void Store(UInt16 inAddr, UInt8 inData)
+    virtual void Store(uint16 inAddr, uint8 inData)
     {
         // Ignore - no mapping
     }
     
     
-    virtual void UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
+    virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
     {
         if (mNumPRG == 1)
         {

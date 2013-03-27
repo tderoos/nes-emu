@@ -19,16 +19,16 @@ class Rom {
 public:
     // Construct and load
                         Rom(const char* inFilename);
-    void                SetVRam(UInt8* mVRam);
+    void                SetVRam(uint8* mVRam);
     
     // Rom info
     inline EVRamLayout  GetVRamMirroring() const                        { return mVRamMirrorMapped; }
 
     // Load
-    inline void         Load(UInt16 inAddr, UInt8* outValue) const      { *outValue = mPRGData[inAddr & 0x7FFF]; };
+    inline void         Load(uint16 inAddr, uint8* outValue) const      { *outValue = mPRGData[inAddr & 0x7FFF]; };
 
     // Store
-    void                Store(UInt16 inAddr, UInt8 inValue);
+    void                Store(uint16 inAddr, uint8 inValue);
     
 
 private:
@@ -37,13 +37,13 @@ private:
     EVRamLayout mVRamMirrorRom;
     EVRamLayout mVRamMirrorMapped;
     
-    UInt8*      mData;
+    uint8*      mData;
     Mapper*     mMapper;
     
     // Remapped data - no remapping during normal runtime
     // Kept up to date by the Mapper.
-    UInt8   mPRGData[0x8000];
-    UInt8*  mCHRData;
+    uint8   mPRGData[0x8000];
+    uint8*  mCHRData;
 };
 
 #endif //__Rom_H_

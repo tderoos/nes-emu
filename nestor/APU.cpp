@@ -11,7 +11,7 @@
 
 void BREAK();
 
-const UInt8 kLengthIndexTable[] =
+const uint8 kLengthIndexTable[] =
 {
     0x0A, 0xFE,
     0x14, 0x02,
@@ -32,7 +32,7 @@ const UInt8 kLengthIndexTable[] =
 };
 
 
-const UInt16 kNoisePeriodTable[] =
+const uint16 kNoisePeriodTable[] =
 {
     0x004,
     0x008,
@@ -68,7 +68,7 @@ void APU::Tick()
 }
 
 
-UInt16 kSequencerTimers[] =
+uint16 kSequencerTimers[] =
 {
     // 4 step, NTSC
     7456, 7458, 7458, 7458, 0,
@@ -84,7 +84,7 @@ void APU::UpdateSequencer()
 {
     // Update the sequencer
     bool mode_5_step = (mMode & 0x80) != 0;
-    UInt8 mod = mode_5_step ? 5 : 4;
+    uint8 mod = mode_5_step ? 5 : 4;
     
     if (mSequencerClock != 4)
     {
@@ -136,7 +136,7 @@ void APU::ClockLength()
 
 
 
-void APU::Load(UInt16 inAddr, UInt8* outValue) const
+void APU::Load(uint16 inAddr, uint8* outValue) const
 {
     if (inAddr != 0x4015)
         BREAK();
@@ -152,9 +152,9 @@ void APU::Load(UInt16 inAddr, UInt8* outValue) const
 
 
 
-void APU::Store(UInt16 inAddr, UInt8 inValue)
+void APU::Store(uint16 inAddr, uint8 inValue)
 {
-    UInt8 reg = (UInt8)(inAddr - 0x4000);
+    uint8 reg = (uint8)(inAddr - 0x4000);
     
     if (reg < 0x4)
         mSquare1.Store(reg, inValue);
@@ -202,7 +202,7 @@ void APU::Store(UInt16 inAddr, UInt8 inValue)
 //// Square
 
 
-void APU::Square::Store(UInt8 inReg, UInt8 inValue)
+void APU::Square::Store(uint8 inReg, uint8 inValue)
 {
     switch (inReg)
     {
@@ -251,7 +251,7 @@ void APU::Square::ClockLength()
 //// Triangle
 
 
-void APU::Triangle::Store(UInt8 inReg, UInt8 inValue)
+void APU::Triangle::Store(uint8 inReg, uint8 inValue)
 {
     switch (inReg)
     {
@@ -298,7 +298,7 @@ void APU::Triangle::ClockLength()
 //// Noise
 
 
-void APU::Noise::Store(UInt8 inReg, UInt8 inValue)
+void APU::Noise::Store(uint8 inReg, uint8 inValue)
 {
     switch (inReg)
     {

@@ -4,10 +4,10 @@
 // To change the template use AppCode | Preferences | File Templates.
 //
 
-#include <stdint.h>
+#include "types.h"
 
 /*
-const uint32_t palette[64] = {
+const uint32 palette[64] = {
     0x808080, 0x0000BB, 0x3700BF, 0x8400A6,
     0xBB006A, 0xB7001E, 0xB30000, 0x912600,
     0x7B2B00, 0x003E00, 0x00480D, 0x003C22,
@@ -76,9 +76,9 @@ static const unsigned char BitReverseTable256[] =
 
 
 
-uint32_t swap(uint32_t inValue)
+uint32 swap(uint32 inValue)
 {
-    uint32_t result = 0;
+    uint32 result = 0;
     
     result = result | ((inValue << 24) & (0xFF << 24));
     result = result | ((inValue <<  8) & (0xFF << 16));
@@ -188,18 +188,18 @@ void PPU2C07::UpdateMirroring()
 int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
 {
     // Determine sprite height
-    UInt8 sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
+    uint8 sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
 
-    const UInt8* spr_tile = mVRAM + ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000);
+    const uint8* spr_tile = mVRAM + ((mPPUCtrl & 0x08) ? 0x1000 : 0x0000);
 
-    UInt8 num_spr_sl = 0;
+    uint8 num_spr_sl = 0;
     for (int i = 0; i < 64; ++i)
     {
-        uint8_t spr_y = mOAM[i*4];
+        uint8 spr_y = mOAM[i*4];
         
         if (spr_y+sprite_h >= mScanline && spr_y < mScanline)
         {
-            uint8_t spr_x = mOAM[i*4 + 3];
+            uint8 spr_x = mOAM[i*4 + 3];
 
             // Sorted insert
             int idx = 0;
@@ -210,9 +210,9 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
             if (idx < num_spr_sl)
                 memmove(&(ioSprites[idx+1]), &(ioSprites[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
 
-            UInt8 y_offset = spr_y - (mScanline-sprite_h);
-            UInt8 tile_idx = mOAM[i*4 + 1];
-            UInt8 flags    = mOAM[i*4 + 2];
+            uint8 y_offset = spr_y - (mScanline-sprite_h);
+            uint8 tile_idx = mOAM[i*4 + 1];
+            uint8 flags    = mOAM[i*4 + 2];
             
             ioSprites[idx].mX = spr_x;
             ioSprites[idx].mPriority   = i;
@@ -222,7 +222,7 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
             if ((flags & 0x80) == 0)
                 y_offset = (sprite_h-1)-y_offset;
 
-            const UInt8* src_tile;
+            const uint8* src_tile;
             if (sprite_h == 16)
             {
                 src_tile = mVRAM + ((tile_idx & 0x01) ? 0x1000 : 0x0000);
@@ -257,47 +257,47 @@ void PPU2C07::Scanline()
         mV = mT;
     }
 
-    UInt16 mask = 0x041F;
+    uint16 mask = 0x041F;
     mV &= ~mask;
     mV |= mT & mask;
     
-    UInt16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
-    UInt16 coarse_y = (mV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
+    uint16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
+    uint16 coarse_y = (mV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
     
-    UInt16 fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
-    UInt8  attr_shift = (coarse_y&2) ? 4 : 0;
+    uint16 fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
+    uint8  attr_shift = (coarse_y&2) ? 4 : 0;
 
     if (mScanline < 240 && (mPPUMask & 0x08))
     {
         // Get sprites for this scanline
         int spr_index = 0;
         ScanlineSprite sprites_sl[64];
-        UInt8 num_spr_sl = FetchScanlineSprites(sprites_sl);
+        uint8 num_spr_sl = FetchScanlineSprites(sprites_sl);
         
-        UInt32*      fb_addr  = mFrameBuffer + (mScanline*256);
-        const UInt8* chr_tile = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
+        uint32*      fb_addr  = mFrameBuffer + (mScanline*256);
+        const uint8* chr_tile = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
         
         for (int slx = 0; slx < 256; )
         {
-            UInt16 name_table_base = mNameTable[(mV & 0xFFF) >> 10];
+            uint16 name_table_base = mNameTable[(mV & 0xFFF) >> 10];
 
             // Fetch name and attr
-            UInt8 name =  mVRAM[name_table_base + (mV & 0x03FF)];
-            UInt8 attr = (mVRAM[name_table_base + 0x03C0 + ((coarse_y>>2)*8 + (coarse_x>>2))] >> (attr_shift + ((coarse_x&2) ? 2 : 0))) & 3;
+            uint8 name =  mVRAM[name_table_base + (mV & 0x03FF)];
+            uint8 attr = (mVRAM[name_table_base + 0x03C0 + ((coarse_y>>2)*8 + (coarse_x>>2))] >> (attr_shift + ((coarse_x&2) ? 2 : 0))) & 3;
             
             // Fetch pattern
-            UInt8 plane0 = chr_tile[(name * 16) + fine_y];
-            UInt8 plane1 = chr_tile[(name * 16) + fine_y + 8];
+            uint8 plane0 = chr_tile[(name * 16) + fine_y];
+            uint8 plane1 = chr_tile[(name * 16) + fine_y + 8];
             
 //            for (int tx = from_x; tx < 8 && slx < 256; ++tx, ++slx)
-            UInt8 tx = mX;
+            uint8 tx = mX;
             {
-                uint8_t color = 0;
+                uint8 color = 0;
                 
                 // BG
-                uint8_t bit0 = (plane0 >> (7-tx)) & 1;
-                uint8_t bit1 = (plane1 >> (7-tx)) & 1;
-                uint8_t bg_color_idx = bit0 | (bit1<<1) ;
+                uint8 bit0 = (plane0 >> (7-tx)) & 1;
+                uint8 bit1 = (plane1 >> (7-tx)) & 1;
+                uint8 bg_color_idx = bit0 | (bit1<<1) ;
 
                 if (bg_color_idx != 0)
                     bg_color_idx |= (attr<<2);
@@ -305,7 +305,7 @@ void PPU2C07::Scanline()
                 if (mPPUMask & 0x08)
                     color = mVRAM[0x3F00 + bg_color_idx];
 
-                uint8_t prio = 0xFF;
+                uint8 prio = 0xFF;
                 for (int s = spr_index; s < num_spr_sl; ++s)
                 {
                     const ScanlineSprite& spr = sprites_sl[s];
@@ -322,8 +322,8 @@ void PPU2C07::Scanline()
                     if (slx >= spr.mX)
                     {
                         // Shift pattern bits to get color idx
-                        uint8_t shift     = slx - spr.mX;
-                        uint8_t color_idx = ((spr.mPlane0>>shift) & 0x01) | (((spr.mPlane1 >> shift) & 0x01)<<1);
+                        uint8 shift     = slx - spr.mX;
+                        uint8 color_idx = ((spr.mPlane0>>shift) & 0x01) | (((spr.mPlane1 >> shift) & 0x01)<<1);
                         
                         if (color_idx != 0 && spr.mPriority < prio)
                         {
@@ -401,9 +401,9 @@ void PPU2C07::Scanline()
 }
 
 
-void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
+void PPU2C07::Load(uint16 inAddr, uint8* outValue) const
 {
-    uint8_t idx = inAddr&0x7;
+    uint8 idx = inAddr&0x7;
     
     switch (idx)
     {
@@ -440,11 +440,11 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
                 // Reads have a delay of one
                 *outValue = mPPULoadBuffer;
                 
-                UInt16 ea = mPPUAddr & 0x3FFF;
+                uint16 ea = mPPUAddr & 0x3FFF;
                 if ((ea & 0xF000) == 0x2000)
 //                if (ea >= 0x2000 && ea < 0x3000)
                 {
-                    UInt8 name_table_idx = (ea >> 10) & 3;
+                    uint8 name_table_idx = (ea >> 10) & 3;
                     ea = mNameTable[name_table_idx] + (ea & 0x3FF);
                 }
 
@@ -459,9 +459,9 @@ void PPU2C07::Load(uint16_t inAddr, uint8_t* outValue) const
     }
 }
 
-void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
+void PPU2C07::Store(uint16 inAddr, uint8 inValue)
 {
-    uint8_t idx = inAddr&0x7;
+    uint8 idx = inAddr&0x7;
     
     switch (idx)
     {
@@ -539,11 +539,11 @@ void PPU2C07::Store(uint16_t inAddr, uint8_t inValue)
 
         case 7:
         {
-            uint16_t ea = mPPUAddr&0x3FFF;
+            uint16 ea = mPPUAddr&0x3FFF;
 
             if ((ea & 0xF000) == 0x2000)
             {
-                UInt8 name_table_idx = (ea >> 10) & 3;
+                uint8 name_table_idx = (ea >> 10) & 3;
                 ea = mNameTable[name_table_idx] + (ea & 0x3FF);
                 mVRAM[ea] = inValue;
             }

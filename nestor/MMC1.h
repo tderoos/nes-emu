@@ -15,7 +15,7 @@
 class MMC1 : public Mapper
 {
 public:
-    MMC1(UInt8 inNumPRG, UInt8 inNumCHR) : Mapper(inNumPRG, inNumCHR)
+    MMC1(uint8 inNumPRG, uint8 inNumCHR) : Mapper(inNumPRG, inNumCHR)
     {
         mShiftIndex = 0;
         mTempReg    = 0;
@@ -25,7 +25,7 @@ public:
         mPRGReg     = 0;
     }
 
-    virtual void Store(UInt16 inAddr, UInt8 inData)
+    virtual void Store(uint16 inAddr, uint8 inData)
     {
         // MMC1 uses a serial register write to update the mapping
         // Registers a 5 bit wide, addres at write of the 5th bit
@@ -57,10 +57,10 @@ public:
         }
     }
     
-    virtual void UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
+    virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
     {
         // Map PRG data
-        UInt8 bank_idx = mPRGReg&0x0F;
+        uint8 bank_idx = mPRGReg&0x0F;
         switch((mControl >> 2) & 0x03)
         {
             case 0:
@@ -82,7 +82,7 @@ public:
         // Map CHR data
         if (mNumCHR != 0)
         {
-            const UInt8* chr_start = inData + mNumPRG * 0x4000;
+            const uint8* chr_start = inData + mNumPRG * 0x4000;
             if ((mControl & 0x10) == 0)
             {
                 // 8K Mode
@@ -113,17 +113,17 @@ public:
     }
 
 private:
-    UInt8   mShiftIndex;
-    UInt8   mTempReg;
+    uint8   mShiftIndex;
+    uint8   mTempReg;
 
     union {
         struct {
-            UInt8   mControl;       // $8000
-            UInt8   mCHRReg0;       // $A000 - CHR select 0
-            UInt8   mCHRReg1;       // $C000 - CHR select 1
-            UInt8   mPRGReg;        // $E000 - PRG select / WRAM enable
+            uint8   mControl;       // $8000
+            uint8   mCHRReg0;       // $A000 - CHR select 0
+            uint8   mCHRReg1;       // $C000 - CHR select 1
+            uint8   mPRGReg;        // $E000 - PRG select / WRAM enable
         };
-        UInt8  mRegisters[4];
+        uint8  mRegisters[4];
     };
     
 };

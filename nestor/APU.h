@@ -21,8 +21,8 @@ public:
     void    Tick();
     
     // Access
-    void    Load(UInt16 inAddr, UInt8* outValue) const;
-    void    Store(UInt16 inAddr, UInt8 inValue);
+    void    Load(uint16 inAddr, uint8* outValue) const;
+    void    Store(uint16 inAddr, uint8 inValue);
     
     // Interrupt
     bool    GetInterrupt() const                            { return mInterrupt; }
@@ -40,16 +40,16 @@ private:
         inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
         inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
         
-        void    Store(UInt8 inAddr, UInt8 inValue);
+        void    Store(uint8 inAddr, uint8 inValue);
         
         void    ClockEnvelope();
         void    ClockLength();
         
-        UInt16  mPeriod;
+        uint16  mPeriod;
         bool    mLengthEnabled;
-        UInt8   mLength;
+        uint8   mLength;
 
-        UInt8   mRegisters[2];
+        uint8   mRegisters[2];
     };
     Square  mSquare1;
     Square  mSquare2;
@@ -59,16 +59,16 @@ private:
         inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
         inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
         
-        void    Store(UInt8 inAddr, UInt8 inValue);
+        void    Store(uint8 inAddr, uint8 inValue);
 
         void    ClockEnvelope();
         void    ClockLength();
 
-        UInt16  mPeriod;
+        uint16  mPeriod;
         bool    mLengthEnabled;
-        UInt8   mLength;
+        uint8   mLength;
         
-        UInt8   mRegisters[1];
+        uint8   mRegisters[1];
     };
     Triangle mTriangle;
     
@@ -77,23 +77,23 @@ private:
         inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
         inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
         
-        void    Store(UInt8 inAddr, UInt8 inValue);
+        void    Store(uint8 inAddr, uint8 inValue);
         
         void    ClockEnvelope();
         void    ClockLength();
 
-        UInt16  mPeriod;
+        uint16  mPeriod;
         bool    mLengthEnabled;
-        UInt8   mLength;
+        uint8   mLength;
         bool    mShortMode;
 
-        UInt8   mRegisters[1];
+        uint8   mRegisters[1];
     };
     Noise mNoise;
     
     struct DMC
     {
-        void    Store(UInt8 inAddr, UInt8 inValue)          { }
+        void    Store(uint8 inAddr, uint8 inValue)          { }
         
     };
     DMC mDMC;
@@ -102,11 +102,11 @@ private:
         NUM_APU_REGISTERS = 0x18
     };
 
-    UInt8   mRegisters[NUM_APU_REGISTERS];
+    uint8   mRegisters[NUM_APU_REGISTERS];
     
-    UInt16  mAPUClock;
-    UInt8   mMode;
-    UInt8   mSequencerClock;
+    uint16  mAPUClock;
+    uint8   mMode;
+    uint8   mSequencerClock;
     mutable bool    mInterrupt;
 };
 

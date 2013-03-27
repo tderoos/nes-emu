@@ -13,8 +13,8 @@
 // Debugging
 struct DebugTrace
 {
-    uint16_t mAddr;
-    uint8_t  mOp;
+    uint16 mAddr;
+    uint8  mOp;
 };
 DebugTrace  sTrace[256];
 int         sTraceHead=0;
@@ -33,25 +33,25 @@ void BREAK()
 }
 
 
-inline bool sAddrOnSamePage(UInt16 inA, UInt16 inB)
+inline bool sAddrOnSamePage(uint16 inA, uint16 inB)
 {
     return (inA & 0xFF00) == (inB & 0xFF00);
 }
 
 
 
-uint16_t ReadAddr(uint16_t inAddr, IO* ioIO)
+uint16 ReadAddr(uint16 inAddr, IO* ioIO)
 {
-    uint8_t addr_lo, addr_hi;
+    uint8 addr_lo, addr_hi;
     ioIO->Load(inAddr, &addr_lo);
     ioIO->Load(inAddr+1, &addr_hi);
 
     return (addr_hi << 8) + addr_lo;
 }
 
-uint16_t ReadAddrWrapped(uint16_t inAddr, IO* ioIO)
+uint16 ReadAddrWrapped(uint16 inAddr, IO* ioIO)
 {
-    uint8_t addr_lo, addr_hi;
+    uint8 addr_lo, addr_hi;
     ioIO->Load(inAddr, &addr_lo);
     
     inAddr = (0xFF00 & inAddr) | (0x00FF & (inAddr+1));
@@ -60,77 +60,77 @@ uint16_t ReadAddrWrapped(uint16_t inAddr, IO* ioIO)
     return (addr_hi << 8) + addr_lo;
 }
 
-uint16_t GetEAAbs(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
+uint16 GetEAAbs(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
 {
-    uint16_t addr = ReadAddr(ioStatus.mPC+1, ioIO);
+    uint16 addr = ReadAddr(ioStatus.mPC+1, ioIO);
     return addr + ioStatus.mReg[inIndex];
 }
 
-uint16_t GetEAZpg(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
+uint16 GetEAZpg(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
 {
-    uint8_t oper_offset;
+    uint8 oper_offset;
     ioIO->Load(ioStatus.mPC+1, &oper_offset);
 
-    uint16_t index_offset = ioStatus.mReg[inIndex];
+    uint16 index_offset = ioStatus.mReg[inIndex];
     return (index_offset + oper_offset) & 0xFF;
 }
 
-uint16_t GetEAZpgInd(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
+uint16 GetEAZpgInd(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
 {
-    uint8_t zpg_offset;
+    uint8 zpg_offset;
     ioIO->Load(ioStatus.mPC+1, &zpg_offset);
     
-    uint16_t pre_inc  = (inIndex == CPU6502::X ? ioStatus.mReg[CPU6502::X] : 0);
-    uint16_t post_inc = (inIndex == CPU6502::Y ? ioStatus.mReg[CPU6502::Y] : 0);
+    uint16 pre_inc  = (inIndex == CPU6502::X ? ioStatus.mReg[CPU6502::X] : 0);
+    uint16 post_inc = (inIndex == CPU6502::Y ? ioStatus.mReg[CPU6502::Y] : 0);
     
-    uint8_t addr_lo, addr_hi;
+    uint8 addr_lo, addr_hi;
     ioIO->Load((zpg_offset + pre_inc    ) & 0xFF, &addr_lo);
     ioIO->Load((zpg_offset + pre_inc + 1) & 0xFF, &addr_hi);
 
     return (addr_hi << 8) + addr_lo + post_inc;
 }
 
-uint16_t GetEAInd(CPU6502::Status& ioStatus, IO* ioIO)
+uint16 GetEAInd(CPU6502::Status& ioStatus, IO* ioIO)
 {
-    uint16_t addr = ReadAddr(ioStatus.mPC+1, ioIO);
+    uint16 addr = ReadAddr(ioStatus.mPC+1, ioIO);
     return ReadAddr(addr, ioIO);
 }
 
 
 
-int8_t ReadOffsetSigned(uint16_t inAddr, IO* ioIO)
+int8_t ReadOffsetSigned(uint16 inAddr, IO* ioIO)
 {
     int8_t offset;
-    ioIO->Load(inAddr, (uint8_t*) &offset);
+    ioIO->Load(inAddr, (uint8*) &offset);
     return offset;
 }
 
 
 
-uint8_t LoadOper(uint16_t inAddr, IO* ioIO)
+uint8 LoadOper(uint16 inAddr, IO* ioIO)
 {
-    uint8_t value;
+    uint8 value;
     ioIO->Load(inAddr, &value);
     return value;
 }
 
 // Addressing
-uint8_t LoadOperImm(CPU6502::Status& ioStatus, IO* ioIO)
+uint8 LoadOperImm(CPU6502::Status& ioStatus, IO* ioIO)
 {
     return LoadOper(ioStatus.mPC+1, ioIO);
 }
 
-uint8_t LoadOperZpg(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
+uint8 LoadOperZpg(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
 {
     return LoadOper(GetEAZpg(ioStatus, ioIO, inIndex), ioIO);
 }
 
-uint8_t LoadOperAbs(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
+uint8 LoadOperAbs(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
 {
     return LoadOper(GetEAAbs(ioStatus, ioIO, inIndex), ioIO);
 }
 
-uint8_t LoadOperInd(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
+uint8 LoadOperInd(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIndex)
 {
     return LoadOper(GetEAZpgInd(ioStatus, ioIO, inIndex), ioIO);
 }
@@ -138,7 +138,7 @@ uint8_t LoadOperInd(CPU6502::Status& ioStatus, IO* ioIO, CPU6502::ERegister inIn
 
 
 
-void SetRegister(CPU6502::ERegister inDst, uint8_t inValue, CPU6502::Status& ioStatus)
+void SetRegister(CPU6502::ERegister inDst, uint8 inValue, CPU6502::Status& ioStatus)
 {
     ioStatus.mReg[inDst] = inValue;
 
@@ -151,45 +151,45 @@ void SetRegister(CPU6502::ERegister inDst, uint8_t inValue, CPU6502::Status& ioS
 
 
 // Stack
-void Push(uint8_t inValue, CPU6502::Status& ioStatus, IO* ioIO)
+void Push(uint8 inValue, CPU6502::Status& ioStatus, IO* ioIO)
 {
     ioIO->Store(0x0100 + ioStatus.mSP--, inValue);
 }
 
-void PushAddr(uint16_t inAddr, CPU6502::Status& ioStatus, IO* ioIO)
+void PushAddr(uint16 inAddr, CPU6502::Status& ioStatus, IO* ioIO)
 {
     Push((inAddr >> 8) & 0xFF, ioStatus, ioIO);
     Push( inAddr       & 0xFF, ioStatus, ioIO);
 }
 
 
-uint8_t Pull(CPU6502::Status& ioStatus, IO* ioIO)
+uint8 Pull(CPU6502::Status& ioStatus, IO* ioIO)
 {
-    uint8_t value;
+    uint8 value;
     ioIO->Load(0x100 + ++ioStatus.mSP, &value);
     return value;
 }
 
 void PullPC(CPU6502::Status& ioStatus, IO* ioIO)
 {
-    uint16_t pc_lo = Pull(ioStatus, ioIO);
-    uint16_t pc_hi = Pull(ioStatus, ioIO);
+    uint16 pc_lo = Pull(ioStatus, ioIO);
+    uint16 pc_hi = Pull(ioStatus, ioIO);
     ioStatus.mPC = pc_lo | pc_hi << 8;
 }
 
 
 
 // Operations
-void OppADDC(uint8_t inValue, CPU6502::Status& ioStatus)
+void OppADDC(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t value = ioStatus.mReg[CPU6502::A] + inValue;
+    uint8 value = ioStatus.mReg[CPU6502::A] + inValue;
     ioStatus.mCarry = inValue != 0 && value <= ioStatus.mReg[CPU6502::A];
     SetRegister(CPU6502::A, value, ioStatus);
 }
 
 
 
-void OppBit(uint8_t inValue, CPU6502::Status& ioStatus)
+void OppBit(uint8 inValue, CPU6502::Status& ioStatus)
 {
     ioStatus.mOverflow = (inValue & 0x40) != 0;
     ioStatus.mNeg      = (inValue & 0x80) != 0;
@@ -197,9 +197,9 @@ void OppBit(uint8_t inValue, CPU6502::Status& ioStatus)
 }
 
 
-uint8_t OppDec(uint8_t inValue, CPU6502::Status& ioStatus)
+uint8 OppDec(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t result = inValue-1;
+    uint8 result = inValue-1;
     
     ioStatus.mZero = result == 0;
     ioStatus.mNeg  = (result & 0x80) != 0;
@@ -208,9 +208,9 @@ uint8_t OppDec(uint8_t inValue, CPU6502::Status& ioStatus)
 }
 
 
-uint8_t OppInc(uint8_t inValue, CPU6502::Status& ioStatus)
+uint8 OppInc(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t result = inValue+1;
+    uint8 result = inValue+1;
     
     ioStatus.mZero = result == 0;
     ioStatus.mNeg  = (result & 0x80) != 0;
@@ -229,11 +229,11 @@ void OppBRK(CPU6502::Status& ioStatus, IO* ioIO)
     ioStatus.mPC = ReadAddr(0xFFFE, ioIO);
 }
 
-void OppCmp(CPU6502::ERegister inRegister, uint8_t inValue, CPU6502::Status& ioStatus)
+void OppCmp(CPU6502::ERegister inRegister, uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t reg = ioStatus.mReg[inRegister];
-    uint8_t cmp = (~inValue)+1;
-    uint8_t delta = reg + cmp;
+    uint8 reg = ioStatus.mReg[inRegister];
+    uint8 cmp = (~inValue)+1;
+    uint8 delta = reg + cmp;
 
     ioStatus.mZero  = (delta == 0);
     ioStatus.mNeg   = (delta & 0x80) != 0;
@@ -241,17 +241,17 @@ void OppCmp(CPU6502::ERegister inRegister, uint8_t inValue, CPU6502::Status& ioS
 }
 
 
-void OppEOR(uint8_t inValue, CPU6502::Status& ioStatus)
+void OppEOR(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t value = ioStatus.mReg[CPU6502::A] | inValue;
+    uint8 value = ioStatus.mReg[CPU6502::A] | inValue;
     SetRegister(CPU6502::A, value, ioStatus);
 }
 
 
 
-uint8_t OppROR(uint8_t inValue, CPU6502::Status& ioStatus)
+uint8 OppROR(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t result  = (inValue >> 1) + (ioStatus.mCarry ? 0x80 : 0x00);
+    uint8 result  = (inValue >> 1) + (ioStatus.mCarry ? 0x80 : 0x00);
 
     ioStatus.mZero  = result == 0;
     ioStatus.mCarry = (inValue&0x01) != 0;
@@ -260,9 +260,9 @@ uint8_t OppROR(uint8_t inValue, CPU6502::Status& ioStatus)
     return result;
 }
 
-uint8_t OppROL(uint8_t inValue, CPU6502::Status& ioStatus)
+uint8 OppROL(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t result  = (inValue << 1) + (ioStatus.mCarry ? 0x01 : 0x00);
+    uint8 result  = (inValue << 1) + (ioStatus.mCarry ? 0x01 : 0x00);
 
     ioStatus.mZero  = result == 0;
     ioStatus.mCarry = (inValue&0x80) != 0;
@@ -271,9 +271,9 @@ uint8_t OppROL(uint8_t inValue, CPU6502::Status& ioStatus)
     return result;
 }
 
-uint8_t OppLSR(uint8_t inValue, CPU6502::Status& ioStatus)
+uint8 OppLSR(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t result  = (inValue >> 1);
+    uint8 result  = (inValue >> 1);
     
     ioStatus.mZero  = result == 0;
     ioStatus.mCarry = (inValue&0x01) != 0;
@@ -281,9 +281,9 @@ uint8_t OppLSR(uint8_t inValue, CPU6502::Status& ioStatus)
     return result;
 }
 
-uint8_t OppASL(uint8_t inValue, CPU6502::Status& ioStatus)
+uint8 OppASL(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t result  = (inValue << 1);
+    uint8 result  = (inValue << 1);
     
     ioStatus.mZero  = result == 0;
     ioStatus.mCarry = (inValue&0x80) != 0;
@@ -294,15 +294,15 @@ uint8_t OppASL(uint8_t inValue, CPU6502::Status& ioStatus)
 
 
 
-void OppORA(uint8_t inValue, CPU6502::Status& ioStatus)
+void OppORA(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint8_t value = ioStatus.mReg[CPU6502::A] | inValue;
+    uint8 value = ioStatus.mReg[CPU6502::A] | inValue;
     SetRegister(CPU6502::A, value, ioStatus);
 }
 
-void OppADC(uint8_t inValue, CPU6502::Status& ioStatus)
+void OppADC(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint16_t sum = ioStatus.mAcc + inValue + (ioStatus.mCarry ? 1 : 0);
+    uint16 sum = ioStatus.mAcc + inValue + (ioStatus.mCarry ? 1 : 0);
 
     // Set overflow if
     //  - Acc and operand are same sign
@@ -311,12 +311,12 @@ void OppADC(uint8_t inValue, CPU6502::Status& ioStatus)
                            ((ioStatus.mAcc ^ sum)     & 0x80);
     ioStatus.mCarry     = (sum > 0xFF);
 
-    SetRegister(CPU6502::A, (uint8_t)(sum & 0xFF), ioStatus);
+    SetRegister(CPU6502::A, (uint8)(sum & 0xFF), ioStatus);
 }
 
-void OppSBC(uint8_t inValue, CPU6502::Status& ioStatus)
+void OppSBC(uint8 inValue, CPU6502::Status& ioStatus)
 {
-    uint16_t sum = ioStatus.mAcc - inValue - (ioStatus.mCarry ? 0 : 1);
+    uint16 sum = ioStatus.mAcc - inValue - (ioStatus.mCarry ? 0 : 1);
     
     // Set overflow if
     //  - Acc and operand are different sign
@@ -324,14 +324,14 @@ void OppSBC(uint8_t inValue, CPU6502::Status& ioStatus)
     ioStatus.mOverflow  = ((ioStatus.mAcc ^ inValue) & 0x80) &&
                           ((ioStatus.mAcc ^ sum)     & 0x80);
     ioStatus.mCarry     = (sum < 0x100);
-    SetRegister(CPU6502::A, (uint8_t)(sum & 0xFF), ioStatus);
+    SetRegister(CPU6502::A, (uint8)(sum & 0xFF), ioStatus);
     ioStatus.mNeg       = (sum & 0x8000) != 0;
 }
 
 
-void OppIncMem(uint16_t inAddr, CPU6502::Status& ioStatus, IO* ioIO)
+void OppIncMem(uint16 inAddr, CPU6502::Status& ioStatus, IO* ioIO)
 {
-    uint8_t value;
+    uint8 value;
     ioIO->Load(inAddr, &value);
     value = value+1;
     ioIO->Store(inAddr, value);
@@ -340,9 +340,9 @@ void OppIncMem(uint16_t inAddr, CPU6502::Status& ioStatus, IO* ioIO)
     ioStatus.mNeg  = (value & 0x80) != 0;
 }
 
-void OppDecMem(uint16_t inAddr, CPU6502::Status& ioStatus, IO* ioIO)
+void OppDecMem(uint16 inAddr, CPU6502::Status& ioStatus, IO* ioIO)
 {
-    uint8_t value;
+    uint8 value;
     ioIO->Load(inAddr, &value);
     value = value-1;
     ioIO->Store(inAddr, value);
@@ -371,7 +371,7 @@ CPU6502::CPU6502(IO* inIO) :
 }
 
 
-UInt8 CPU6502::Handle00(uint8_t opcode)
+uint8 CPU6502::Handle00(uint8 opcode)
 {
     if (opcode == 0x00) // BRK
     {
@@ -414,7 +414,7 @@ UInt8 CPU6502::Handle00(uint8_t opcode)
     
     if (opcode == 0x6C)
     {
-        uint16_t addr = ReadAddr(mRegs.mPC+1, mIO);
+        uint16 addr = ReadAddr(mRegs.mPC+1, mIO);
         mRegs.mPC = ReadAddrWrapped(addr, mIO);
         return 5;
     }
@@ -422,8 +422,8 @@ UInt8 CPU6502::Handle00(uint8_t opcode)
     // Branches
     if ((opcode & 0x1F) == 0x10)
     {
-        uint8_t cmp  = (opcode >> 5) & 0x01;
-        uint8_t flag;
+        uint8 cmp  = (opcode >> 5) & 0x01;
+        uint8 flag;
         switch(opcode >> 6)
         {
             case 0: flag = mRegs.mNeg;      break;
@@ -432,14 +432,14 @@ UInt8 CPU6502::Handle00(uint8_t opcode)
             case 3: flag = mRegs.mZero;     break;
         }
 
-        UInt8 cycles = 2;
+        uint8 cycles = 2;
         
         if (cmp == flag)
         {
             int8_t offset = ReadOffsetSigned(mRegs.mPC+1, mIO);
             mRegs.mPC += 2;
             
-            UInt16 tgt = mRegs.mPC + offset;
+            uint16 tgt = mRegs.mPC + offset;
             cycles += sAddrOnSamePage(mRegs.mPC, tgt) ? 1 : 2;
             mRegs.mPC = tgt;
         }
@@ -452,7 +452,7 @@ UInt8 CPU6502::Handle00(uint8_t opcode)
     // 0x?8
     if ((opcode & 0x0F) == 0x08)
     {
-        UInt8 cycles = 2;
+        uint8 cycles = 2;
         
         switch (opcode >> 4)
         {
@@ -481,13 +481,13 @@ UInt8 CPU6502::Handle00(uint8_t opcode)
     }
     
     // Else decode
-    uint8_t am = (opcode >> 2) & 7;
-    uint8_t op = (opcode >> 5) & 7;
+    uint8 am = (opcode >> 2) & 7;
+    uint8 op = (opcode >> 5) & 7;
     
-    uint16_t ea;
-    uint8_t oper;
+    uint16 ea;
+    uint8 oper;
     
-    UInt8 cycles = 2;
+    uint8 cycles = 2;
     
     switch (am)
     {
@@ -517,23 +517,23 @@ UInt8 CPU6502::Handle00(uint8_t opcode)
             BREAK();
     }
     
-    uint8_t instr_size[] = { 2, 2, 0, 3, 0, 2, 0, 3 };
+    uint8 instr_size[] = { 2, 2, 0, 3, 0, 2, 0, 3 };
     mRegs.mPC += instr_size[am];
     
     return cycles;
 }
 
 
-UInt8 CPU6502::Handle01(uint8_t opcode)
+uint8 CPU6502::Handle01(uint8 opcode)
 {
-    UInt8 am = (opcode >> 2) & 7;
-    UInt8 op = (opcode >> 5) & 7;
+    uint8 am = (opcode >> 2) & 7;
+    uint8 op = (opcode >> 5) & 7;
     
-    UInt8 cycles = 0;
+    uint8 cycles = 0;
     
     if (op != 4)
     {
-        uint8_t oper;
+        uint8 oper;
         
         switch (am)
         {
@@ -560,7 +560,7 @@ UInt8 CPU6502::Handle01(uint8_t opcode)
     }
     else
     {
-        uint16_t ea;
+        uint16 ea;
         switch (am)
         {
             case 0: ea = GetEAZpgInd(mRegs, mIO, CPU6502::X);   cycles = 6;     break;              // (zpg,X)
@@ -576,14 +576,14 @@ UInt8 CPU6502::Handle01(uint8_t opcode)
         mIO->Store(ea, mRegs.mAcc);
     }
     
-    uint8_t instr_size[] = { 2, 2, 2, 3, 2, 2, 3, 3 };
+    uint8 instr_size[] = { 2, 2, 2, 3, 2, 2, 3, 3 };
     mRegs.mPC += instr_size[am];
     
     return cycles;
 }
 
 
-UInt8 CPU6502::Handle10(uint8_t opcode)
+uint8 CPU6502::Handle10(uint8 opcode)
 {
     // Handle single byte instructions
     if ((opcode & 0x8F) == 0x8A)
@@ -606,19 +606,19 @@ UInt8 CPU6502::Handle10(uint8_t opcode)
     }
     
     // Else decode
-    uint8_t am = (opcode >> 2) & 7;
-    uint8_t op = (opcode >> 5) & 7;
+    uint8 am = (opcode >> 2) & 7;
+    uint8 op = (opcode >> 5) & 7;
    
-    uint16_t ea;
-    uint8_t oper;
+    uint16 ea;
+    uint8 oper;
     
     // Select offset reg - normally X, except LDX and STX
     ERegister offset_reg = ((op&6)==4) ? CPU6502::Y : CPU6502::X;
 
     
-    UInt8 page_boundary_cycles = 0;
-    UInt8 op_cycles = 2;
-    UInt8 lc = 0, sc = 0;       // Load/Store cycles
+    uint8 page_boundary_cycles = 0;
+    uint8 op_cycles = 2;
+    uint8 lc = 0, sc = 0;       // Load/Store cycles
     
     switch (am)
     {
@@ -671,7 +671,7 @@ UInt8 CPU6502::Handle10(uint8_t opcode)
             break;
     }
     
-    UInt8 instr_size[] = { 2, 2, 1, 3, 0, 2, 0, 3 };
+    uint8 instr_size[] = { 2, 2, 1, 3, 0, 2, 0, 3 };
     mRegs.mPC += instr_size[am];
         
     return op_cycles + page_boundary_cycles;
@@ -688,7 +688,7 @@ inline bool sTriggerNMI(bool inValue, bool& ioOldvalue)
     return trigger;
 }
 
-void CPU6502::Tick(UInt16 inPPUClock)
+void CPU6502::Tick(uint16 inPPUClock)
 {
     bool trigger_nmi = !mReset && sTriggerNMI(mIO->NMI(), mNMI);
     if (mReset || trigger_nmi || (mRegs.mInterrupt == 0 && mIO->IRQ()))
@@ -699,7 +699,7 @@ void CPU6502::Tick(UInt16 inPPUClock)
             Push(mRegs.mFlags, mRegs, mIO);
         }
         
-        UInt16 addr = mReset      ? 0xFFFC :
+        uint16 addr = mReset      ? 0xFFFC :
                       trigger_nmi ? 0xFFFA : 0xFFFE;
         
         mRegs.mPC = ReadAddr(addr, mIO);
@@ -713,7 +713,7 @@ void CPU6502::Tick(UInt16 inPPUClock)
     
     if (mInstrTimer-- <= 1)
     {
-        UInt8 opcode;
+        uint8 opcode;
         mIO->Load(mRegs.mPC, &opcode);
         
         sTrace[sTraceHead].mAddr = mRegs.mPC;

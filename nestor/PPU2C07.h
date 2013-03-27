@@ -16,60 +16,60 @@
 class PPU2C07 {
 public:
             PPU2C07(Rom* inRom);
-    void    SetFrameBuffer(UInt32* inFrameBuffer)               { mFrameBuffer = inFrameBuffer; }
+    void    SetFrameBuffer(uint32* inFrameBuffer)               { mFrameBuffer = inFrameBuffer; }
 
     void    Tick();
     void    Scanline();
     
     bool    GetNMI() const                                      { return !((mPPUCtrl & 0x80) != 0 && (mPPUStatus & 0x80) != 0); }
-    UInt16  GetScanline() const                                 { return mScanline; }
-    UInt16  GetClock() const                                    { return mClock; }
+    uint16  GetScanline() const                                 { return mScanline; }
+    uint16  GetClock() const                                    { return mClock; }
     bool    SwapBuffer() const                                  { return mScanline == 241 && mClock < 3; }
 
     // Access
-    void    Load(UInt16 inAddr, UInt8* outValue) const;
-    void    Store(UInt16 inAddr, UInt8 inValue);
+    void    Load(uint16 inAddr, uint8* outValue) const;
+    void    Store(uint16 inAddr, uint8 inValue);
 
 private:
     
     // Scanline sprite span
     struct ScanlineSprite
     {
-        UInt8 mX;
-        UInt8 mPlane0;
-        UInt8 mPlane1;
-        UInt8 mPriority;
-        UInt8 mPalette;
-        UInt8 mForeGround;
+        uint8 mX;
+        uint8 mPlane0;
+        uint8 mPlane1;
+        uint8 mPriority;
+        uint8 mPalette;
+        uint8 mForeGround;
     };
 
     void        UpdateMirroring();
     int         FetchScanlineSprites(ScanlineSprite* ioSprites);
     
     const Rom*  mRom;
-    UInt32*     mFrameBuffer;
-    UInt16      mClock;
+    uint32*     mFrameBuffer;
+    uint16      mClock;
 
     
-    UInt8       mVRAM[0x4000];
-    UInt8       mOAM[64*4];
-    UInt8*      mCHRData;
-    UInt16      mScanline;
+    uint8       mVRAM[0x4000];
+    uint8       mOAM[64*4];
+    uint8*      mCHRData;
+    uint16      mScanline;
     
-    UInt16      mNameTable[4];
+    uint16      mNameTable[4];
     
     // Internal registers
     mutable bool mPPUAddrWriteLO;
     
-    UInt8 mPPUCtrl;
-    UInt8 mPPUMask;
+    uint8 mPPUCtrl;
+    uint8 mPPUMask;
     
     // Loopy scrolling
     // http://wiki.nesdev.com/w/index.php/The_skinny_on_NES_scrolling
-    mutable UInt16 mV;              // Current VRam (15b)
-    mutable UInt16 mT;              // Temp VRam (15b)
-    mutable UInt8  mX;              // Fine X (3b)
-    mutable UInt8  mW;              // Write toggle (1b)
+    mutable uint16 mV;              // Current VRam (15b)
+    mutable uint16 mT;              // Temp VRam (15b)
+    mutable uint8  mX;              // Fine X (3b)
+    mutable uint8  mW;              // Write toggle (1b)
     
     enum
     {
@@ -104,11 +104,11 @@ private:
         EAddrHiMaskTgt         = 0xFF << EAddrLoShiftTgt
     };
     
-    mutable UInt8  mPPULoadBuffer;
-    mutable UInt8  mPPUStatus;
-    mutable UInt16 mPPUAddr;
-    mutable UInt16 mPPUScroll;
-    mutable UInt8  mOAMAddr;
+    mutable uint8  mPPULoadBuffer;
+    mutable uint8  mPPUStatus;
+    mutable uint16 mPPUAddr;
+    mutable uint16 mPPUScroll;
+    mutable uint8  mOAMAddr;
 };
 
 #endif //__PPU2C07_H_

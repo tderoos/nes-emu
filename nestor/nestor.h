@@ -24,7 +24,7 @@ class nestor
 public:
                 nestor(const char* inRom);
 
-    void        RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer);
+    void        RunToVBlank(char inButtonState, uint32* ioFrameBuffer);
     
 private:
     Rom         mRom;

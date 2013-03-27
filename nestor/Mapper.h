@@ -24,21 +24,21 @@ enum EVRamLayout
 class Mapper
 {
 public:
-    static Mapper* sCreate(UInt8 inType, UInt8 inNumPRG, UInt8 inNumCHR);
+    static Mapper* sCreate(uint8 inType, uint8 inNumPRG, uint8 inNumCHR);
 
-    Mapper(UInt8 inNumPRG, UInt8 inNumCHR) :
+    Mapper(uint8 inNumPRG, uint8 inNumCHR) :
         mNumPRG(inNumPRG),
         mNumCHR(inNumCHR),
         mDirty(true)                        { }
 
     inline bool     IsDirty() const         { return mDirty; }
     
-    virtual void    Store(UInt16 inAddr, UInt8 inData) = 0;
-    virtual void    UpdateMapping(const UInt8* inData, UInt8* ioPRG, UInt8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const = 0;
+    virtual void    Store(uint16 inAddr, uint8 inData) = 0;
+    virtual void    UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const = 0;
     
 protected:
-    UInt8           mNumPRG;
-    UInt8           mNumCHR;
+    uint8           mNumPRG;
+    uint8           mNumCHR;
     mutable bool    mDirty;
 };
 

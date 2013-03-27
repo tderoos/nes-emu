@@ -9,20 +9,20 @@
 #ifndef __Ram_H_
 #define __Ram_H_
 
-#include <stdint.h>
+#include "types.h"
 
 
 class Ram
 {
 public:
-    Ram(uint16_t inSize);
+    Ram(uint16 inSize);
 
     // Access
-    inline void Load(uint16_t inAddr, uint8_t* outValue) const      { *outValue = mData[inAddr & 0x07FF]; }
-    inline void Store(uint16_t inAddr, uint8_t inValue)             { mData[inAddr & 0x07FF] = inValue;   }
+    inline void Load(uint16 inAddr, uint8* outValue) const      { *outValue = mData[inAddr & 0x07FF]; }
+    inline void Store(uint16 inAddr, uint8 inValue)             { mData[inAddr & 0x07FF] = inValue;   }
 
 private:
-    uint8_t* mData;
+    uint8* mData;
 };
 
 #endif //__Ram_H_
