@@ -22,7 +22,7 @@ public:
     void    Scanline();
     
     bool    GetNMI() const                                      { return !((mPPUCtrl & 0x80) != 0 && (mPPUStatus & 0x80) != 0); }
-    uint16  GetScanline() const                                 { return mScanline; }
+    int16   GetScanline() const                                 { return mScanline; }
     uint16  GetClock() const                                    { return mClock; }
     bool    SwapBuffer() const                                  { return mScanline == 241 && mClock < 3; }
 
@@ -54,7 +54,7 @@ private:
     uint8       mVRAM[0x4000];
     uint8       mOAM[64*4];
     uint8*      mCHRData;
-    uint16      mScanline;
+    int16       mScanline;
     
     uint16      mNameTable[4];
     

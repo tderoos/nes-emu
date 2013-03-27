@@ -99,7 +99,7 @@ void BREAKPPU()
 
 PPU2C07::PPU2C07(Rom* inRom)
 {
-    mScanline = 0;
+    mScanline = 241;
     mClock    = 0;
     memset(mVRAM, 0, sizeof(mVRAM));
     memset(mOAM, 0, sizeof(mOAM));
@@ -250,12 +250,18 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
 
 void PPU2C07::Scanline()
 {
-    if (mScanline == 0)
+    if (mScanline == -1)
     {
-        mPPUStatus = mPPUStatus & (~0x40);
+        // Clear sprite hit detection and NMI
+        mPPUStatus = mPPUStatus & (~0xC0);
+
+        // Update mirror mode - can be set from mapper
         UpdateMirroring();
-        mV = mT;
     }
+    
+    // Tranfer VRam location from temp (loopy)
+    if (mScanline == 0)
+        mV = mT;
 
     uint16 mask = 0x041F;
     mV &= ~mask;
@@ -267,7 +273,7 @@ void PPU2C07::Scanline()
     uint16 fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
     uint8  attr_shift = (coarse_y&2) ? 4 : 0;
 
-    if (mScanline < 240 && (mPPUMask & 0x08))
+    if (mScanline >= 0 && mScanline < 240 && (mPPUMask & 0x08))
     {
         // Get sprites for this scanline
         int spr_index = 0;
@@ -397,7 +403,8 @@ void PPU2C07::Scanline()
     mV &= ~(EScrollYCoarseMaskTgt | EScrollYFineMaskTgt);
     mV |= (coarse_y << EScrollYCoarseShiftTgt) | (fine_y << EScrollYFineShiftTgt);
 
-    mScanline = (mScanline+1) % 262;
+    if (++mScanline == 261)
+        mScanline = -1;
 }
 
 

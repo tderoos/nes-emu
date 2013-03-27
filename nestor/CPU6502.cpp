@@ -734,7 +734,7 @@ void CPU6502::Tick(uint16 inPPUClock, int16 inScanline)
         sTraceHead = (sTraceHead+1) % 256;
 
         if (sEnableTrace)
-            printf("%04X %02X       A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%3d SL:%3d\n",
+            printf("%04X  %02X       A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%3d SL:%3d\n",
                    mRegs.mPC, opcode, mRegs.mA, mRegs.mX, mRegs.mY, mRegs.mFlags, mRegs.mSP, inPPUClock, inScanline);
         
         // Process opcode
