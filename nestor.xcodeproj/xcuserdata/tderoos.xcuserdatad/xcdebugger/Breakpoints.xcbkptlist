@@ -13,7 +13,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "751"
          endingLineNumber = "751"
-         landmarkName = "CPU6502::Tick(uint16 inPPUClock)"
+         landmarkName = "CPU6502::Tick(uint16 inPPUClock, int16 inScanline)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -26,7 +26,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "542"
          endingLineNumber = "542"
-         landmarkName = "CPU6502::Handle01(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle01(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -39,7 +39,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "604"
          endingLineNumber = "604"
-         landmarkName = "CPU6502::Handle10(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle10(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -52,7 +52,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "387"
          endingLineNumber = "387"
-         landmarkName = "CPU6502::Handle00(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle00(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -65,7 +65,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "672"
          endingLineNumber = "672"
-         landmarkName = "CPU6502::Handle10(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle10(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -78,7 +78,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "671"
          endingLineNumber = "671"
-         landmarkName = "CPU6502::Handle10(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle10(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -90,7 +90,9 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "283"
-         endingLineNumber = "283">
+         endingLineNumber = "283"
+         landmarkName = "OppLSR(uint8 inValue, CPU6502::Status&amp; ioStatus)"
+         landmarkType = "7">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -102,7 +104,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "479"
          endingLineNumber = "479"
-         landmarkName = "CPU6502::Handle00(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle00(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -115,7 +117,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "480"
          endingLineNumber = "480"
-         landmarkName = "CPU6502::Handle00(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle00(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -128,7 +130,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "312"
          endingLineNumber = "312"
-         landmarkName = "OppADC(uint8_t inValue, CPU6502::Status&amp; ioStatus)"
+         landmarkName = "OppADC(uint8 inValue, CPU6502::Status&amp; ioStatus)"
          landmarkType = "7">
       </FileBreakpoint>
       <FileBreakpoint
@@ -141,7 +143,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "581"
          endingLineNumber = "581"
-         landmarkName = "CPU6502::Handle01(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle01(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -154,7 +156,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "400"
          endingLineNumber = "400"
-         landmarkName = "CPU6502::Handle00(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle00(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -308,7 +310,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "28"
          endingLineNumber = "28"
-         landmarkName = "nestor::RunToVBlank(char inButtonState, uint32_t* ioFrameBuffer)"
+         landmarkName = "nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -412,7 +414,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "741"
          endingLineNumber = "741"
-         landmarkName = "CPU6502::Tick(uint16 inPPUClock)"
+         landmarkName = "CPU6502::Tick(uint16 inPPUClock, int16 inScanline)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -464,7 +466,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "736"
          endingLineNumber = "736"
-         landmarkName = "CPU6502::Tick(uint16 inPPUClock)"
+         landmarkName = "CPU6502::Tick(uint16 inPPUClock, int16 inScanline)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -503,7 +505,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "718"
          endingLineNumber = "718"
-         landmarkName = "CPU6502::Tick(uint16 inPPUClock)"
+         landmarkName = "CPU6502::Tick(uint16 inPPUClock, int16 inScanline)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -516,7 +518,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "408"
          endingLineNumber = "408"
-         landmarkName = "CPU6502::Handle00(uint8_t opcode)"
+         landmarkName = "CPU6502::Handle00(uint8 opcode)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -542,7 +544,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "715"
          endingLineNumber = "715"
-         landmarkName = "CPU6502::Tick(uint16 inPPUClock)"
+         landmarkName = "CPU6502::Tick(uint16 inPPUClock, int16 inScanline)"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

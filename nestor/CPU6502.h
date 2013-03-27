@@ -21,7 +21,7 @@ class CPU6502 {
 
 public:
     CPU6502(IO* inIO);
-    void Tick(uint16 inPPUClock);
+    void Tick(uint16 inPPUClock, int16 inScanline);
 
 //private:
 
@@ -45,7 +45,7 @@ public:
         {
             struct {
                 uint8  mSP;
-                uint8  mAcc;
+                uint8  mA;
                 uint8  mX;
                 uint8  mY;
                 uint8  mRegZero;
@@ -74,7 +74,6 @@ public:
     uint8       Handle01(uint8 opcode);
     uint8       Handle10(uint8 opcode);
     
-    bool        mReset;
     bool        mNMI;
 
     uint8       mInstrTimer;

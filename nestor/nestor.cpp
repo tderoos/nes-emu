@@ -29,7 +29,7 @@ void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer)
     
     do
     {
-        mCPU.Tick(mPPU.GetClock());//, mPPU.GetScanline());
+        mCPU.Tick(mPPU.GetClock(), mPPU.GetScanline());
         mPPU.Tick();
         mAPU.Tick();
         mIO.Tick();
