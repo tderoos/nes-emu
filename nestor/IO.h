@@ -27,6 +27,7 @@ public:
     void    Load(uint16 inAddr, uint8* outValue);
     void    Store(uint16 inAddr, uint8 inValue);
 
+    bool    IsDMA() const                { return mDMAState != INACTIVE; }
     bool    IRQ() const;
     bool    NMI() const;
     
