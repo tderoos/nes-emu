@@ -112,15 +112,12 @@ PPU2C07::PPU2C07(Rom* inRom)
     mPPUCtrl = 0;
     mPPUMask = 0;
     mPPUStatus = 0;
-    mPPUAddr = 0;
     mOAMAddr = 0;
     
     mV = 0;
     mT = 0;
     mX = 0;
     mW = 0;
-    
-    mPPUAddrWriteLO = false;
     
     for (int i = 0; i < 64; ++i)
         palette[i] = swap(palette[i]<<8);
@@ -132,12 +129,29 @@ void PPU2C07::Tick()
     mClock += 3;
     if (mClock > 340)
     {
-        // Clear vblank flag
-        if (mScanline == 0)
+        if (mScanline == -1)
+        {
+            // Clear sprite hit detection and NMI
+            mPPUStatus = mPPUStatus & (~0xC0);
+            
+            // Update mirror mode - can be set from mapper
+            UpdateMirroring();
+        }
+
+        // Clear(0)/set(241) vblank flag
+        else if (mScanline == 0)
             mPPUStatus = mPPUStatus & 0x7F;
+
+        else if (mScanline == 241)
+            mPPUStatus = mPPUStatus | 0x80;
         
         mClock -= 341;
-        Scanline();
+        
+        if (mScanline >= 0 && mScanline < 240 && (mPPUMask & 0x18) != 0)
+            Scanline();
+        
+        if (++mScanline == 261)
+            mScanline = -1;
     }
 }
 
@@ -250,15 +264,6 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
 
 void PPU2C07::Scanline()
 {
-    if (mScanline == -1)
-    {
-        // Clear sprite hit detection and NMI
-        mPPUStatus = mPPUStatus & (~0xC0);
-
-        // Update mirror mode - can be set from mapper
-        UpdateMirroring();
-    }
-    
     // Tranfer VRam location from temp (loopy)
     if (mScanline == 0)
         mV = mT;
@@ -376,8 +381,6 @@ void PPU2C07::Scanline()
             }
         }
     }
-    else if (mScanline == 241)
-        mPPUStatus = mPPUStatus | 0x80;
   
     // Increment Y
     if (fine_y ==7)
@@ -402,9 +405,6 @@ void PPU2C07::Scanline()
     // Store Y in V
     mV &= ~(EScrollYCoarseMaskTgt | EScrollYFineMaskTgt);
     mV |= (coarse_y << EScrollYCoarseShiftTgt) | (fine_y << EScrollYFineShiftTgt);
-
-    if (++mScanline == 261)
-        mScanline = -1;
 }
 
 
@@ -425,9 +425,6 @@ void PPU2C07::Load(uint16 inAddr, uint8* outValue) const
         case 2:
             *outValue = mPPUStatus;
             mPPUStatus = mPPUStatus & 0x7F;
-            mPPUAddr = 0;
-            mPPUAddrWriteLO = false;
-            
             mW = 0;
             
             break;
@@ -437,17 +434,17 @@ void PPU2C07::Load(uint16 inAddr, uint8* outValue) const
             break;
 
         case 7:
-            
-            if (mPPUAddr > 0x3F00)
+        {
+            if (mV > 0x3F00)
             {
-                *outValue = mVRAM[mPPUAddr & 0x3FFF];
+                *outValue = mVRAM[mV & 0x3FFF];
             }
             else
             {
                 // Reads have a delay of one
                 *outValue = mPPULoadBuffer;
                 
-                uint16 ea = mPPUAddr & 0x3FFF;
+                uint16 ea = mV & 0x3FFF;
                 if ((ea & 0xF000) == 0x2000)
 //                if (ea >= 0x2000 && ea < 0x3000)
                 {
@@ -458,7 +455,8 @@ void PPU2C07::Load(uint16 inAddr, uint8* outValue) const
                 mPPULoadBuffer = mVRAM[ea];
             }
 
-            mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
+            mV += (mPPUCtrl&0x04) ? 32 : 1;
+        }
             break;
             
         default:
@@ -500,7 +498,6 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
 
                 // Fine x to X
                 mX = inValue & EScrollXFineMaskSrc;
-
                 mW = 1;
             }
             else
@@ -512,7 +509,6 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
                 // Fine y to T
                 mT = mT & ~EScrollYFineMaskTgt;
                 mT = mT | ((inValue & EScrollYFineMaskSrc)) << EScrollYFineShiftTgt;
-
                 mW = 0;
             }
         
@@ -533,20 +529,11 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
                 mV = mT;
                 mW = 0;
             }
-            
-            if (mPPUAddrWriteLO)
-                mPPUAddr = (mPPUAddr & 0xFF00) | inValue;
-
-            else
-                mPPUAddr = (mPPUAddr & 0x00FF) | inValue << 8;
-            
-//            mPPUAddr = (mPPUAddr<<8) | (inValue);
-            mPPUAddrWriteLO = !mPPUAddrWriteLO;
             break;
 
         case 7:
         {
-            uint16 ea = mPPUAddr&0x3FFF;
+            uint16 ea = mV&0x3FFF;
 
             if ((ea & 0xF000) == 0x2000)
             {
@@ -563,11 +550,14 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
             
                 else if (ea >= 0x3F00)
                     ea = ea & 0x3F1F;
-            
+                
                 mVRAM[ea] = inValue;
             }
             
-            mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
+            mV += (mPPUCtrl&0x04) ? 32 : 1;
+//          mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
+            
+
             break;
         }
             

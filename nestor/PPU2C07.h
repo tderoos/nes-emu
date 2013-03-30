@@ -58,9 +58,6 @@ private:
     
     uint16      mNameTable[4];
     
-    // Internal registers
-    mutable bool mPPUAddrWriteLO;
-    
     uint8 mPPUCtrl;
     uint8 mPPUMask;
     
@@ -99,14 +96,13 @@ private:
         EAddrLoMaskTgt         = 0xFF << EAddrLoShiftTgt,
 
         EAddrHiShiftSrc        = 0,
-        EAddrHiMaskSrc         = 0xFF << EAddrLoShiftSrc,
+        EAddrHiMaskSrc         = 0xFF << EAddrHiShiftSrc,
         EAddrHiShiftTgt        = 0,
-        EAddrHiMaskTgt         = 0xFF << EAddrLoShiftTgt
+        EAddrHiMaskTgt         = 0xFF << EAddrHiShiftTgt
     };
     
     mutable uint8  mPPULoadBuffer;
     mutable uint8  mPPUStatus;
-    mutable uint16 mPPUAddr;
     mutable uint16 mPPUScroll;
     mutable uint8  mOAMAddr;
 };
