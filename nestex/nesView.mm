@@ -139,8 +139,6 @@ nestor* nes = NULL;
 // Unsupported (mapper)
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Super Off-Road (E) [!].nes");
 
-  
-    
     mButtonState = 0;
 }
 

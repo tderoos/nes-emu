@@ -25,6 +25,9 @@ public:
     int16   GetScanline() const                                 { return mScanline; }
     uint16  GetClock() const                                    { return mClock; }
     bool    SwapBuffer() const                                  { return mScanline == 241 && mClock < 3; }
+    
+    inline bool IsRendering() const                             { return (mScanline >= 0 && mScanline < 240 && (mPPUMask & 0x18) != 0); }
+
 
     // Access
     void    Load(uint16 inAddr, uint8* outValue) const;
@@ -45,6 +48,7 @@ private:
 
     void        UpdateMirroring();
     int         FetchScanlineSprites(ScanlineSprite* ioSprites);
+    uint16      IncreaseScrollY(uint16 inV) const;
     
     const Rom*  mRom;
     uint32*     mFrameBuffer;

@@ -147,7 +147,7 @@ void PPU2C07::Tick()
         
         mClock -= 341;
         
-        if (mScanline >= 0 && mScanline < 240 && (mPPUMask & 0x18) != 0)
+        if (IsRendering())
             Scanline();
         
         if (++mScanline == 261)
@@ -197,6 +197,35 @@ void PPU2C07::UpdateMirroring()
             break;
     }
 }
+
+
+uint16 PPU2C07::IncreaseScrollY(uint16 inV) const
+{
+    // Increasing the Y scroll register updates the associated flags in mV
+    // Normally, Y wraps at 29, flipping the vertical nametable bit at the
+    // same time. However, if manuyally ste above 29, it will wrap at 31 leaving
+    // the nametable at the old value.
+
+    uint16 coarse_y = (inV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
+
+    if (coarse_y == 29)
+    {
+        coarse_y = 0;
+        inV ^= 0x02 << ENameTableShiftTgt;   // switch vertical nametable
+    }
+    else if (coarse_y == 31)
+    {
+        coarse_y = 0;
+    }
+    else
+        coarse_y++;
+    
+    inV &= ~EScrollYCoarseMaskTgt;
+    inV |= coarse_y << EScrollYCoarseShiftTgt;
+    
+    return inV;
+}
+
 
 
 int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
@@ -383,28 +412,17 @@ void PPU2C07::Scanline()
     }
   
     // Increment Y
-    if (fine_y ==7)
+    if (fine_y == 7)
     {
         fine_y = 0;
-        
-        if (coarse_y == 29)
-        {
-            coarse_y = 0;
-            mV ^= 0x02 << ENameTableShiftTgt;   // switch vertical nametable
-        }
-        else if (coarse_y == 31)
-        {
-            coarse_y = 0;
-        }
-        else
-            coarse_y++;
+        mV = IncreaseScrollY(mV);
     }
     else
         fine_y++;
-    
-    // Store Y in V
-    mV &= ~(EScrollYCoarseMaskTgt | EScrollYFineMaskTgt);
-    mV |= (coarse_y << EScrollYCoarseShiftTgt) | (fine_y << EScrollYFineShiftTgt);
+
+    // Store fine Y in V
+    mV &= ~EScrollYFineMaskTgt;
+    mV |= fine_y << EScrollYFineShiftTgt;
 }
 
 
@@ -455,7 +473,11 @@ void PPU2C07::Load(uint16 inAddr, uint8* outValue) const
                 mPPULoadBuffer = mVRAM[ea];
             }
 
-            mV += (mPPUCtrl&0x04) ? 32 : 1;
+            // During rendering, ctrl bits are ignored and scrollY is increased - probably a timing issue
+//            if (IsRendering())
+//                mV = IncreaseScrollY(mV);
+//            else
+                mV += (mPPUCtrl&0x04) ? 32 : 1;
         }
             break;
             
@@ -554,9 +576,11 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
                 mVRAM[ea] = inValue;
             }
             
-            mV += (mPPUCtrl&0x04) ? 32 : 1;
-//          mPPUAddr += (mPPUCtrl&0x04) ? 32 : 1;
-            
+            // During rendering, ctrl bits are ignored and scrollY is increased - probably a timing issue
+//            if (IsRendering())
+//                mV = IncreaseScrollY(mV);
+//          else
+                mV += (mPPUCtrl&0x04) ? 32 : 1;
 
             break;
         }
