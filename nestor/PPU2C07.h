@@ -53,7 +53,6 @@ private:
     const Rom*  mRom;
     uint32*     mFrameBuffer;
     uint16      mClock;
-
     
     uint8       mVRAM[0x4000];
     uint8       mOAM[64*4];
@@ -109,6 +108,7 @@ private:
     mutable uint8  mPPUStatus;
     mutable uint16 mPPUScroll;
     mutable uint8  mOAMAddr;
+    mutable bool   mNMILatch;
 };
 
 #endif //__PPU2C07_H_

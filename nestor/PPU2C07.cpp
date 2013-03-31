@@ -101,6 +101,7 @@ PPU2C07::PPU2C07(Rom* inRom)
 {
     mScanline = 241;
     mClock    = 0;
+    mNMILatch = false;
     memset(mVRAM, 0, sizeof(mVRAM));
     memset(mOAM, 0, sizeof(mOAM));
     
@@ -127,6 +128,7 @@ PPU2C07::PPU2C07(Rom* inRom)
 void PPU2C07::Tick()
 {
     mClock += 3;
+    
     if (mClock > 340)
     {
         if (mScanline == -1)
@@ -143,7 +145,7 @@ void PPU2C07::Tick()
             mPPUStatus = mPPUStatus & 0x7F;
 
         else if (mScanline == 241)
-            mPPUStatus = mPPUStatus | 0x80;
+            mNMILatch = true;
         
         mClock -= 341;
         
@@ -152,6 +154,15 @@ void PPU2C07::Tick()
         
         if (++mScanline == 261)
             mScanline = -1;
+    }
+    
+    // Time the NMI eaxactly. Also note that there is
+    // one frame where reading status clears the latch
+    // causing the code to miss an NMI. 
+    if (mClock>0 && mNMILatch)
+    {
+        mNMILatch  = false;
+        mPPUStatus = mPPUStatus | 0x80;
     }
 }
 
@@ -455,8 +466,9 @@ void PPU2C07::Load(uint16 inAddr, uint8* outValue) const
             break;
 
         case 2:
-            *outValue = mPPUStatus;
+            *outValue  = mPPUStatus;
             mPPUStatus = mPPUStatus & 0x7F;
+            mNMILatch  = false;
             mW = 0;
             
             break;
@@ -526,6 +538,10 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
             
         case 1:
             mPPUMask = inValue;
+            break;
+            
+        case 2:
+            // Some unit tests write here - not sure why
             break;
             
         case 3:
