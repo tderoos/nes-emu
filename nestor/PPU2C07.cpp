@@ -240,7 +240,9 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
     {
         uint8 spr_y = mOAM[i*4];
         
-        if (spr_y+sprite_h >= mScanline && spr_y < mScanline)
+        // There is a delay of one scanline when drawing sprite
+        // Check spr-y and start drawing on when we passed that scanline
+        if (spr_y < mScanline && mScanline <= spr_y+sprite_h)
         {
             uint8 spr_x = mOAM[i*4 + 3];
 
@@ -253,7 +255,8 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
             if (idx < num_spr_sl)
                 memmove(&(ioSprites[idx+1]), &(ioSprites[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
 
-            uint8 y_offset = spr_y - (mScanline-sprite_h);
+            // -1 for one frame delay (see above)
+            uint8 y_offset = mScanline - spr_y - 1;
             uint8 tile_idx = mOAM[i*4 + 1];
             uint8 flags    = mOAM[i*4 + 2];
             
@@ -261,15 +264,25 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
             ioSprites[idx].mPriority   = i;
             ioSprites[idx].mPalette    = flags & 0x03;
             ioSprites[idx].mForeGround = (flags & 0x20) == 0;
-            
-            if ((flags & 0x80) == 0)
+
+            // Vertical flip
+            if ((flags & 0x80) != 0)
                 y_offset = (sprite_h-1)-y_offset;
 
             const uint8* src_tile;
             if (sprite_h == 16)
             {
+                // for 8x16 sprites, lowest bit select bank.
+                // Therefore, top half of sprite is always on even tile
                 src_tile = mVRAM + ((tile_idx & 0x01) ? 0x1000 : 0x0000);
                 tile_idx = tile_idx & 0xFE;
+                
+                // Lower half is on next tile.
+                if (y_offset >= 8)
+                {
+                    tile_idx++;
+                    y_offset -= 8;
+                }
             }
             else
                 src_tile = spr_tile;
@@ -277,7 +290,8 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
             ioSprites[idx].mPlane0 = src_tile[tile_idx * 16 + y_offset];
             ioSprites[idx].mPlane1 = src_tile[tile_idx * 16 + y_offset + 8];
             
-            if ((flags & 0x40) == 0)
+            // Horizontal flip
+            if ((flags & 0x40) != 0)
             {
                 ioSprites[idx].mPlane0 = BitReverseTable256[ioSprites[idx].mPlane0];
                 ioSprites[idx].mPlane1 = BitReverseTable256[ioSprites[idx].mPlane1];
@@ -362,7 +376,7 @@ void PPU2C07::Scanline()
                     if (slx >= spr.mX)
                     {
                         // Shift pattern bits to get color idx
-                        uint8 shift     = slx - spr.mX;
+                        uint8 shift     = 7 - (slx - spr.mX);
                         uint8 color_idx = ((spr.mPlane0>>shift) & 0x01) | (((spr.mPlane1 >> shift) & 0x01)<<1);
                         
                         if (color_idx != 0 && spr.mPriority < prio)
