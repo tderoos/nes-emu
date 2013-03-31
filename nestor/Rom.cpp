@@ -14,6 +14,7 @@
 
 
 Rom::Rom(char const *inFilename) :
+    mFilename(inFilename),
     mData(NULL),
     mCHRData(NULL)
 {
@@ -26,8 +27,6 @@ Rom::Rom(char const *inFilename) :
         
         uint8 num_prg = mData[4];
         uint8 num_chr = mData[5];
-        
-        
         
         uint8 mapper_id = mData[6] >> 4;
         mapper_id       = mapper_id | (mData[7] & 0xF0);
@@ -46,6 +45,23 @@ Rom::Rom(char const *inFilename) :
         printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRM:%d SR:%d SRB:%d)\n", inFilename, num_prg, num_chr, mapper_id, (int)GetVRamMirroring(), (int)mSRam, (int)mSRamBattery);
         
         mMapper = Mapper::sCreate(mapper_id, num_prg, num_chr);
+        
+        // Load savegame
+        if (mSRamBattery)
+        {
+            mSavename = mFilename;
+            size_t idx = mSavename.find(".nes");
+            mSavename.replace(idx, idx + 4, ".sav");
+            
+            FILE* savegame = fopen(mSavename.c_str(), "r");
+            if (savegame != NULL)
+            {
+                fread(mPRGRam, 1, 0x2000, savegame);
+                fclose(savegame);
+            }
+            else
+                memset(mPRGRam, 0, 0x2000);
+        }
     }
 }
 
@@ -61,10 +77,32 @@ void Rom::SetVRam(uint8* mVRam)
 // Store are passed on to the mapper
 void Rom::Store(uint16 inAddr, uint8 inValue)
 {
-    mMapper->Store(inAddr, inValue);
-    
-    if (mMapper->IsDirty())
-        mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+    if (inAddr >= 0x6000 && inAddr < 0x8000)
+    {
+        mPRGRam[inAddr - 0x6000] = inValue;
+    }
+    else
+    {
+        mMapper->Store(inAddr, inValue);
+        
+        if (mMapper->IsDirty())
+            mMapper->UpdateMapping(mData+0x10, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+    }
+}
+
+
+// If rom has SRam - save state on exit
+void Rom::SaveGameState()
+{
+    if (mSRamBattery)
+    {
+        FILE* savegame = fopen(mSavename.c_str(), "w");
+        if (savegame != NULL)
+        {
+            fwrite(mPRGRam, 1, 0x2000, savegame);
+            fclose(savegame);
+        }
+    }
 }
 
 

@@ -46,8 +46,6 @@ private:
     EDMAState   mDMAState;
     uint16      mDMASrc;
     uint8       mDMAValue;
-    
-    uint8       mPRGRam[0x2000];
 };
 
 #endif //__IO_H_

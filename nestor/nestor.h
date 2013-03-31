@@ -23,6 +23,7 @@ class nestor
 {
 public:
                 nestor(const char* inRom);
+    void        onExit();
 
     void        RunToVBlank(char inButtonState, uint32* ioFrameBuffer);
     

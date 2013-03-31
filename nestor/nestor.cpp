@@ -20,6 +20,12 @@ nestor::nestor(const char* inRom) :
 }
 
 
+void nestor::onExit()
+{
+    mRom.SaveGameState();
+}
+
+
 void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer)
 {
     mIO.SetButtonState(inButtonState);

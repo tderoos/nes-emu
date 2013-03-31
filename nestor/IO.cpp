@@ -93,10 +93,6 @@ void IO::Load(uint16 inAddr, uint8* outValue)
     else if (inAddr < 0x6000)
     {   // EROM
     }
-    else if (inAddr < 0x8000)
-    {   // SRAM
-        *outValue = mPRGRam[inAddr-0x6000];
-    }
     else
         mRom->Load(inAddr, outValue);
 }
@@ -132,10 +128,6 @@ void IO::Store(uint16 inAddr, uint8 inValue)
     
     else if (inAddr < 0x6000)
     {   // EROM
-    }
-    else if (inAddr < 0x8000)
-    {   // SRAM
-        mPRGRam[inAddr-0x6000] = inValue;
     }
     else
         mRom->Store(inAddr, inValue);
