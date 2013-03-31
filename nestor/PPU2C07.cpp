@@ -467,26 +467,37 @@ void PPU2C07::Load(uint16 inAddr, uint8* outValue) const
 
         case 7:
         {
+            // Reads have a delay of one
+            *outValue = mPPULoadBuffer;
+            
+            // Read from sprite memory
             if (mV > 0x3F00)
             {
-                *outValue = mVRAM[mV & 0x3FFF];
-            }
-            else
-            {
-                // Reads have a delay of one
-                *outValue = mPPULoadBuffer;
+                uint16 ea = mV;
+                if (ea == 0x3F10)
+                    ea = 0x3f00;
                 
-                uint16 ea = mV & 0x3FFF;
-                if ((ea & 0xF000) == 0x2000)
-//                if (ea >= 0x2000 && ea < 0x3000)
-                {
-                    uint8 name_table_idx = (ea >> 10) & 3;
-                    ea = mNameTable[name_table_idx] + (ea & 0x3FF);
-                }
-
-                mPPULoadBuffer = mVRAM[ea];
+                else if (ea >= 0x3F00)
+                    ea = ea & 0x3F1F;
+                
+                // No delay - but load-buffer will still be set to mirrored value below
+                *outValue = mVRAM[ea];
             }
 
+            // 0x3000 - 0x3FFF is mirrored to 0x2000 - 0x2FFF
+            uint16 ea = mV & 0x3FFF;
+            if (ea >= 0x3000)
+                ea -= 0x1000;
+
+            // Loads from VRam - remap on right nametable
+            if ((ea & 0xF000) == 0x2000)
+            {
+                uint8 name_table_idx = (ea >> 10) & 3;
+                ea = mNameTable[name_table_idx] + (ea & 0x3FF);
+            }
+
+            mPPULoadBuffer = mVRAM[ea];
+           
             // During rendering, ctrl bits are ignored and scrollY is increased - probably a timing issue
 //            if (IsRendering())
 //                mV = IncreaseScrollY(mV);
@@ -571,8 +582,11 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
         {
             uint16 ea = mV&0x3FFF;
 
-            if ((ea & 0xF000) == 0x2000)
+            if (ea >= 0x2000 && ea < 0x3F00)
             {
+                // Remap 0x3000 - 0x3F00 to 0x2000 - 0x2F00
+                ea = ea&0x2FFF;
+                
                 uint8 name_table_idx = (ea >> 10) & 3;
                 ea = mNameTable[name_table_idx] + (ea & 0x3FF);
                 mVRAM[ea] = inValue;
