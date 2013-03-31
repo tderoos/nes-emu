@@ -104,16 +104,17 @@ nestor* nes = NULL;
 
 
 /// PPU
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/sprite_ram.nes");     // PASSED
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/sprite_ram.nes");       // PASSED ($1)
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vram_access.nes");      // PASSED ($1)
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/01-vbl_basics.nes");      // PASSED
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/02-vbl_set_time.nes");      // PASSED
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/ppu_vbl_nmi.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/04-nmi_control.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05-nmi_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vbl_clear_time.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vram_access.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/scrolltest_scroll.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/s0.nes");
 
-    
     
     
 // APU
@@ -129,10 +130,10 @@ nestor* nes = NULL;
 // Working games
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
 
 // Broken games
 

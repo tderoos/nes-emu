@@ -131,20 +131,7 @@ void PPU2C07::Tick()
     
     if (mClock > 340)
     {
-        if (mScanline == -1)
-        {
-            // Clear sprite hit detection and NMI
-            mPPUStatus = mPPUStatus & (~0xC0);
-            
-            // Update mirror mode - can be set from mapper
-            UpdateMirroring();
-        }
-
-        // Clear(0)/set(241) vblank flag
-        else if (mScanline == 0)
-            mPPUStatus = mPPUStatus & 0x7F;
-
-        else if (mScanline == 241)
+        if (mScanline == 240)
             mNMILatch = true;
         
         mClock -= 341;
@@ -156,13 +143,27 @@ void PPU2C07::Tick()
             mScanline = -1;
     }
     
-    // Time the NMI eaxactly. Also note that there is
-    // one frame where reading status clears the latch
-    // causing the code to miss an NMI. 
-    if (mClock>0 && mNMILatch)
+    if (mClock > 0)
     {
-        mNMILatch  = false;
-        mPPUStatus = mPPUStatus | 0x80;
+        // Time the NMI eaxactly. Also note that there is
+        // one frame where reading status clears the latch
+        // causing the code to miss an NMI.
+        if (mNMILatch)
+        {
+            mNMILatch  = false;
+            mPPUStatus = mPPUStatus | 0x80;
+        }
+        
+        // Clearing NMI and sprite-0 hit happens at PPU cycle 1
+        // of the pre-render scanline.
+        if (mScanline == -1)
+        {
+            // Clear sprite hit detection and NMI
+            mPPUStatus = mPPUStatus & (~0xC0);
+            
+            // Update mirror mode - can be set from mapper
+            UpdateMirroring();
+        }
     }
 }
 
