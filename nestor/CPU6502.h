@@ -73,6 +73,7 @@ public:
     uint8       Handle00(uint8 opcode);
     uint8       Handle01(uint8 opcode);
     uint8       Handle10(uint8 opcode);
+    uint8       Handle11(uint8 opcode);
     
     bool        mNMI;
 

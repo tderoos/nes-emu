@@ -113,7 +113,7 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05-nmi_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/06-suppression.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/09-even_odd_frames.nes");     // PASSED
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/10-even_odd_timing.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/10-even_odd_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/scrolltest_scroll.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/s0.nes");
 
@@ -121,13 +121,15 @@ nestor* nes = NULL;
     
 // APU
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/apu_test.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05.len_timing_mode0.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05.len_timing_mode0.nes");    // PASSED
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/6-irq_flag_timing.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/5-len_timing.nes");     // PASSED
     
 // CPU
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/nestest.nes");        // PASSED
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/instr_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/cpu_timing_test.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/cpu_timing_test.nes");  // PASSED
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/registers.nes");
     
 // Working games
@@ -136,7 +138,7 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
 
 // Broken games
 

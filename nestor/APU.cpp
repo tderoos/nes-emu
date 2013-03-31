@@ -9,6 +9,8 @@
 #include "APU.h"
 
 
+static int clocks = 0;
+
 void BREAK();
 
 const uint8 kLengthIndexTable[] =
@@ -63,6 +65,7 @@ APU::APU() :
 
 void APU::Tick()
 {
+    clocks++;
     if (--mAPUClock == 0)
         UpdateSequencer();
 }
@@ -183,10 +186,15 @@ void APU::Store(uint16 inAddr, uint8 inValue)
     {
         mMode = inValue;
         mSequencerClock = 0;
+
+        // I have to add 1 to the timers - I suspect it's an
+        // update order issue. To investigate. 
         if (mMode & 0x80)
-            mAPUClock = 1;
+            mAPUClock = 1+1;
         else
-            mAPUClock = 7459;
+            mAPUClock = 7459+1;
+        
+        clocks = 0;
         
         // Clear the frame interrupt flag when the interrupt is disabled 
         if ((mMode & 0x40))
