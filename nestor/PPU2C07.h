@@ -53,6 +53,7 @@ private:
     const Rom*  mRom;
     uint32*     mFrameBuffer;
     uint16      mClock;
+    bool        mOddFrame;
     
     uint8       mVRAM[0x4000];
     uint8       mOAM[64*4];

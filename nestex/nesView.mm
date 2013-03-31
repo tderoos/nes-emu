@@ -111,11 +111,13 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/ppu_vbl_nmi.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/04-nmi_control.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05-nmi_timing.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vbl_clear_time.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/06-suppression.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/09-even_odd_frames.nes");     // PASSED
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/10-even_odd_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/scrolltest_scroll.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/s0.nes");
 
-    
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vbl_clear_time.nes");       // BROKEN TEST
     
 // APU
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/apu_test.nes");
@@ -126,7 +128,7 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/instr_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/cpu_timing_test.nes");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/registers.nes"); 
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/registers.nes");
     
 // Working games
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");

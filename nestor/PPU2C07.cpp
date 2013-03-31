@@ -101,6 +101,7 @@ PPU2C07::PPU2C07(Rom* inRom)
 {
     mScanline = 241;
     mClock    = 0;
+    mOddFrame = false;
     mNMILatch = false;
     memset(mVRAM, 0, sizeof(mVRAM));
     memset(mOAM, 0, sizeof(mOAM));
@@ -141,6 +142,14 @@ void PPU2C07::Tick()
         
         if (++mScanline == 261)
             mScanline = -1;
+        
+        // When BG drawing is enabled, the first cycle of every odd frame is skipped
+        if (mScanline == 0)
+        {
+            mOddFrame = !mOddFrame;
+            if (mOddFrame && (mPPUMask&0x8) != 0)
+                mClock++;
+        }
     }
     
     if (mClock > 0)
