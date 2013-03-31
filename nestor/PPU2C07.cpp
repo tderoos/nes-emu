@@ -531,6 +531,12 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
     switch (idx)
     {
         case 0:
+            // Enabling NMI during VBlank will cause an extra NMI.
+            // Not thta the timing is off - probably because the CPU
+            // does its writes immidiately. 
+            if ((inValue & 0x80) != 0 && !GetNMI() && !IsRendering())
+                mNMILatch = true;
+            
             mPPUCtrl = inValue;
             
             mT = mT & ~ENameTableMaskTgt;

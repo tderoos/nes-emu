@@ -226,16 +226,6 @@ uint8 OppInc(uint8 inValue, CPU6502::Status& ioStatus)
 }
 
 
-
-void OppBRK(CPU6502::Status& ioStatus, IO* ioIO)
-{
-    PushAddr(ioStatus.mPC+1, ioStatus, ioIO);
-    ioStatus.mBreak = 1;
-    Push(ioStatus.mFlags, ioStatus, ioIO);
-    ioStatus.mInterrupt = 1;
-    ioStatus.mPC = ReadAddr(0xFFFE, ioIO);
-}
-
 void OppCmp(CPU6502::ERegister inRegister, uint8 inValue, CPU6502::Status& ioStatus)
 {
     uint8 reg = ioStatus.mReg[inRegister];
@@ -336,37 +326,14 @@ void OppSBC(uint8 inValue, CPU6502::Status& ioStatus)
 }
 
 
-void OppIncMem(uint16 inAddr, CPU6502::Status& ioStatus, IO* ioIO)
-{
-    uint8 value;
-    ioIO->Load(inAddr, &value);
-    value = value+1;
-    ioIO->Store(inAddr, value);
-
-    ioStatus.mZero = value == 0;
-    ioStatus.mNeg  = (value & 0x80) != 0;
-}
-
-void OppDecMem(uint16 inAddr, CPU6502::Status& ioStatus, IO* ioIO)
-{
-    uint8 value;
-    ioIO->Load(inAddr, &value);
-    value = value-1;
-    ioIO->Store(inAddr, value);
-
-    ioStatus.mZero = value == 0;
-    ioStatus.mNeg  = (value & 0x80) != 0;
-}
-
-
 CPU6502::CPU6502(IO* inIO) :
     mIO(inIO)
 {
-    mRegs.mFlags    = 0;
+    mRegs.mFlags    = 0x34;
     mRegs.mReserved = 1;
     mRegs.mPC       = 0x8000;
     mRegs.mRegZero  = 0;
-    mRegs.mSP       = 0xFF;
+    mRegs.mSP       = 0xFD;
     mRegs.mA        = 0;
     mRegs.mX        = 0;
     mRegs.mY        = 0;

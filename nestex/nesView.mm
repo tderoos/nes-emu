@@ -126,11 +126,12 @@ nestor* nes = NULL;
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/instr_timing.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/cpu_timing_test.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/registers.nes"); 
     
 // Working games
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
