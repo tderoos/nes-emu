@@ -7,105 +7,14 @@
 //
 
 #import "nesAudio.h"
-#import <AudioUnit/AudioUnit.h>
-
-#include <AudioToolbox/AudioToolbox.h>
-//#include <AudioToolbox/AudioSession.h>
-#include <AudioUnit/AudioUnit.h>
-#include <AudioUnit/AudioUnitProperties.h>
 #include <stdio.h>
 
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 
-//#include "CAStreamBasicDescription.h"
-
-// This determines how slowly the oscilloscope lines fade away from the display.
-// Larger numbers = slower fade (and more strain on the graphics processing)
-#define kNumDrawBuffers 12
-#define kDefaultDrawSamples 1024
-#define kMinDrawSamples 64
-#define kMaxDrawSamples 4096
+#import <AudioToolbox/AudioToolbox.h>
 
 
-SInt8 *drawBuffers[kNumDrawBuffers];
-
-int drawBufferIdx = 0;
-int drawBufferLen = kDefaultDrawSamples;
-int drawBufferLen_alloced = 0;
-
-//
-//class CAStreamBasicDescription : public AudioStreamBasicDescription
-//{
-//public:
-//    void	SetAUCanonical(UInt32 nChannels, bool interleaved)
-//	{
-//		mFormatID = kAudioFormatLinearPCM;
-//#if CA_PREFER_FIXED_POINT
-//		mFormatFlags = kAudioFormatFlagsCanonical | (kAudioUnitSampleFractionBits << kLinearPCMFormatFlagsSampleFractionShift);
-//#else
-//		mFormatFlags = kAudioFormatFlagsCanonical;
-//#endif
-//		mChannelsPerFrame = nChannels;
-//		mFramesPerPacket = 1;
-//		mBitsPerChannel = 8 * sizeof(AudioUnitSampleType);
-//		if (interleaved)
-//			mBytesPerPacket = mBytesPerFrame = nChannels * sizeof(AudioUnitSampleType);
-//		else {
-//			mBytesPerPacket = mBytesPerFrame = sizeof(AudioUnitSampleType);
-//			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
-//		}
-//	}
-//};
-
-int SetupRemoteIO (AudioUnit& inRemoteIOUnit, AURenderCallbackStruct inRenderProc, CAStreamBasicDescription& outFormat)
-{
-    // Open the output unit
-    AudioComponentDescription desc;
-    desc.componentType = kAudioUnitType_Output;
-    desc.componentSubType = kAudioUnitSubType_GenericOutput;
-    desc.componentManufacturer = kAudioUnitManufacturer_Apple;
-    desc.componentFlags = 0;
-    desc.componentFlagsMask = 0;
-    
-    AudioComponent comp = AudioComponentFindNext(NULL, &desc);
-    
-    OSStatus stat = AudioComponentInstanceNew(comp, &inRemoteIOUnit);
-    
-//    UInt32 one = 1;
-//    stat = AudioUnitSetProperty(inRemoteIOUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &one, sizeof(one));
-    
-    stat = AudioUnitSetProperty(inRemoteIOUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &inRenderProc, sizeof(inRenderProc));
-    
-    // set our required format - Canonical AU format: LPCM non-interleaved 8.24 fixed point
-    outFormat.SetAUCanonical(2, false);
-    outFormat.mSampleRate = 44100;
-    stat = AudioUnitSetProperty(inRemoteIOUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &outFormat, sizeof(outFormat));
-    
-//    stat = AudioUnitSetProperty(inRemoteIOUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &outFormat, sizeof(outFormat));
-    stat = AudioUnitInitialize(inRemoteIOUnit);
-
-	return 0;
-}
-
-
-void rioInterruptionListener(void *inClientData, UInt32 inInterruption)
-{
-//	printf("Session interrupted! --- %s ---", inInterruption == kAudioSessionBeginInterruption ? "Begin Interruption" : "End Interruption");
-}
-
-
-static OSStatus	PerformThru(
-							void						*inRefCon,
-							AudioUnitRenderActionFlags 	*ioActionFlags,
-							const AudioTimeStamp 		*inTimeStamp,
-							UInt32 						inBusNumber,
-							UInt32 						inNumberFrames,
-							AudioBufferList 			*ioData)
-{
-
-	return 0;
-}
 @implementation nesAudio
 
 // open the audio file
@@ -209,30 +118,6 @@ static OSStatus	PerformThru(
             alSourcePlay(sourceID);
         }
 	}
-    
-//    OSStatus stat = AudioSessionInitialize(NULL, NULL, rioInterruptionListener, self);
-//    
-//    UInt32 audioCategory = kAudioSessionCategory_PlayAndRecord;
-//    stat = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(audioCategory), &audioCategory);
-//    stat = AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, propListener, self);
-    
-//    Float32 preferredBufferSize = .005;
-//    XThrowIfError(AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareIOBufferDuration, sizeof(preferredBufferSize), &preferredBufferSize), "couldn't set i/o buffer duration");
-//    
-//    UInt32 size = sizeof(hwSampleRate);
-//    XThrowIfError(AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareSampleRate, &size, &hwSampleRate), "couldn't get hw sample rate");
-    
-//    stat = AudioSessionSetActive(true);
-
-    
-    
-    
-    
-//    inputProc.inputProc = PerformThru;
-//	inputProc.inputProcRefCon = self;
-//
-//    SetupRemoteIO(rioUnit, inputProc, thruFormat);
-//    stat = AudioOutputUnitStart(rioUnit);
     
     return self;
 }
