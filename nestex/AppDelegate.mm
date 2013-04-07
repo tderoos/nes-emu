@@ -72,7 +72,7 @@
     [self initNestor];
     
     // start animation timer
-    timer = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self
+    timer = [NSTimer timerWithTimeInterval:(1.0f/240.0f) target:self
                                   selector:@selector(nesFrame:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
     
@@ -87,7 +87,7 @@
 
 - (void)nesFrame:(NSTimer *)timer
 {
-    if (nes != NULL)
+    if ([audio needsRefresh] && nes != NULL)
     {
         mButtonState = [_view getButtonState];
         nes->RunToVBlank(mButtonState, mFrameBuffer, mAudioBuffer);

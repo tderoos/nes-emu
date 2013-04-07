@@ -66,7 +66,7 @@ APU::APU() :
 }
 
 
-static float fr = 2000.0f;
+static float fr = 1000.0f;
 static float  r = 0;
 
 

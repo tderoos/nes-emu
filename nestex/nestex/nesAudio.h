@@ -22,11 +22,11 @@
     ALuint      mSource;
     ALuint      mBufferIDs[3];
     
-    Boolean     mIsPLaying;
     NSInteger   mCurrentBuffer;
 }
 
 -(id) init;
 -(void) render:(unsigned char*)inBuffer bufferSize:(ALsizei)inBufferSize;
+-(bool) needsRefresh;
 
 @end
