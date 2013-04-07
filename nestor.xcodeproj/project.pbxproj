@@ -36,7 +36,6 @@
 		93C51FAD170A15C400693E33 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93C51FAC170A15C300693E33 /* AudioUnit.framework */; };
 		93C51FAF170AA29700693E33 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93C51FAE170AA29600693E33 /* AudioToolbox.framework */; };
 		93C51FB1170B620800693E33 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93C51FB0170B620800693E33 /* OpenAL.framework */; };
-		93C51FB5170B65EC00693E33 /* button_press.caf in Resources */ = {isa = PBXBuildFile; fileRef = 93C51FB4170B65EC00693E33 /* button_press.caf */; };
 		93CEBBB316EFC3A000CBDE87 /* Mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */; };
 		93CEBBB516EFC48600CBDE87 /* Mapper.h in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB016EFC2A800CBDE87 /* Mapper.h */; };
 		93CEBBB616EFC48600CBDE87 /* Mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */; };
@@ -98,7 +97,6 @@
 		93C51FAC170A15C300693E33 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		93C51FAE170AA29600693E33 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		93C51FB0170B620800693E33 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
-		93C51FB4170B65EC00693E33 /* button_press.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = button_press.caf; sourceTree = "<group>"; };
 		93CEBBB016EFC2A800CBDE87 /* Mapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mapper.h; sourceTree = "<group>"; };
 		93CEBBB116EFC2ED00CBDE87 /* types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		93CEBBB216EFC3A000CBDE87 /* Mapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mapper.cpp; sourceTree = "<group>"; };
@@ -169,7 +167,6 @@
 		9338174216EB216100C8FCAC /* nestex */ = {
 			isa = PBXGroup;
 			children = (
-				93C51FB2170B65EC00693E33 /* Resources */,
 				9338174E16EB216100C8FCAC /* AppDelegate.h */,
 				9338174F16EB216100C8FCAC /* AppDelegate.mm */,
 				9338175716EB22B000C8FCAC /* nesView.h */,
@@ -192,22 +189,6 @@
 				9338174B16EB216100C8FCAC /* Credits.rtf */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		93C51FB2170B65EC00693E33 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				93C51FB3170B65EC00693E33 /* audio */,
-			);
-			path = Resources;
-			sourceTree = SOURCE_ROOT;
-		};
-		93C51FB3170B65EC00693E33 /* audio */ = {
-			isa = PBXGroup;
-			children = (
-				93C51FB4170B65EC00693E33 /* button_press.caf */,
-			);
-			path = audio;
 			sourceTree = "<group>";
 		};
 		93CEBBAF16EFC27100CBDE87 /* Mapper */ = {
@@ -332,7 +313,6 @@
 				9338174716EB216100C8FCAC /* InfoPlist.strings in Resources */,
 				9338174D16EB216100C8FCAC /* Credits.rtf in Resources */,
 				9338175316EB216200C8FCAC /* MainMenu.xib in Resources */,
-				93C51FB5170B65EC00693E33 /* button_press.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
