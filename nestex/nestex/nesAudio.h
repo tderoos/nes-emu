@@ -8,17 +8,25 @@
 
 #import <Foundation/Foundation.h>
 
-typedef struct ALCdevice_struct ALCdevice;
-typedef struct ALCcontext_struct ALCcontext;
-
+#include <OpenAL/al.h>
+#include <Openal/alc.h>
 
 
 @interface nesAudio : NSObject
 {
     ALCcontext* mContext;
     ALCdevice* mDevice;
+    
+    NSMutableArray *mAudioBuffers;
+    
+    ALuint      mSource;
+    ALuint      mBufferIDs[3];
+    
+    Boolean     mIsPLaying;
+    NSInteger   mCurrentBuffer;
 }
 
 -(id) init;
+-(void) render:(unsigned char*)inBuffer bufferSize:(ALsizei)inBufferSize;
 
 @end

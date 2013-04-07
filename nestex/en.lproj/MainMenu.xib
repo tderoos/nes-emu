@@ -1309,6 +1309,7 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{37, 8}, {512, 512}}</string>
 							<reference key="NSSuperview" ref="439893737"/>
+							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:24</string>
 							<object class="NSOpenGLPixelFormat" key="NSPixelFormat">
 								<object class="NSMutableData" key="NSPixelAttributes">
@@ -1321,7 +1322,7 @@
 					<reference key="NSSuperview"/>
 					<reference key="NSNextKeyView" ref="930359575"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1920, 1178}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1366, 768}}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
@@ -1965,6 +1966,14 @@
 						<reference key="destination" ref="738670835"/>
 					</object>
 					<int key="connectionID">535</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="972006081"/>
+						<reference key="destination" ref="976324537"/>
+					</object>
+					<int key="connectionID">579</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -3288,7 +3297,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">578</int>
+			<int key="maxID">581</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>

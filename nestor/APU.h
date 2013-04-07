@@ -18,6 +18,8 @@ class APU
 {
 public:
             APU();
+    void    SetAudioBuffer(uint8* ioAudioBuffer);
+
     void    Tick();
     
     // Access
@@ -102,6 +104,9 @@ private:
         NUM_APU_REGISTERS = 0x18
     };
 
+    uint8*  mAudioBuffer;
+    uint32  mAudioBufferOffset;
+    
     uint8   mRegisters[NUM_APU_REGISTERS];
     
     uint16  mAPUClock;

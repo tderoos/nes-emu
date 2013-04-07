@@ -14,14 +14,12 @@
     // Timer object that can be attached to animationTimer method for time-based
     // animations
     NSTimer* timer;
-    bool damage;
 
-    unsigned int mFrameBuffer[256*256];
     unsigned int mTexture;
     unsigned char mButtonState;
 }
 
-+ (void)onTerminate;
-
+- (unsigned char)getButtonState;
+-(void) render:(unsigned int*)inBuffer;
 
 @end

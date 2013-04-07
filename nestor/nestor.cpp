@@ -26,10 +26,11 @@ void nestor::onExit()
 }
 
 
-void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer)
+void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer)
 {
     mIO.SetButtonState(inButtonState);
     mPPU.SetFrameBuffer(ioFrameBuffer);
+    mAPU.SetAudioBuffer(ioAudioBuffer);
     
     int cycles = 0;
     

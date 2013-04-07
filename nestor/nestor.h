@@ -22,12 +22,15 @@
 class nestor
 {
 public:
-                nestor(const char* inRom);
-    void        onExit();
+                    nestor(const char* inRom);
+    void            onExit();
 
-    void        RunToVBlank(char inButtonState, uint32* ioFrameBuffer);
+    void            RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer);
+    const uint32*   GetFrameBuffer() const          { return mFrameBuffer; }
     
 private:
+    uint32      mFrameBuffer[256*256];
+    
     Rom         mRom;
     Ram         mRam;
     PPU2C07     mPPU;

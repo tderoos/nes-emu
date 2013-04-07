@@ -8,12 +8,23 @@
 
 #import <Cocoa/Cocoa.h>
 #import "nesView.h"
+#import "nesAudio.h"
 
+class nestor;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
+{
+    nestor* nes;
+    NSTimer* timer;
+    nesAudio* audio;
+    
+    unsigned char mButtonState;
+    unsigned int  mFrameBuffer[256*256];
+    unsigned char mAudioBuffer[735];        // 44100 / 60
+}
 
 @property (assign) IBOutlet NSWindow *window;
-@property (assign) IBOutlet nesView *view;
+@property (assign) IBOutlet nesView   *view;
 
 @end
 

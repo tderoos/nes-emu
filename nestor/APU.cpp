@@ -7,6 +7,7 @@
 //
 
 #include "APU.h"
+#include <math.h>
 
 
 static int clocks = 0;
@@ -55,12 +56,35 @@ const uint16 kNoisePeriodTable[] =
 };
 
 APU::APU() :
+    mAudioBuffer(nullptr),
+    mAudioBufferOffset(0),
     mAPUClock(1),
     mSequencerClock(0),
     mMode(0),
     mInterrupt(false)
 {
 }
+
+
+static float fr = 2000.0f;
+static float  r = 0;
+
+
+void APU::SetAudioBuffer(uint8* ioAudioBuffer)
+{
+    mAudioBuffer = ioAudioBuffer;
+    mAudioBufferOffset = 0;
+    
+    for (int i = 0; i < 44100/60; ++i)
+    {
+        float v  = sin(2.0f * r * 3.14);
+        uint8 v8 = (uint8) (v + 1.0f) * 255.0f;
+        
+        ioAudioBuffer[i] = v8;
+        r += fr / 44100.0f;
+    }
+}
+
 
 
 void APU::Tick()

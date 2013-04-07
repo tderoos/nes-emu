@@ -10,8 +10,6 @@
 #include "../nestor/nestor.h"
 #include <OpenGL/gl.h>
 
-nestor* nes = NULL;
-
 @implementation nesView
 
 - (id)initWithFrame:(NSRect)frame
@@ -41,23 +39,6 @@ nestor* nes = NULL;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //set its parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     
-/*    if(!openGL_initialized)
-    {
-        // Get command line arguments and find whether stealFocus is set to YES
-        NSUserDefaults *args = [NSUserDefaults standardUserDefaults];
-        // also find out if app should steal focus
-        bool stealFocus = [args boolForKey:@"stealFocus"];
-        if(stealFocus)
-        {
-            // Steal focus means that the apps window will appear in front of all
-            // other programs when it launches even in front of the calling
-            // application (e.g. a terminal)
-            [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
-        }
-        // TODO: Initialize OpenGL app, do anything here that you need to *after*
-        // the OpenGL context is initialized (load textures, shaders, etc.)
-        openGL_initialized = true;
-    }*/
     NSLog(@"prepareOpenGL\n");
 }
 
@@ -73,8 +54,6 @@ nestor* nes = NULL;
     glLoadIdentity();
     
     glBindTexture(GL_TEXTURE_2D, mTexture); //bind the first texture.
-    //then load it into the graphics hardware:
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, mFrameBuffer );
     
     glBegin(GL_QUADS);
         glTexCoord2i(0,0); glVertex2i(-1,1);
@@ -89,77 +68,15 @@ nestor* nes = NULL;
     [[self openGLContext] flushBuffer];
 }
 
-- (void) awakeFromNib
+-(void) render:(unsigned int*)inBuffer
 {
-//    openGL_initialized = false;
-    // keep track of start/launch time
-//    [self setStartTime];
-    // start animation timer
-    timer = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self
-                                  selector:@selector(animationTimer:) userInfo:nil repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-
-    // ensure timer fires during resize
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
-
-
-/// PPU
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/sprite_ram.nes");       // PASSED ($1)
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vram_access.nes");      // PASSED ($1)
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/01-vbl_basics.nes");      // PASSED
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/02-vbl_set_time.nes");      // PASSED
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/ppu_vbl_nmi.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/04-nmi_control.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05-nmi_timing.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/06-suppression.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/09-even_odd_frames.nes");     // PASSED
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/10-even_odd_timing.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/scrolltest_scroll.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/s0.nes");
-
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/vbl_clear_time.nes");       // BROKEN TEST
+    glBindTexture(GL_TEXTURE_2D, mTexture); //bind the first texture.
+    //then load it into the graphics hardware:
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, inBuffer );
     
-// APU
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/apu_test.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/05.len_timing_mode0.nes");    // PASSED
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/6-irq_flag_timing.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/5-len_timing.nes");     // PASSED
-    
-// CPU
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/nestest.nes");        // PASSED
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/instr_timing.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/all_instrs.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/cpu_timing_test.nes");  // PASSED
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/registers.nes");
-    
-// Working games
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
-
-// Broken games
-
-// Unsupported (mapper)
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Super Off-Road (E) [!].nes");
-
-    mButtonState = 0;
+    [self drawRect:[self bounds]];
 }
 
-- (void)animationTimer:(NSTimer *)timer
-{
-    // TODO: handle timer based redraw (animation) here
-    bool your_app_says_to_redraw = true;
-    if(your_app_says_to_redraw || damage)
-    {
-        nes->RunToVBlank(mButtonState, mFrameBuffer);
-        
-        damage = false;
-        [self drawRect:[self bounds]];
-    }
-}
 
 - (BOOL)acceptsFirstResponder
 {
@@ -180,13 +97,6 @@ nestor* nes = NULL;
 {
     return YES;
 }
-
-+ (void)onTerminate
-{
-    nes->onExit();
-    delete nes;
-}
-
 
 
 //
@@ -227,9 +137,9 @@ nestor* nes = NULL;
     mButtonState = mButtonState | bit;
 }
 
-- (void) update
+- (unsigned char)getButtonState
 {
-    [super update];
+    return mButtonState;
 }
 
 @end

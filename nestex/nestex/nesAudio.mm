@@ -49,14 +49,29 @@
 -(id) init
 {
     [super init];
-
+    
     // Initialization
 	mDevice = alcOpenDevice(NULL); // select the "preferred device"
-	if (mDevice) {
+	if (mDevice)
+    {
 		// use the device to make a context
 		mContext=alcCreateContext(mDevice,NULL);
+
 		// set my context to the currently active one
 		alcMakeContextCurrent(mContext);
+
+        // Generate an audio source and set buffer to 0 - no buffer (we'll queue them)
+        alGenSources(1, &mSource);
+        alSourcei(mSource, AL_BUFFER, 0);
+        alSourcei(mSource, AL_LOOPING, AL_FALSE);
+        
+        // Generate 3 buffers;
+        alGenBuffers(3, mBufferIDs);
+    }
+
+    // Initialization
+//	mDevice = alcOpenDevice(NULL); // select the "preferred device"
+	if (false && mDevice) {
         
         // get the full path of the file
         NSString* fileName = [[NSBundle mainBundle] pathForResource:@"button_press" ofType:@"caf"];
@@ -82,7 +97,7 @@
         alGenBuffers(1, &bufferID);
         
         // jam the audio data into the new buffer
-        alBufferData(bufferID,AL_FORMAT_STEREO16,outData,fileSize,44100);
+        alBufferData(bufferID,AL_FORMAT_MONO8,outData,fileSize,44100);
         
         // save the buffer so I can release it later
 //        [bufferStorageArray addObject:[NSNumber numberWithUnsignedInteger:bufferID]];
@@ -121,4 +136,46 @@
     
     return self;
 }
+
+
+-(void) render:(unsigned char*)inBuffer bufferSize:(ALsizei)inBufferSize
+{
+//    if (mIsPLaying)
+    {
+        ALint buffersProcessed = 0, buffersQueued;
+        alGetSourcei(mSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
+        alGetSourcei(mSource, AL_BUFFERS_QUEUED, &buffersQueued);
+        ALenum error = alGetError();
+        
+        ALuint buffer = 0;
+        if (buffersProcessed > 0)
+        {
+            alSourceUnqueueBuffers(mSource, 1, &buffer);
+            error = alGetError();
+        }
+
+
+        else if (mCurrentBuffer != 3)
+            buffer = mBufferIDs[mCurrentBuffer++];
+        
+        if (buffer != 0)
+        {
+            alBufferData(buffer,AL_FORMAT_MONO8,inBuffer,inBufferSize,44100);
+            error = alGetError();
+            
+            alSourceQueueBuffers(mSource, 1, &buffer);
+            error = alGetError();
+        }
+//        assert(buffer!=0);
+        
+        if (buffersQueued == 0 || !mIsPLaying)
+        {
+            alSourcePlay(mSource);
+            error = alGetError();
+            mIsPLaying = true;
+        }
+    }
+}
+
+
 @end
