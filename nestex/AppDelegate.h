@@ -20,7 +20,7 @@ class nestor;
     
     unsigned char mButtonState;
     unsigned int  mFrameBuffer[256*256];
-    unsigned char mAudioBuffer[735];        // 44100 / 60
+    unsigned char mAudioBuffer[736];        // 44100 / 60
 }
 
 @property (assign) IBOutlet NSWindow *window;

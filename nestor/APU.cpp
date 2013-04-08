@@ -8,6 +8,7 @@
 
 #include "APU.h"
 #include <math.h>
+#include <assert.h>
 
 
 static int clocks = 0;
@@ -58,6 +59,7 @@ const uint16 kNoisePeriodTable[] =
 APU::APU() :
     mAudioBuffer(nullptr),
     mAudioBufferOffset(0),
+    mDACDivider(2),
     mAPUClock(1),
     mSequencerClock(0),
     mMode(0),
@@ -66,8 +68,6 @@ APU::APU() :
 }
 
 
-//static float fr = 1000.0f;
-static float  r = 0;
 
 uint8 sSquareDuty[4][8] =
 {
@@ -77,31 +77,18 @@ uint8 sSquareDuty[4][8] =
     { 1, 0, 0, 1, 1, 1, 1, 1 }
 };
 
+uint8 sTriangleDuty[] =
+{
+    15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+};
+
+static int count;
 
 void APU::SetAudioBuffer(uint8* ioAudioBuffer)
 {
     mAudioBuffer = ioAudioBuffer;
     mAudioBufferOffset = 0;
-    
-    for (int i = 0; i < 44100/60; ++i)
-    {
-//        float v = sin(2.0f * r * 3.14);
-        
-        int idx = r * 8;
-        float v = sSquareDuty[mSquare2.mRegisters[0] >> 6][idx] == 1 ? 1.0f : -1.0f;
-        
-        v = mSquare2.mLength != 0 ? v : 0.0f;
-        v *= mSquare2.GetVolume();
-        
-        uint8 v8 = (uint8) (v + 1.0f) * 255.0f;
-        
-        double fr = 1789773.0;
-        fr /= (16.0 * (mSquare2.mPeriod+1));
-        
-
-        ioAudioBuffer[i] = v8;
-        r = fmod(r + (fr / 44100.0f), 1.0f);
-    }
 }
 
 
@@ -111,6 +98,10 @@ void APU::Tick()
     clocks++;
     if (--mAPUClock == 0)
         UpdateSequencer();
+    
+    mDACDivider -= 2;
+    if (mDACDivider <= 1)
+        UpdateDAC();
 }
 
 
@@ -179,6 +170,25 @@ void APU::ClockLength()
     mNoise.ClockLength();
 }
 
+
+
+void APU::UpdateDAC()
+{
+    assert(mAudioBufferOffset < 736);
+
+    mDACDivider += 81;
+    count++;
+    
+    float sq1 = mSquare1.ClockDAC();
+    float sq2 = mSquare2.ClockDAC();
+    float tr  = mTriangle.ClockDAC();
+    
+    float avg = (tr+sq1+sq2) / 3.0f;
+//    avg = tr;
+    
+    uint8 v8 = (uint8) (avg + 1.0f) * 255.0f;
+    mAudioBuffer[mAudioBufferOffset++] = v8;
+}
 
 
 
@@ -319,8 +329,21 @@ void APU::Square::ClockLength()
 
 
 
+float APU::Square::ClockDAC()
+{
+    double fr = 1789773.0;
+    fr /= (16.0 * (mPeriod+1));
+    
+    mPhase = fmod(mPhase + (fr / 44100.0f), 1.0f);
 
-
+    int idx = mPhase * 8;
+    float v = sSquareDuty[mRegisters[0] >> 6][idx] == 1 ? 1.0f : -1.0f;
+    
+    v = mLength != 0 ? v : 0.0f;
+    v *= GetVolume();
+    
+    return v;
+}
 
 
 //// Triangle
@@ -338,13 +361,13 @@ void APU::Triangle::Store(uint8 inReg, uint8 inValue)
             break;
             
         case 2:
-            mPeriod &= 0x07;
-            mPeriod |= inValue << 3;
+            mPeriod &= 0xFF00;
+            mPeriod |= inValue;
             break;
             
         case 3:
-            mPeriod &= ~0x07;
-            mPeriod |= inValue & 0x07;
+            mPeriod &= 0x00FF;
+            mPeriod |= (inValue & 0x07) << 8;
             
             if (GetLengthCtrEnabled())
                 mLength = kLengthIndexTable[inValue>>3];
@@ -367,6 +390,25 @@ void APU::Triangle::ClockLength()
     if (GETBIT(mRegisters[0], 7) == 0)
         mLength = mLength == 0 ? 0 : mLength-1;
 }
+
+
+float APU::Triangle::ClockDAC()
+{
+    double fr = 1789773.0;
+    fr /= (32.0 * (mPeriod+1));
+    
+    mPhase = fmod(mPhase + (fr / 44100.0f), 1.0f);
+    
+    int idx = mPhase * 32;
+    float v = sTriangleDuty[idx];// == 1 ? 1.0f : -1.0f;
+    v /= 15.0f;
+    v -= 0.5f;
+    v *= 2.0f;
+    v = mLength != 0 ? v : 0.0f;
+    
+    return v;
+}
+
 
 
 

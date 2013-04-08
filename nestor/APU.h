@@ -19,6 +19,7 @@ class APU
 public:
             APU();
     void    SetAudioBuffer(uint8* ioAudioBuffer);
+    uint32  GetSampleCount() const                          { return mAudioBufferOffset; }
 
     void    Tick();
     
@@ -36,17 +37,22 @@ private:
     void    UpdateSequencer();
     void    ClockEnvelope();
     void    ClockLength();
+    void    UpdateDAC();
     
     struct Square
     {
+        Square() : mPhase(0.0f)                             { }
+        
         inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
         inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
+        
         float   GetVolume() const                           { return (float)(GETBIT(mRegisters[0], 4) ? mRegisters[0] & 0x0F : mEnvelopeDivider) / 15.0f; }
         
         void    Store(uint8 inAddr, uint8 inValue);
         
         void    ClockEnvelope();
         void    ClockLength();
+        float   ClockDAC();
         
         uint16  mPeriod;
         bool    mLengthEnabled;
@@ -57,12 +63,15 @@ private:
         bool    mEnvelopeReset;
         uint8   mEnvelopeDivider;
         uint8   mEnvelopeCounter;
+        float   mPhase;
     };
     Square  mSquare1;
     Square  mSquare2;
     
     struct Triangle
-    {
+    {   
+        Triangle() : mPhase(0.0f)                           { }
+        
         inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
         inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
         
@@ -70,12 +79,14 @@ private:
 
         void    ClockEnvelope();
         void    ClockLength();
+        float   ClockDAC();
 
         uint16  mPeriod;
         bool    mLengthEnabled;
         uint8   mLength;
         
         uint8   mRegisters[1];
+        float   mPhase;
     };
     Triangle mTriangle;
     
@@ -111,6 +122,7 @@ private:
 
     uint8*  mAudioBuffer;
     uint32  mAudioBufferOffset;
+    uint32  mDACDivider;
     
     uint8   mRegisters[NUM_APU_REGISTERS];
     

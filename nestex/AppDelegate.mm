@@ -57,12 +57,12 @@
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/registers.nes");
 
 // Working games
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
-//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
+    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
 
 // Broken games
 
@@ -91,9 +91,10 @@
 {
     if ([audio needsRefresh] && nes != NULL)
     {
+        unsigned int samplecount;
         mButtonState = [_view getButtonState];
-        nes->RunToVBlank(mButtonState, mFrameBuffer, mAudioBuffer);
-        [audio render:mAudioBuffer bufferSize:735];
+        nes->RunToVBlank(mButtonState, mFrameBuffer, mAudioBuffer, &samplecount);
+        [audio render:mAudioBuffer bufferSize:samplecount];
         [_view render:mFrameBuffer];
     }
 }

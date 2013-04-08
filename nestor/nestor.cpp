@@ -26,7 +26,7 @@ void nestor::onExit()
 }
 
 
-void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer)
+void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount)
 {
     mIO.SetButtonState(inButtonState);
     mPPU.SetFrameBuffer(ioFrameBuffer);
@@ -46,6 +46,7 @@ void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAud
     }
     while (!mPPU.SwapBuffer());
     
+    *sampleCount = mAPU.GetSampleCount();
     cycles = cycles;
 }
 

@@ -25,7 +25,7 @@ public:
                     nestor(const char* inRom);
     void            onExit();
 
-    void            RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer);
+    void            RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount);
     const uint32*   GetFrameBuffer() const          { return mFrameBuffer; }
     
 private:
