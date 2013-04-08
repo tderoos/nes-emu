@@ -41,6 +41,7 @@ private:
     {
         inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
         inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
+        float   GetVolume() const                           { return (float)(GETBIT(mRegisters[0], 4) ? mRegisters[0] & 0x0F : mEnvelopeDivider) / 15.0f; }
         
         void    Store(uint8 inAddr, uint8 inValue);
         
@@ -52,6 +53,10 @@ private:
         uint8   mLength;
 
         uint8   mRegisters[2];
+        
+        bool    mEnvelopeReset;
+        uint8   mEnvelopeDivider;
+        uint8   mEnvelopeCounter;
     };
     Square  mSquare1;
     Square  mSquare2;

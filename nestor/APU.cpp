@@ -66,8 +66,16 @@ APU::APU() :
 }
 
 
-static float fr = 1000.0f;
+//static float fr = 1000.0f;
 static float  r = 0;
+
+uint8 sSquareDuty[4][8] =
+{
+    { 0, 1, 0, 0, 0, 0, 0, 0 },
+    { 0, 1, 1, 0, 0, 0, 0, 0 },
+    { 0, 1, 1, 1, 1, 0, 0, 0 },
+    { 1, 0, 0, 1, 1, 1, 1, 1 }
+};
 
 
 void APU::SetAudioBuffer(uint8* ioAudioBuffer)
@@ -77,11 +85,22 @@ void APU::SetAudioBuffer(uint8* ioAudioBuffer)
     
     for (int i = 0; i < 44100/60; ++i)
     {
-        float v  = sin(2.0f * r * 3.14);
+//        float v = sin(2.0f * r * 3.14);
+        
+        int idx = r * 8;
+        float v = sSquareDuty[mSquare2.mRegisters[0] >> 6][idx] == 1 ? 1.0f : -1.0f;
+        
+        v = mSquare2.mLength != 0 ? v : 0.0f;
+        v *= mSquare2.GetVolume();
+        
         uint8 v8 = (uint8) (v + 1.0f) * 255.0f;
         
+        double fr = 1789773.0;
+        fr /= (16.0 * (mSquare2.mPeriod+1));
+        
+
         ioAudioBuffer[i] = v8;
-        r += fr / 44100.0f;
+        r = fmod(r + (fr / 44100.0f), 1.0f);
     }
 }
 
@@ -244,13 +263,14 @@ void APU::Square::Store(uint8 inReg, uint8 inValue)
             break;
 
         case 2:
-            mPeriod &= 0x07;
-            mPeriod |= inValue << 3;
+            mPeriod &= 0xFF00;
+            mPeriod |= inValue;
             break;
 
         case 3:
-            mPeriod &= ~0x07;
-            mPeriod |= inValue & 0x07;
+            mPeriod &= 0x00FF;
+            mPeriod |= (inValue & 0x07) << 8;
+
             
             if (GetLengthCtrEnabled())
                 mLength = kLengthIndexTable[inValue>>3];
@@ -263,6 +283,29 @@ void APU::Square::Store(uint8 inReg, uint8 inValue)
 
 void APU::Square::ClockEnvelope()
 {
+    if (mEnvelopeReset)
+    {
+        mEnvelopeDivider = (mRegisters[0] & 0x0F) + 1;
+        mEnvelopeCounter = 15;
+        mEnvelopeReset = false;
+    }
+    else
+    {
+        mEnvelopeDivider--;
+        if (mEnvelopeDivider == 0)
+        {
+            mEnvelopeDivider = (mRegisters[0] & 0x0F) + 1;
+            
+            if (mEnvelopeCounter == 0)
+            {
+                // Check for looping
+                if (GETBIT(mRegisters[0], 5))
+                    mEnvelopeCounter = 15;
+            }
+            else
+                mEnvelopeCounter--;
+        }
+    }
 }
 
 

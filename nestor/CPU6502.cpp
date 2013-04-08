@@ -341,7 +341,7 @@ CPU6502::CPU6502(IO* inIO) :
     mRegs.mY        = 0;
     
     mInstrTimer     = 1;
-
+    
     /// NMI gets pulled down to interrupt - default is on
     mNMI            = true;
 
@@ -775,9 +775,10 @@ void CPU6502::Tick(uint16 inPPUClock, int16 inScanline)
         {
             PushAddr(mRegs.mPC, mRegs, mIO);
             Push(mRegs.mFlags, mRegs, mIO);
+            mRegs.mInterrupt = 1;
             
             uint16 addr = trigger_nmi ? 0xFFFA : 0xFFFE;
-            
+
             mRegs.mPC = ReadAddr(addr, mIO);
             mRegs.mBreak = 0;
         }
