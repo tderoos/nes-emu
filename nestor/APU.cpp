@@ -57,6 +57,8 @@ const uint16 kNoisePeriodTable[] =
 };
 
 APU::APU() :
+    mSquare1(0),
+    mSquare2(0),
     mAudioBuffer(nullptr),
     mAudioBufferOffset(0),
     mDACDivider(2),
@@ -65,6 +67,7 @@ APU::APU() :
     mMode(0),
     mInterrupt(false)
 {
+    mNoise.Reset();
 }
 
 
@@ -95,6 +98,8 @@ void APU::SetAudioBuffer(uint8* ioAudioBuffer)
 
 void APU::Tick()
 {
+    mNoise.Tick();
+    
     clocks++;
     if (--mAPUClock == 0)
         UpdateSequencer();
@@ -154,10 +159,9 @@ void APU::UpdateSequencer()
 
 void APU::ClockEnvelope()
 {
-    mSquare1.ClockEnvelope();
-    mSquare2.ClockEnvelope();
-    mTriangle.ClockEnvelope();
-    mNoise.ClockEnvelope();
+    mSquare1.mEnvelope.Tick();
+    mSquare2.mEnvelope.Tick();
+    mNoise.mEnvelope.Tick();
 }
 
 
@@ -179,14 +183,16 @@ void APU::UpdateDAC()
     mDACDivider += 81;
     count++;
     
-    float sq1 = mSquare1.ClockDAC();
-    float sq2 = mSquare2.ClockDAC();
-    float tr  = mTriangle.ClockDAC();
+    float sq1   = mSquare1.ClockDAC();
+    float sq2   = mSquare2.ClockDAC();
+    float tr    = mTriangle.ClockDAC() / 8227.0f;
+    float noise = mNoise.ClockDAC()    / 12241.0f;
+    float dmc   = mDMC.ClockDAC()      / 22638.0f;
     
-    float avg = (tr+sq1+sq2) / 3.0f;
-//    avg = tr;
+    float sq_out = 95.88f / ((8128.0f / (sq1+sq2)) + 100.0f);
+    float tnd_out = 159.79f / ((1.0f / (tr+noise+dmc)) + 100.0f);
     
-    uint8 v8 = (uint8) (avg + 1.0f) * 255.0f;
+    uint8 v8 = (sq_out+tnd_out) * 127.0f;
     mAudioBuffer[mAudioBufferOffset++] = v8;
 }
 
@@ -259,6 +265,59 @@ void APU::Store(uint16 inAddr, uint8 inValue)
 }
 
 
+/// EnvelopeGenerator
+
+void APU::EnvelopeGenerator::Tick()
+{
+    if (mReset)
+    {
+        mDivider = (mRegister & 0x0F) + 1;
+        mValue   = 15;
+        mReset   = false;
+    }
+    else
+    {
+        mDivider--;
+        if (mDivider == 0)
+        {
+            mDivider = (mRegister & 0x0F) + 1;
+            
+            if (mValue == 0)
+            {
+                // Check for looping
+                if (GETBIT(mRegister, 5))
+                    mValue = 15;
+            }
+            else
+                mValue--;
+        }
+    }
+}
+
+// SweepUnit
+void APU::SweepUnit::Tick(int inIdx, uint16& ioPeriod)
+{
+    mDivider--;
+    if (GETBIT(mRegister, 7) && mDivider == 0)
+    {
+        mDivider = ((mRegister >> 4) & 0x07) + 1;
+        
+        uint8 shift = mRegister&0x07;
+        uint16 v = ioPeriod >> shift;
+        
+        if (GETBIT(mRegister, 3))
+            v = ~v + inIdx;
+        
+        ioPeriod = (ioPeriod + v) & 0x3FFF;
+    }
+    
+    if (mReset)
+    {
+        mDivider = ((mRegister >> 4) & 0x07) + 1;
+        mReset   = false;
+    }
+}
+
 
 //// Square
 
@@ -268,7 +327,12 @@ void APU::Square::Store(uint8 inReg, uint8 inValue)
     switch (inReg)
     {
         case 0:
+            mEnvelope.Set(inValue);
+            mRegisters[inReg] = inValue;
+            break;
+            
         case 1:
+            mSweep.Set(inValue);
             mRegisters[inReg] = inValue;
             break;
 
@@ -291,40 +355,14 @@ void APU::Square::Store(uint8 inReg, uint8 inValue)
 
 
 
-void APU::Square::ClockEnvelope()
-{
-    if (mEnvelopeReset)
-    {
-        mEnvelopeDivider = (mRegisters[0] & 0x0F) + 1;
-        mEnvelopeCounter = 15;
-        mEnvelopeReset = false;
-    }
-    else
-    {
-        mEnvelopeDivider--;
-        if (mEnvelopeDivider == 0)
-        {
-            mEnvelopeDivider = (mRegisters[0] & 0x0F) + 1;
-            
-            if (mEnvelopeCounter == 0)
-            {
-                // Check for looping
-                if (GETBIT(mRegisters[0], 5))
-                    mEnvelopeCounter = 15;
-            }
-            else
-                mEnvelopeCounter--;
-        }
-    }
-}
-
-
 
 void APU::Square::ClockLength()
 {
     // Update length if halt not set
     if (GETBIT(mRegisters[0], 5) == 0)
         mLength = mLength == 0 ? 0 : mLength-1;
+    
+    mSweep.Tick(mIdx, mPeriod);
 }
 
 
@@ -337,10 +375,10 @@ float APU::Square::ClockDAC()
     mPhase = fmod(mPhase + (fr / 44100.0f), 1.0f);
 
     int idx = mPhase * 8;
-    float v = sSquareDuty[mRegisters[0] >> 6][idx] == 1 ? 1.0f : -1.0f;
+    float v = sSquareDuty[mRegisters[0] >> 6][idx] == 1 ? 15.0f : 0.0f;
     
     v = mLength != 0 ? v : 0.0f;
-    v *= GetVolume();
+    v *= mEnvelope.Volume();
     
     return v;
 }
@@ -377,13 +415,6 @@ void APU::Triangle::Store(uint8 inReg, uint8 inValue)
 
 
 
-
-void APU::Triangle::ClockEnvelope()
-{
-}
-
-
-
 void APU::Triangle::ClockLength()
 {
     // Update length if halt not set
@@ -400,10 +431,7 @@ float APU::Triangle::ClockDAC()
     mPhase = fmod(mPhase + (fr / 44100.0f), 1.0f);
     
     int idx = mPhase * 32;
-    float v = sTriangleDuty[idx];// == 1 ? 1.0f : -1.0f;
-    v /= 15.0f;
-    v -= 0.5f;
-    v *= 2.0f;
+    float v = sTriangleDuty[idx];
     v = mLength != 0 ? v : 0.0f;
     
     return v;
@@ -415,11 +443,33 @@ float APU::Triangle::ClockDAC()
 //// Noise
 
 
+void APU::Noise::Reset()
+{
+    mDivider = 0;
+    mNoise = 1;
+}
+
+
+void APU::Noise::Tick()
+{
+    if (mDivider == 0)
+    {
+        bool mode = mRegisters[2] & 0x80;
+        uint16 v = mNoise ^ (mNoise >> (mode == 0 ? 1 : 6));
+        mNoise = (mNoise >> 1) | (v << 14);
+        mDivider = mPeriod;
+    }
+
+    mDivider--;
+}
+
+
 void APU::Noise::Store(uint8 inReg, uint8 inValue)
 {
     switch (inReg)
     {
         case 0:
+            mEnvelope.Set(inValue);
             mRegisters[inReg] = inValue;
             break;
             
@@ -429,6 +479,7 @@ void APU::Noise::Store(uint8 inReg, uint8 inValue)
         case 2:
             mShortMode = (inValue & 0x80) != 0;
             mPeriod    = kNoisePeriodTable[inValue & 0x0F];
+            mDivider   = 0;
             break;
             
         case 3:
@@ -440,16 +491,26 @@ void APU::Noise::Store(uint8 inReg, uint8 inValue)
 
 
 
-
-void APU::Noise::ClockEnvelope()
-{
-}
-
-
-
 void APU::Noise::ClockLength()
 {
     // Update length if halt not set
     if (GETBIT(mRegisters[0], 5) == 0)
         mLength = mLength == 0 ? 0 : mLength-1;
 }
+
+
+float APU::Noise::ClockDAC()
+{
+    if (mLength != 0)
+        return mEnvelope.Volume() *  (mNoise & 0x01) ? 15.0f : 0.0f;
+    return 0.0f;
+}
+
+
+
+
+float APU::DMC::ClockDAC()
+{
+    return 0.0f;
+}
+

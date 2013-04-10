@@ -35,7 +35,7 @@
         alGenSources(1, &mSource);
         alSourcei(mSource, AL_BUFFER, 0);
         alSourcei(mSource, AL_LOOPING, AL_FALSE);
-        alSourcef(mSource, AL_GAIN, 0.1f);
+        alSourcef(mSource, AL_GAIN, 1.0f);
         
         // Generate 3 buffers;
         alGenBuffers(3, mBufferIDs);

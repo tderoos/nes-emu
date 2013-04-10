@@ -62,7 +62,7 @@
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Blaster Master.nes");
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
+//    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Legend of Zelda.nes");
 
 // Broken games
 
