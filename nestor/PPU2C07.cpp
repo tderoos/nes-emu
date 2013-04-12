@@ -331,7 +331,7 @@ void PPU2C07::Scanline()
     // Tranfer VRam location from temp (loopy)
     if (mScanline == 0)
         mV = mT;
-
+    
     uint16 mask = 0x041F;
     mV &= ~mask;
     mV |= mT & mask;
@@ -341,6 +341,9 @@ void PPU2C07::Scanline()
     
     uint16 fine_y   = (mV & EScrollYFineMaskTgt  ) >> EScrollYFineShiftTgt;
     uint8  attr_shift = (coarse_y&2) ? 4 : 0;
+    
+    bool draw_bg  = (mPPUMask & 0x08) != 0;
+    bool draw_spr = (mPPUMask & 0x10) != 0;
 
     if (mScanline >= 0 && mScanline < 240 && (mPPUMask & 0x08))
     {
@@ -364,20 +367,19 @@ void PPU2C07::Scanline()
             uint8 plane0 = chr_tile[(name * 16) + fine_y];
             uint8 plane1 = chr_tile[(name * 16) + fine_y + 8];
             
-//            for (int tx = from_x; tx < 8 && slx < 256; ++tx, ++slx)
-            uint8 tx = mX;
+            for (; mX < 8 && slx < 256; mX++, slx++)
             {
                 uint8 color = 0;
                 
                 // BG
-                uint8 bit0 = (plane0 >> (7-tx)) & 1;
-                uint8 bit1 = (plane1 >> (7-tx)) & 1;
+                uint8 bit0 = (plane0 >> (7-mX)) & 1;
+                uint8 bit1 = (plane1 >> (7-mX)) & 1;
                 uint8 bg_color_idx = bit0 | (bit1<<1) ;
 
                 if (bg_color_idx != 0)
                     bg_color_idx |= (attr<<2);
                 
-                if (mPPUMask & 0x08)
+                if (draw_bg)
                     color = mVRAM[0x3F00 + bg_color_idx];
 
                 uint8 prio = 0xFF;
@@ -406,42 +408,36 @@ void PPU2C07::Scanline()
                             
                             if (bg_color_idx == 0 || spr.mForeGround)
                             {
-                                if ((mPPUMask & 0x10) != 0)
+                                if (draw_spr)
                                     color = mVRAM[0x3F10 + color_idx];
                                 prio = spr.mPriority;
                             }
-                            
-                            if (spr.mPriority == 0 && bg_color_idx != 0)
-                                mPPUStatus = mPPUStatus | 0x40;
                         }
-//
-//                        if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
-//                            mPPUStatus = mPPUStatus | 0x40;
-                        
-                    }
-                }
-                slx++;
-                
-                (*fb_addr++) = palette[color];
-                
-                // Incerement X
-                if (mX == 7)
-                {
-                    // Increment coarse X
-                    coarse_x++;
-                    if (coarse_x == 32)
-                    {
-                        coarse_x = 0;
-                        mV ^= 0x01 << ENameTableShiftTgt;   // switch horizontal nametable
-                    }
-                    
-                    mV &= ~EScrollXCoarseMaskTgt;
-                    mV |= coarse_x << EScrollXCoarseShiftTgt;
 
-                    mX = 0;
+                        // Hit 0 detection
+                        if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
+                            mPPUStatus = mPPUStatus | 0x40;
+                    }
                 }
-                else
-                    mX++;
+
+                (*fb_addr++) = palette[color];
+            }
+            
+            // Incerement X
+            if (mX > 7)
+            {
+                // Increment coarse X
+                coarse_x++;
+                if (coarse_x == 32)
+                {
+                    coarse_x = 0;
+                    mV ^= 0x01 << ENameTableShiftTgt;   // switch horizontal nametable
+                }
+                
+                mV &= ~EScrollXCoarseMaskTgt;
+                mV |= coarse_x << EScrollXCoarseShiftTgt;
+
+                mX = 0;
             }
         }
     }
