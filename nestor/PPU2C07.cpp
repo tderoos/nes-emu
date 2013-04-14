@@ -290,25 +290,17 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
         if (spr_y < mScanline && mScanline <= spr_y+sprite_h)
         {
             uint8 spr_x = mOAM[i*4 + 3];
-
+            
             // Sorted insert
-            int idx = 0;
-            for (idx = 0; idx < num_spr_sl; idx++)
-                if (spr_x < ioSprites[idx].mX)
-                    break;
-
-            if (idx < num_spr_sl)
-                memmove(&(ioSprites[idx+1]), &(ioSprites[idx]), (num_spr_sl-idx) * sizeof(ScanlineSprite));
-
             // -1 for one frame delay (see above)
             uint8 y_offset = mScanline - spr_y - 1;
             uint8 tile_idx = mOAM[i*4 + 1];
             uint8 flags    = mOAM[i*4 + 2];
             
-            ioSprites[idx].mX = spr_x;
-            ioSprites[idx].mPriority   = i;
-            ioSprites[idx].mPalette    = flags & 0x03;
-            ioSprites[idx].mForeGround = (flags & 0x20) == 0;
+            ioSprites[num_spr_sl].mX = spr_x;
+            ioSprites[num_spr_sl].mPriority   = i;
+            ioSprites[num_spr_sl].mPalette    = flags & 0x03;
+            ioSprites[num_spr_sl].mForeGround = (flags & 0x20) == 0;
 
             // Vertical flip
             if ((flags & 0x80) != 0)
@@ -332,14 +324,14 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
             else
                 src_tile = spr_tile;
             
-            ioSprites[idx].mPlane0 = src_tile[tile_idx * 16 + y_offset];
-            ioSprites[idx].mPlane1 = src_tile[tile_idx * 16 + y_offset + 8];
+            ioSprites[num_spr_sl].mPlane0 = src_tile[tile_idx * 16 + y_offset];
+            ioSprites[num_spr_sl].mPlane1 = src_tile[tile_idx * 16 + y_offset + 8];
             
             // Horizontal flip
             if ((flags & 0x40) != 0)
             {
-                ioSprites[idx].mPlane0 = BitReverseTable256[ioSprites[idx].mPlane0];
-                ioSprites[idx].mPlane1 = BitReverseTable256[ioSprites[idx].mPlane1];
+                ioSprites[num_spr_sl].mPlane0 = BitReverseTable256[ioSprites[num_spr_sl].mPlane0];
+                ioSprites[num_spr_sl].mPlane1 = BitReverseTable256[ioSprites[num_spr_sl].mPlane1];
             }
             
             num_spr_sl++;
@@ -361,7 +353,7 @@ void PPU2C07::Scanline()
     mV |= mT & mask;
     
     uint8  scanline[264];
-    uint64* scanlineptr = (uint64*) &scanline[0];
+    uint64* scanlineptr64 = (uint64*) &scanline[0];
     uint8*  palette = mVRAM + 0x3F00;
     
     uint16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
@@ -389,7 +381,7 @@ void PPU2C07::Scanline()
             uint8 plane0 = chr_tile[(name * 16) + fine_y];
             uint8 plane1 = chr_tile[(name * 16) + fine_y + 8];
             
-            *scanlineptr++ = TileRemapper[attr][plane0][plane1];
+            *scanlineptr64++ = TileRemapper[attr][plane0][plane1];
             
             // Increment coarse X
             coarse_x++;
@@ -407,51 +399,44 @@ void PPU2C07::Scanline()
         // Get sprites for this scanline
         ScanlineSprite sprites_sl[64];
         uint8 num_spr_sl = FetchScanlineSprites(sprites_sl);
+        
+        for (int s = 0; s < num_spr_sl; ++s)
+        {
+            const ScanlineSprite& spr = sprites_sl[s];
+            uint8* scanlineptr_spr = &scanline[mX + spr.mX];
+            
+            for (int i = 7; i >= 0; i--, scanlineptr_spr++)
+            {
+                uint8 scanline_value = *scanlineptr_spr;
+
+                // Skip already touched by sprite;  
+                if (scanline_value & 0x80)
+                    continue;
+                
+                uint8 color_idx = ((spr.mPlane0>>i) & 0x01) | (((spr.mPlane1 >>i) & 0x01)<<1);
+                if (color_idx == 0)
+                    continue;
+
+                color_idx = 0x10 + color_idx + spr.mPalette * 4;
+                
+                // Hit 0 detection
+                if (spr.mPriority == 0 && scanline_value != 0)
+                    mPPUStatus = mPPUStatus | 0x40;
+
+                // We are touching this pixel
+                if (draw_spr && (scanline_value == 0 || spr.mForeGround))
+                    scanline_value = color_idx;
+
+                *scanlineptr_spr = scanline_value | 0x80;
+            }
+        }
+        
         uint32* framebuffer = mFrameBuffer + mScanline*256;
 
-        int spr_index = 0;
         for (int i = 0; i < 256; ++i)
         {
             uint8 bg_color_idx = scanline[i+mX];
-            uint8 color        = draw_bg ? palette[bg_color_idx] : 0;
-            
-            uint8 prio = 0xFF;
-            for (int s = spr_index; s < num_spr_sl; ++s)
-            {
-                const ScanlineSprite& spr = sprites_sl[s];
-                
-                if (i < spr.mX)
-                    break;
-                
-                if (i >= spr.mX + 8)
-                {
-                    spr_index++;
-                    continue;
-                }
-                
-                if (i >= spr.mX)
-                {
-                    // Shift pattern bits to get color idx
-                    uint8 shift     = 7 - (i - spr.mX);
-                    uint8 color_idx = ((spr.mPlane0>>shift) & 0x01) | (((spr.mPlane1 >> shift) & 0x01)<<1);
-                    
-                    if (color_idx != 0 && spr.mPriority < prio)
-                    {
-                        color_idx += spr.mPalette * 4;
-                        
-                        if (bg_color_idx == 0 || spr.mForeGround)
-                        {
-                            if (draw_spr)
-                                color = palette[0x10 + color_idx];
-                            prio = spr.mPriority;
-                        }
-                    }
-                    
-                    // Hit 0 detection
-                    if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
-                        mPPUStatus = mPPUStatus | 0x40;
-                }
-            }
+            uint8 color        = draw_bg ? palette[bg_color_idx&0x7F] : 0;
             
             *framebuffer++ = sNesPalette[color];
         }
