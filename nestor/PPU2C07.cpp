@@ -30,7 +30,7 @@ const uint32 palette[64] = {
 };
 
  /*/
-unsigned int palette[] =
+unsigned int sNesPalette[] =
 {
     0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC,
     0x940084, 0xA80020, 0xA81000, 0x881400,
@@ -54,7 +54,7 @@ unsigned int palette[] =
 };
 //*/
 
-static const unsigned char BitReverseTable256[] =
+static const uint8 BitReverseTable256[] =
 {
     0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0, 0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0,
     0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8, 0x18, 0x98, 0x58, 0xD8, 0x38, 0xB8, 0x78, 0xF8,
@@ -74,6 +74,8 @@ static const unsigned char BitReverseTable256[] =
     0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF, 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
 };
 
+
+static uint64 TileRemapper[4][256][256];
 
 
 uint32 swap(uint32 inValue)
@@ -122,7 +124,29 @@ PPU2C07::PPU2C07(Rom* inRom)
     mW = 0;
     
     for (int i = 0; i < 64; ++i)
-        palette[i] = swap(palette[i]<<8);
+        sNesPalette[i] = swap(sNesPalette[i]<<8);
+    
+    for (int a = 0; a < 4; ++a)
+    {
+        for (int t0 = 0; t0 < 256; t0++)
+        {
+            for (int t1 = 0; t1 < 256; t1++)
+            {
+                uint64 value = 0;
+                
+                for (int i = 0; i < 8; ++i)
+                {
+                    uint8 bt0 = (t0 >> (7-i)) & 1;
+                    uint8 bt1 = (t1 >> (7-i)) & 1;
+                    uint64 idx = bt0 | (bt1<<1);
+                    if (idx != 0)
+                        idx |= a<<2;
+                    value |= idx << (i*8);
+                }
+                TileRemapper[a][t0][t1] = value;
+            }
+        }
+    }
 }
 
 
@@ -336,6 +360,10 @@ void PPU2C07::Scanline()
     mV &= ~mask;
     mV |= mT & mask;
     
+    uint8  scanline[264];
+    uint64* scanlineptr = (uint64*) &scanline[0];
+    uint8*  palette = mVRAM + 0x3F00;
+    
     uint16 coarse_x = (mV & EScrollXCoarseMaskTgt) >> EScrollXCoarseShiftTgt;
     uint16 coarse_y = (mV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
     
@@ -345,17 +373,11 @@ void PPU2C07::Scanline()
     bool draw_bg  = (mPPUMask & 0x08) != 0;
     bool draw_spr = (mPPUMask & 0x10) != 0;
 
-    if (mScanline >= 0 && mScanline < 240 && (mPPUMask & 0x08))
+    if (draw_bg || draw_spr)
     {
-        // Get sprites for this scanline
-        int spr_index = 0;
-        ScanlineSprite sprites_sl[64];
-        uint8 num_spr_sl = FetchScanlineSprites(sprites_sl);
-        
-        uint32*      fb_addr  = mFrameBuffer + (mScanline*256);
         const uint8* chr_tile = mVRAM + ((mPPUCtrl & 0x10) ? 0x1000 : 0x0000);
         
-        for (int slx = 0; slx < 256; )
+        for (int slx = 0; slx < 256+mX; slx+=8)
         {
             uint16 name_table_base = mNameTable[(mV & 0xFFF) >> 10];
 
@@ -367,81 +389,74 @@ void PPU2C07::Scanline()
             uint8 plane0 = chr_tile[(name * 16) + fine_y];
             uint8 plane1 = chr_tile[(name * 16) + fine_y + 8];
             
-            for (; mX < 8 && slx < 256; mX++, slx++)
+            *scanlineptr++ = TileRemapper[attr][plane0][plane1];
+            
+            // Increment coarse X
+            coarse_x++;
+            if (coarse_x == 32)
             {
-                uint8 color = 0;
-                
-                // BG
-                uint8 bit0 = (plane0 >> (7-mX)) & 1;
-                uint8 bit1 = (plane1 >> (7-mX)) & 1;
-                uint8 bg_color_idx = bit0 | (bit1<<1) ;
-
-                if (bg_color_idx != 0)
-                    bg_color_idx |= (attr<<2);
-                
-                if (draw_bg)
-                    color = mVRAM[0x3F00 + bg_color_idx];
-
-                uint8 prio = 0xFF;
-                for (int s = spr_index; s < num_spr_sl; ++s)
-                {
-                    const ScanlineSprite& spr = sprites_sl[s];
-                    
-                    if (slx < spr.mX)
-                        break;
-
-                    if (slx >= spr.mX + 8)
-                    {
-                        spr_index++;
-                        continue;
-                    }
-                    
-                    if (slx >= spr.mX)
-                    {
-                        // Shift pattern bits to get color idx
-                        uint8 shift     = 7 - (slx - spr.mX);
-                        uint8 color_idx = ((spr.mPlane0>>shift) & 0x01) | (((spr.mPlane1 >> shift) & 0x01)<<1);
-                        
-                        if (color_idx != 0 && spr.mPriority < prio)
-                        {
-                            color_idx += spr.mPalette * 4;
-                            
-                            if (bg_color_idx == 0 || spr.mForeGround)
-                            {
-                                if (draw_spr)
-                                    color = mVRAM[0x3F10 + color_idx];
-                                prio = spr.mPriority;
-                            }
-                        }
-
-                        // Hit 0 detection
-                        if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
-                            mPPUStatus = mPPUStatus | 0x40;
-                    }
-                }
-
-                (*fb_addr++) = palette[color];
+                coarse_x = 0;
+                mV ^= 0x01 << ENameTableShiftTgt;   // switch horizontal nametable
             }
             
-            // Incerement X
-            if (mX > 7)
+            mV &= ~EScrollXCoarseMaskTgt;
+            mV |= coarse_x << EScrollXCoarseShiftTgt;
+        }
+
+        
+        // Get sprites for this scanline
+        ScanlineSprite sprites_sl[64];
+        uint8 num_spr_sl = FetchScanlineSprites(sprites_sl);
+        uint32* framebuffer = mFrameBuffer + mScanline*256;
+
+        int spr_index = 0;
+        for (int i = 0; i < 256; ++i)
+        {
+            uint8 bg_color_idx = scanline[i+mX];
+            uint8 color        = draw_bg ? palette[bg_color_idx] : 0;
+            
+            uint8 prio = 0xFF;
+            for (int s = spr_index; s < num_spr_sl; ++s)
             {
-                // Increment coarse X
-                coarse_x++;
-                if (coarse_x == 32)
+                const ScanlineSprite& spr = sprites_sl[s];
+                
+                if (i < spr.mX)
+                    break;
+                
+                if (i >= spr.mX + 8)
                 {
-                    coarse_x = 0;
-                    mV ^= 0x01 << ENameTableShiftTgt;   // switch horizontal nametable
+                    spr_index++;
+                    continue;
                 }
                 
-                mV &= ~EScrollXCoarseMaskTgt;
-                mV |= coarse_x << EScrollXCoarseShiftTgt;
-
-                mX = 0;
+                if (i >= spr.mX)
+                {
+                    // Shift pattern bits to get color idx
+                    uint8 shift     = 7 - (i - spr.mX);
+                    uint8 color_idx = ((spr.mPlane0>>shift) & 0x01) | (((spr.mPlane1 >> shift) & 0x01)<<1);
+                    
+                    if (color_idx != 0 && spr.mPriority < prio)
+                    {
+                        color_idx += spr.mPalette * 4;
+                        
+                        if (bg_color_idx == 0 || spr.mForeGround)
+                        {
+                            if (draw_spr)
+                                color = palette[0x10 + color_idx];
+                            prio = spr.mPriority;
+                        }
+                    }
+                    
+                    // Hit 0 detection
+                    if (spr.mPriority == 0 && color_idx != 0 && bg_color_idx != 0)
+                        mPPUStatus = mPPUStatus | 0x40;
+                }
             }
+            
+            *framebuffer++ = sNesPalette[color];
         }
     }
-  
+    
     // Increment Y
     if (fine_y == 7)
     {
@@ -450,7 +465,7 @@ void PPU2C07::Scanline()
     }
     else
         fine_y++;
-
+    
     // Store fine Y in V
     mV &= ~EScrollYFineMaskTgt;
     mV |= fine_y << EScrollYFineShiftTgt;
