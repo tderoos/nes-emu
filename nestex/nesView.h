@@ -15,8 +15,11 @@
     // animations
     NSTimer* timer;
 
-    unsigned int mTexture;
+    unsigned int mTexture[2];
+    int          mCurTexture;
     unsigned char mButtonState;
+    
+//    CVDisplayLinkRef m_displayLink;
 }
 
 - (unsigned char)getButtonState;

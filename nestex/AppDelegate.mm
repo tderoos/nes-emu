@@ -10,6 +10,7 @@
 #import "nesView.h"
 #import "nesAudio.h"
 #include "../nestor/nestor.h"
+#include "../nestor/Profiler.h"
 
 
 @implementation AppDelegate
@@ -87,16 +88,30 @@
     [audio render:mAudioBuffer bufferSize:735];
 }
 
+ProfileBar tpb("Timer");
+
+
 - (void)nesFrame:(NSTimer *)timer
 {
+
+//    tpb.Tick();
+    
     if ([audio needsRefresh] && nes != NULL)
     {
-        unsigned int samplecount;
-        mButtonState = [_view getButtonState];
-        nes->RunToVBlank(mButtonState, mFrameBuffer, mAudioBuffer, &samplecount);
-        [audio render:mAudioBuffer bufferSize:samplecount];
-        [_view render:mFrameBuffer];
+        {
+//            PROFILEBAR("frame");
+            unsigned int samplecount;
+            mButtonState = [_view getButtonState];
+            nes->RunToVBlank(mButtonState, mFrameBuffer, mAudioBuffer, &samplecount);
+            [audio render:mAudioBuffer bufferSize:samplecount];
+        }
+        {
+//            PROFILEBAR("render");
+            [_view render:mFrameBuffer];
+        }
     }
+    
+    ProfileBar::sClear();
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification

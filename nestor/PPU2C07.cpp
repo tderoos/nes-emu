@@ -5,6 +5,7 @@
 //
 
 #include "types.h"
+#include "Profiler.h"
 
 /*
 const uint32 palette[64] = {
@@ -78,19 +79,6 @@ static const uint8 BitReverseTable256[] =
 static uint64 TileRemapper[4][256][256];
 
 
-uint32 swap(uint32 inValue)
-{
-    uint32 result = 0;
-    
-    result = result | ((inValue << 24) & (0xFF << 24));
-    result = result | ((inValue <<  8) & (0xFF << 16));
-    result = result | ((inValue >>  8) & (0xFF <<  8));
-    result = result | ((inValue >> 24) & (0xFF <<  0));
-    
-    return result;
-}
-
-
 #include "PPU2C07.h"
 
 void BREAKPPU()
@@ -122,9 +110,6 @@ PPU2C07::PPU2C07(Rom* inRom)
     mT = 0;
     mX = 0;
     mW = 0;
-    
-    for (int i = 0; i < 64; ++i)
-        sNesPalette[i] = swap(sNesPalette[i]<<8);
     
     for (int a = 0; a < 4; ++a)
     {

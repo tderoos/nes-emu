@@ -16,6 +16,7 @@ class Ram
 {
 public:
     Ram(uint16 inSize);
+    ~Ram();
 
     // Access
     inline void Load(uint16 inAddr, uint8* outValue) const      { *outValue = mData[inAddr & 0x07FF]; }

@@ -29,6 +29,8 @@
 		9338176616EB3E2500C8FCAC /* PPU2C07.h in Sources */ = {isa = PBXBuildFile; fileRef = A8BC3ACCD56D547A389473D5 /* PPU2C07.h */; };
 		9338176716EB3E2500C8FCAC /* nestor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9338173316EA9A9800C8FCAC /* nestor.cpp */; };
 		9338176816EB3E2500C8FCAC /* nestor.h in Sources */ = {isa = PBXBuildFile; fileRef = 9338173416EA9A9800C8FCAC /* nestor.h */; };
+		937A12471722BD010006E793 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937A12461722BD010006E793 /* Profiler.cpp */; };
+		937A12481722BD010006E793 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937A12461722BD010006E793 /* Profiler.cpp */; };
 		937BB0EA16F910B000F8F003 /* APU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937BB0E816F910B000F8F003 /* APU.cpp */; };
 		937BB0EB16F9133F00F8F003 /* APU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937BB0E816F910B000F8F003 /* APU.cpp */; };
 		93C51FA81709EDE400693E33 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93C51FA71709EDE400693E33 /* CoreAudio.framework */; };
@@ -89,6 +91,8 @@
 		9338175716EB22B000C8FCAC /* nesView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nesView.h; sourceTree = "<group>"; };
 		9338175816EB22B000C8FCAC /* nesView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = nesView.mm; sourceTree = "<group>"; };
 		9338175916EB23B500C8FCAC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		937A12451722934A0006E793 /* Profiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Profiler.h; sourceTree = "<group>"; };
+		937A12461722BD010006E793 /* Profiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Profiler.cpp; sourceTree = "<group>"; };
 		937BB0E816F910B000F8F003 /* APU.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = APU.cpp; sourceTree = "<group>"; };
 		937BB0E916F910B000F8F003 /* APU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APU.h; sourceTree = "<group>"; };
 		93C51FA71709EDE400693E33 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -231,6 +235,8 @@
 				93CEBBB116EFC2ED00CBDE87 /* types.h */,
 				937BB0E816F910B000F8F003 /* APU.cpp */,
 				937BB0E916F910B000F8F003 /* APU.h */,
+				937A12451722934A0006E793 /* Profiler.h */,
+				937A12461722BD010006E793 /* Profiler.cpp */,
 			);
 			path = nestor;
 			sourceTree = "<group>";
@@ -344,6 +350,7 @@
 				9338174916EB216100C8FCAC /* main.m in Sources */,
 				9338175016EB216100C8FCAC /* AppDelegate.mm in Sources */,
 				93C51FAB1709F0D800693E33 /* nesAudio.mm in Sources */,
+				937A12481722BD010006E793 /* Profiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +367,7 @@
 				9338173516EA9A9800C8FCAC /* nestor.cpp in Sources */,
 				93CEBBB316EFC3A000CBDE87 /* Mapper.cpp in Sources */,
 				937BB0EA16F910B000F8F003 /* APU.cpp in Sources */,
+				937A12471722BD010006E793 /* Profiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

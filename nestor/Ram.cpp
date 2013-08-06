@@ -15,3 +15,10 @@ Ram::Ram(uint16 inSize)
     mData = (uint8 *) malloc(inSize);
     memset(mData, 0xFFFFFFFF, inSize);
 }
+
+
+
+Ram::~Ram()
+{
+    free(mData);
+}

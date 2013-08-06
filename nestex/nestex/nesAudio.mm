@@ -64,6 +64,7 @@
 
     if (buffer != 0)
     {
+        inBufferSize = 735;
         alBufferData(buffer,AL_FORMAT_MONO8,inBuffer,inBufferSize,44100);
         error = alGetError();
         

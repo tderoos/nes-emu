@@ -8,9 +8,12 @@
 
 #import "nesView.h"
 #include "../nestor/nestor.h"
+#include "../nestor/Profiler.h"
 #include <OpenGL/gl.h>
 
 @implementation nesView
+
+//ProfileBar pb("SwapInterval");
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -24,7 +27,7 @@
 
 - (void) prepareOpenGL
 {
-    const GLint swapInt = 1;
+    const GLint swapInt = 0;
     // set to vbl sync
     [[self openGLContext] setValues:&swapInt
                        forParameter:NSOpenGLCPSwapInterval];
@@ -34,10 +37,24 @@
     glLoadIdentity();
     
     glEnable(GL_TEXTURE_2D);
-    glGenTextures(1, &mTexture);
-    glBindTexture(GL_TEXTURE_2D, mTexture);
+    glGenTextures(2, mTexture);
+    glBindTexture(GL_TEXTURE_2D, mTexture[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //set its parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glBindTexture(GL_TEXTURE_2D, mTexture[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //set its parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    
+    mCurTexture = 0;
+    
+//    pb.Tick();
+    
+    // Create a display link capable of being used with all active displays
+//    CVDisplayLinkCreateWithActiveCGDisplays(&m_displayLink);
+//    
+//    // Set the renderer output callback function
+//    CVDisplayLinkSetOutputCallback(m_displayLink, &MyDisplayLinkCallback, (__bridge void*)self);
     
     NSLog(@"prepareOpenGL\n");
 }
@@ -48,13 +65,6 @@
     // TODO: handle draw event
     // For now just clear the screen with a time dependent color
     
-    glClear (GL_COLOR_BUFFER_BIT);
-    
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    
-    glBindTexture(GL_TEXTURE_2D, mTexture); //bind the first texture.
-    
     glBegin(GL_QUADS);
         glTexCoord2i(0,0); glVertex2i(-1,1);
         glTexCoord2i(0,1); glVertex2i(-1,-1);
@@ -62,19 +72,19 @@
         glTexCoord2i(1,0); glVertex2i(1,1);
     glEnd();
     
-    // Flush all OpenGL calls
-    glFlush();
     // Flush OpenGL context
     [[self openGLContext] flushBuffer];
+//    pb.Tick();
 }
 
 -(void) render:(unsigned int*)inBuffer
 {
-    glBindTexture(GL_TEXTURE_2D, mTexture); //bind the first texture.
-    //then load it into the graphics hardware:
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, inBuffer );
-    
-    [self drawRect:[self bounds]];
+    glBindTexture(GL_TEXTURE_2D, mTexture[mCurTexture]);
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, inBuffer );
+
+//    [self drawRect:[self bounds]];
+    [self setNeedsDisplay:YES];
+    mCurTexture = 1-mCurTexture;
 }
 
 
