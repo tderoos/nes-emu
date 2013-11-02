@@ -58,7 +58,7 @@
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/registers.nes");
 
 // Working games
-    nes = new nestor("/Users/tderoos/Projects/playground/nestor/smb1.nes");
+    nes = new nestor("/Users/Tommy/Projects/playground/nestor/smb1.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/DEFENDR2.NES");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Kid Icarus.nes");
 //    nes = new nestor("/Users/tderoos/Projects/playground/nestor/Metroid.nes");
