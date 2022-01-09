@@ -27,6 +27,8 @@
 
 - (void) prepareOpenGL
 {
+    [super prepareOpenGL];
+
     const GLint swapInt = 0;
     // set to vbl sync
     [[self openGLContext] setValues:&swapInt
@@ -62,9 +64,9 @@
 
 - (void) drawRect:(NSRect)rect
 {
-    // TODO: handle draw event
-    // For now just clear the screen with a time dependent color
+    [[self openGLContext] makeCurrentContext];
     
+    // Draw a single quad with our frame
     glBegin(GL_QUADS);
         glTexCoord2i(0,0); glVertex2i(-1,1);
         glTexCoord2i(0,1); glVertex2i(-1,-1);
@@ -79,8 +81,16 @@
 
 -(void) render:(unsigned int*)inBuffer
 {
+    [[self openGLContext] makeCurrentContext];
+
     glBindTexture(GL_TEXTURE_2D, mTexture[mCurTexture]);
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, inBuffer );
+    
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR)
+    {
+        NSLog(@"error");
+    }
 
 //    [self drawRect:[self bounds]];
     [self setNeedsDisplay:YES];
