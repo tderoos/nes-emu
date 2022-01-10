@@ -338,6 +338,7 @@ void PPU2C07::Scanline()
     mV |= mT & mask;
     
     uint8  scanline[264];
+    const uint8* scanline_end = &scanline[264];
     uint64* scanlineptr64 = (uint64*) &scanline[0];
     uint8*  palette = mVRAM + 0x3F00;
     
@@ -390,7 +391,7 @@ void PPU2C07::Scanline()
             const ScanlineSprite& spr = sprites_sl[s];
             uint8* scanlineptr_spr = &scanline[mX + spr.mX];
             
-            for (int i = 7; i >= 0; i--, scanlineptr_spr++)
+            for (int i = 7; i >= 0 && scanlineptr_spr < scanline_end; i--, scanlineptr_spr++)
             {
                 uint8 scanline_value = *scanlineptr_spr;
 
