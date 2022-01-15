@@ -49,15 +49,7 @@
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     
     mCurTexture = 0;
-    
-//    pb.Tick();
-    
-    // Create a display link capable of being used with all active displays
-//    CVDisplayLinkCreateWithActiveCGDisplays(&m_displayLink);
-//    
-//    // Set the renderer output callback function
-//    CVDisplayLinkSetOutputCallback(m_displayLink, &MyDisplayLinkCallback, (__bridge void*)self);
-    
+  
     NSLog(@"prepareOpenGL\n");
 }
 
@@ -76,7 +68,6 @@
     
     // Flush OpenGL context
     [[self openGLContext] flushBuffer];
-//    pb.Tick();
 }
 
 -(void) render:(unsigned int*)inBuffer
@@ -86,7 +77,6 @@
     glBindTexture(GL_TEXTURE_2D, mTexture[mCurTexture]);
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, inBuffer );
 
-//    [self drawRect:[self bounds]];
     [self setNeedsDisplay:YES];
     mCurTexture = 1-mCurTexture;
 }
