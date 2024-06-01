@@ -1,0 +1,19 @@
+add_library(LibNestor 	
+			APU.cpp
+			APU.h
+			CPU6502.cpp
+			CPU6502.h
+			IO.cpp
+			IO.h
+			Mapper.cpp
+			Mapper.h
+			nestor.cpp
+			nestor.h
+			PPU2C07.cpp
+			PPU2C07.h
+			Profiler.cpp
+			Profiler.h
+			Ram.cpp
+			Ram.h
+			Rom.cpp 
+			Rom.h)

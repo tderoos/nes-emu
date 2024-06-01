@@ -8,6 +8,8 @@
 
 #include "Profiler.h"
 
+#ifdef ENABLE_PROFILING
+
 int ProfileBar::sCurProfileEntry = 0;
 ProfileBar::ProfileEntry ProfileBar::sProfileEntries[ProfileBar::sNumProfileEntry];
 
@@ -36,3 +38,5 @@ float ProfileBar::sCPUCounterToMS(uint64 inCount)
     
     return conversion * (double) inCount;
 }
+
+#endif

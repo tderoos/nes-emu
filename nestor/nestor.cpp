@@ -45,8 +45,8 @@ void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAud
         cycles++;
     }
     while (!mPPU.SwapBuffer());
-    
-    *sampleCount = mAPU.GetSampleCount();
+    if (sampleCount)
+        *sampleCount = mAPU.GetSampleCount();
     cycles = cycles;
 }
 

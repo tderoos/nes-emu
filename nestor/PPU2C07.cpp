@@ -233,7 +233,7 @@ uint16 PPU2C07::IncreaseScrollY(uint16 inV) const
 {
     // Increasing the Y scroll register updates the associated flags in mV
     // Normally, Y wraps at 29, flipping the vertical nametable bit at the
-    // same time. However, if manuyally ste above 29, it will wrap at 31 leaving
+    // same time. However, if manually set above 29, it will wrap at 31 leaving
     // the nametable at the old value.
 
     uint16 coarse_y = (inV & EScrollYCoarseMaskTgt) >> EScrollYCoarseShiftTgt;
@@ -417,14 +417,16 @@ void PPU2C07::Scanline()
             }
         }
         
-        uint32* framebuffer = mFrameBuffer + mScanline*256;
-
-        for (int i = 0; i < 256; ++i)
+        if (mFrameBuffer != nullptr)
         {
-            uint8 bg_color_idx = scanline[i+mX];
-            uint8 color        = draw_bg ? palette[bg_color_idx&0x7F] : 0;
-            
-            *framebuffer++ = sNesPalette[color];
+            uint32* framebuffer = mFrameBuffer + mScanline * 256;
+            for (int i = 0; i < 256; ++i)
+            {
+                uint8 bg_color_idx = scanline[i + mX];
+                uint8 color        = draw_bg ? palette[bg_color_idx & 0x7F] : 0;
+
+                *framebuffer++ = sNesPalette[color];
+            }
         }
     }
     

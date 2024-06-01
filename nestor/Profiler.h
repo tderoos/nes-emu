@@ -7,7 +7,7 @@
 //
 
 #pragma once
-#define ENABLE_PROFILING
+//#define ENABLE_PROFILING
 
 #ifdef ENABLE_PROFILING
 

@@ -192,8 +192,10 @@ void APU::UpdateDAC()
     float sq_out = 95.88f / ((8128.0f / (sq1+sq2)) + 100.0f);
     float tnd_out = 159.79f / ((1.0f / (tr+noise+dmc)) + 100.0f);
     
-    uint8 v8 = (sq_out+tnd_out) * 127.0f;
-    mAudioBuffer[mAudioBufferOffset++] = v8;
+    uint8 v8 = (uint8)((sq_out + tnd_out) * 127.0f);
+
+    if (mAudioBuffer != nullptr)
+        mAudioBuffer[mAudioBufferOffset++] = v8;
 }
 
 
@@ -372,9 +374,9 @@ float APU::Square::ClockDAC()
     double fr = 1789773.0;
     fr /= (16.0 * (mPeriod+1));
     
-    mPhase = fmod(mPhase + (fr / 44100.0f), 1.0f);
+    mPhase = (float)fmod(mPhase + (fr / 44100.0f), 1.0f);
 
-    int idx = mPhase * 8;
+    int idx = (int)(mPhase * 8);
     float v = sSquareDuty[mRegisters[0] >> 6][idx] == 1 ? 15.0f : 0.0f;
     
     v = mLength != 0 ? v : 0.0f;
@@ -428,9 +430,9 @@ float APU::Triangle::ClockDAC()
     double fr = 1789773.0;
     fr /= (32.0 * (mPeriod+1));
     
-    mPhase = fmod(mPhase + (fr / 44100.0f), 1.0f);
+    mPhase = (float)fmod(mPhase + (fr / 44100.0f), 1.0f);
     
-    int idx = mPhase * 32;
+    int idx = (int)(mPhase * 32);
     float v = sTriangleDuty[idx];
     v = mLength != 0 ? v : 0.0f;
     
