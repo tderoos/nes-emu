@@ -1,13 +1,5 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
-
-
-
-#ifndef __IO_H_
-#define __IO_H_
+// nes-emu IO module
+#pragma once
 
 #include "types.h"
 
@@ -21,15 +13,20 @@ public:
     
     IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU);
     
-    void    SetButtonState(char inState) { mButtonState = inState; }
+    void		SetButtonState(char inState) { mButtonState = inState; }
 
-    void    Tick();
-    void    Load(uint16 inAddr, uint8* outValue);
-    void    Store(uint16 inAddr, uint8 inValue);
+    void		Tick();
+    void		Load(uint16 inAddr, uint8* outValue);
+    void		Store(uint16 inAddr, uint8 inValue);
 
-    bool    IsDMA() const                { return mDMAState != INACTIVE; }
-    bool    IRQ() const;
-    bool    NMI() const;
+    bool		IsDMA() const												  { return mDMAState != INACTIVE; }
+    bool		IRQ() const;
+    bool		NMI() const;
+
+	// State saving
+	void		ReadState(const SaveState& ioState);
+	void		WriteState(SaveState& ioState) const;
+
     
 private:
     Ram*        mRam;
@@ -47,5 +44,3 @@ private:
     uint16      mDMASrc;
     uint8       mDMAValue;
 };
-
-#endif //__IO_H_

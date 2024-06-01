@@ -1,13 +1,5 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
-
-
-
-#ifndef __PPU2C07_H_
-#define __PPU2C07_H_
+// nes-emu PPU module
+#pragma once
 
 #include <iostream>
 #include "Rom.h"
@@ -33,6 +25,10 @@ public:
     void    Load(uint16 inAddr, uint8* outValue) const;
     void    Store(uint16 inAddr, uint8 inValue);
 
+    // State saving
+    void    ReadState(const SaveState& ioState);
+    void    WriteState(SaveState& ioState) const;
+
 private:
     
     // Scanline sprite span
@@ -57,7 +53,6 @@ private:
     
     uint8       mVRAM[0x4000];
     uint8       mOAM[64*4];
-    uint8*      mCHRData;
     int16       mScanline;
     
     uint16      mNameTable[4];
@@ -111,5 +106,3 @@ private:
     mutable uint8  mOAMAddr;
     mutable bool   mNMILatch;
 };
-
-#endif //__PPU2C07_H_

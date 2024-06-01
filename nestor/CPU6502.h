@@ -1,15 +1,6 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
+// nes-emu CPU module
+#pragma once
 
-
-
-#ifndef __CPU6502_H_
-#define __CPU6502_H_
-
-#include <iostream>
 #include "types.h"
 
 class IO;
@@ -20,13 +11,18 @@ void BREAK();
 class CPU6502 {
 
 public:
-    CPU6502(IO* inIO);
-    void Tick(uint16 inPPUClock, int16 inScanline);
+			    CPU6502(IO* inIO);
+    void		Tick(uint16 inPPUClock, int16 inScanline);
+
+
+	// State saving
+	void		ReadState(const SaveState& ioState);
+	void		WriteState(SaveState& ioState) const;
 
 //private:
 
-    uint8   Load(uint16 inAddr);
-    void    Store(uint16 inAddr, uint8 inValue);
+    uint8		Load(uint16 inAddr);
+    void		Store(uint16 inAddr, uint8 inValue);
 
     enum ERegister
     {
@@ -81,5 +77,3 @@ public:
     Status      mRegs;
     IO*         mIO;
 };
-
-#endif //__CPU6502_H_

@@ -1,10 +1,4 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
-
-
+// nes-emu CPU module
 #include "CPU6502.h"
 #include "IO.h"
 
@@ -806,4 +800,22 @@ void CPU6502::Tick(uint16 inPPUClock, int16 inScanline)
             case 0x03: mInstrTimer = Handle11(opcode); break;
         }
     }
+}
+
+
+// State saving
+void CPU6502::ReadState(const SaveState& ioState)
+{
+	ioState.Read(mNMI);
+	ioState.Read(mInstrTimer);
+	ioState.Read(mRegs);
+}
+
+
+
+void CPU6502::WriteState(SaveState& ioState) const
+{
+	ioState.Write(mNMI);
+	ioState.Write(mInstrTimer);
+	ioState.Write(mRegs);
 }

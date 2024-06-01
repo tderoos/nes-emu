@@ -1,13 +1,5 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
-
-
-
-#ifndef __Rom_H_
-#define __Rom_H_
+// nes-emu Rom module
+#pragma once
 
 #include "types.h"
 #include "Mapper.h"
@@ -41,7 +33,10 @@ public:
     
     // Game saving
     void                SaveGameState();
-    
+
+    // State saving
+    void        ReadState(const SaveState& ioState);
+    void        WriteState(SaveState& ioState) const;
 
 private:
     std::string mFilename;
@@ -61,5 +56,3 @@ private:
     uint8*  mCHRData;
     uint8   mPRGRam[0x2000];
 };
-
-#endif //__Rom_H_

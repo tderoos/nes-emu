@@ -1,13 +1,5 @@
-//
-//  Mapper.h
-//  nestor
-//
-//  Created by Tommy de Roos on 3/12/13.
-//
-//
-
-#ifndef nestor_Mapper_h
-#define nestor_Mapper_h
+// nes-emu Mapper interface
+#pragma once
 
 #include "types.h"
 
@@ -35,11 +27,13 @@ public:
     
     virtual void    Store(uint16 inAddr, uint8 inData) = 0;
     virtual void    UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const = 0;
+
+    // State saving
+    virtual void    ReadState(const SaveState& ioState) {}
+    virtual void    WriteState(SaveState& ioState) const {}
     
 protected:
     uint8           mNumPRG;
     uint8           mNumCHR;
     mutable bool    mDirty;
 };
-
-#endif

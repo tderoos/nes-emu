@@ -3,16 +3,27 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include "Nestor/nestor.h"
+#include "nestor/types.h"
+
+
+
+enum class ESaveStateRequest
+{
+	None, Load, Save
+};
+
 
 struct AppContext {
-    SDL_Window* window;
-    SDL_Renderer* renderer;
-    SDL_Texture* texture;
-    SDL_AudioDeviceID audio_device;
-    SDL_AudioStream* audio_stream;
-    SDL_Joystick* stick;
-    nestor* nestor = nullptr;
-    SDL_bool app_quit = SDL_FALSE;
+    SDL_Window*			window;
+    SDL_Renderer*		renderer;
+    SDL_Texture*		texture;
+    SDL_AudioDeviceID	audio_device;
+    SDL_AudioStream*	audio_stream;
+    SDL_Joystick*		stick;
+    nestor*				nestor = nullptr;
+    SDL_bool			app_quit = SDL_FALSE;
+	SaveState			mSaveState;
+	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
 };
 
 int SDL_Fail() {
@@ -93,18 +104,46 @@ int SDL_AppInit(void** appstate, int argc, char* argv[]) {
     return 0;
 }
 
-int SDL_AppEvent(void* appstate, const SDL_Event* event) {
+int SDL_AppEvent(void* appstate, const SDL_Event* event) 
+{
     auto* app = (AppContext*)appstate;
 
+	// Handle quit event	
     if (event->type == SDL_EVENT_QUIT) {
         app->app_quit = SDL_TRUE;
     }
+
+	// Handle keyboard events
+	if (event->type == SDL_EVENT_KEY_UP)
+	{
+		if (event->key.keysym.scancode == SDL_SCANCODE_K)
+			app->mSaveStateRequest = ESaveStateRequest::Save;
+		else if(event->key.keysym.scancode == SDL_SCANCODE_L)
+			app->mSaveStateRequest = ESaveStateRequest::Load;
+	}
 
     return 0;
 }
 
 int SDL_AppIterate(void* appstate) {
     auto* app = (AppContext*)appstate;
+
+	// Handle load/save state request
+	switch (app->mSaveStateRequest)
+	{
+	case ESaveStateRequest::None:
+		break;
+
+	case ESaveStateRequest::Load:
+		app->nestor->ReadState(app->mSaveState);
+		app->mSaveStateRequest = ESaveStateRequest::None;
+		break;
+
+	case ESaveStateRequest::Save:
+		app->nestor->WriteState(app->mSaveState);
+		app->mSaveStateRequest = ESaveStateRequest::None;
+		break;
+	}
 
     void* pixels;
     int pitch;

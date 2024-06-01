@@ -1,13 +1,5 @@
-//
-//  NROM.h
-//  nestor
-//
-//  Created by Tommy de Roos on 3/13/13.
-//
-//
-
-#ifndef nestor_NROM_h
-#define nestor_NROM_h
+// nes-emu 
+#pragma once 
 
 #include "Mapper.h"
 #include <string.h>
@@ -49,5 +41,3 @@ public:
         mDirty = false;
     }
 };
-
-#endif

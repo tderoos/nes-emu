@@ -1,10 +1,4 @@
-//
-//  Profiler.h
-//  nestor
-//
-//  Created by Tommy de Roos on 4/20/13.
-//
-//
+// nes-emu Profiler
 
 #pragma once
 //#define ENABLE_PROFILING

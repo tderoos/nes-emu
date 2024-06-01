@@ -1,11 +1,4 @@
-//
-//  Mapper.cpp
-//  nestor
-//
-//  Created by Tommy de Roos on 3/12/13.
-//
-//
-
+// nes-emu Mapper interface
 #include "Mapper.h"
 #include "NROM.h"
 #include "MMC1.h"

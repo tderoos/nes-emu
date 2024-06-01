@@ -1,10 +1,4 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
-
-
+// nes-emu IO Module
 #include "IO.h"
 #include "Rom.h"
 #include "Ram.h"
@@ -131,4 +125,26 @@ void IO::Store(uint16 inAddr, uint8 inValue)
     }
     else
         mRom->Store(inAddr, inValue);
+}
+
+
+
+void IO::ReadState(const SaveState& ioState)
+{
+	ioState.Read(mButtonState);
+	ioState.Read(mButtonReadMask);
+	ioState.Read(mDMAState);
+	ioState.Read(mDMASrc);
+	ioState.Read(mDMAValue);
+}
+
+
+
+void IO::WriteState(SaveState& ioState) const
+{
+	ioState.Write(mButtonState);
+	ioState.Write(mButtonReadMask);
+	ioState.Write(mDMAState);
+	ioState.Write(mDMASrc);
+	ioState.Write(mDMAValue);
 }

@@ -1,11 +1,4 @@
-//
-//  APU.cpp
-//  nestor
-//
-//  Created by Tommy de Roos on 3/19/13.
-//
-//
-
+// nes-emu APU Module
 #include "APU.h"
 #include <math.h>
 #include <assert.h>
@@ -265,6 +258,17 @@ void APU::Store(uint16 inAddr, uint8 inValue)
     else
         BREAK();
 }
+
+
+
+// State saving
+void APU::ReadState(const SaveState& ioState)
+{
+}
+void APU::WriteState(SaveState& ioState) const
+{
+}
+
 
 
 /// EnvelopeGenerator

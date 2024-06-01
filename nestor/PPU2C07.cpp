@@ -1,9 +1,4 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
-
+// nes-emu PPU Module
 #include "types.h"
 #include "Profiler.h"
 
@@ -87,7 +82,7 @@ void BREAKPPU()
 }
 
 
-PPU2C07::PPU2C07(Rom* inRom)
+PPU2C07::PPU2C07(Rom* inRom) : mRom(inRom)
 {
     mScanline = 241;
     mClock    = 0;
@@ -95,10 +90,7 @@ PPU2C07::PPU2C07(Rom* inRom)
     mNMILatch = false;
     memset(mVRAM, 0, sizeof(mVRAM));
     memset(mOAM, 0, sizeof(mOAM));
-    
-    
 
-    mRom = inRom;
     inRom->SetVRam(mVRAM);
 
     mPPUCtrl = 0;
@@ -633,3 +625,50 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
             BREAKPPU();
     }
 }
+
+
+// State saving
+void PPU2C07::ReadState(const SaveState& ioState)
+{
+	ioState.Read(mClock);
+	ioState.Read(mOddFrame);
+	ioState.Read(mVRAM);
+	ioState.Read(mOAM);
+	ioState.Read(mScanline);
+	ioState.Read(mNameTable);
+	ioState.Read(mPPUCtrl);
+	ioState.Read(mPPUMask);
+	ioState.Read(mV);
+	ioState.Read(mT);
+	ioState.Read(mX);
+	ioState.Read(mW);
+	ioState.Read(mPPULoadBuffer);
+	ioState.Read(mPPUStatus);
+	ioState.Read(mPPUScroll);
+	ioState.Read(mOAMAddr);
+	ioState.Read(mNMILatch);
+}
+
+
+
+void PPU2C07::WriteState(SaveState& ioState) const
+{
+	ioState.Write(mClock);
+	ioState.Write(mOddFrame);
+	ioState.Write(mVRAM);
+	ioState.Write(mOAM);
+	ioState.Write(mScanline);
+	ioState.Write(mNameTable);
+	ioState.Write(mPPUCtrl);
+	ioState.Write(mPPUMask);
+	ioState.Write(mV);
+	ioState.Write(mT);
+	ioState.Write(mX);
+	ioState.Write(mW);
+	ioState.Write(mPPULoadBuffer);
+	ioState.Write(mPPUStatus);
+	ioState.Write(mPPUScroll);
+	ioState.Write(mOAMAddr);
+	ioState.Write(mNMILatch);
+}
+

@@ -1,11 +1,4 @@
-//
-//  nestor.cpp
-//  nestor
-//
-//  Created by Tommy de Roos on 3/8/13.
-//
-//
-
+// nes-emu 
 #include "nestor.h"
 
 
@@ -51,3 +44,34 @@ void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAud
 }
 
 //7458.333333333333333
+
+
+// State saving
+void nestor::ReadState(const SaveState& ioState)
+{
+	if (ioState.mData.empty())
+		return;
+
+	ioState.mReadOffset = 0;
+    mRom.ReadState(ioState);
+    mRam.ReadState(ioState);
+    mPPU.ReadState(ioState);
+    mAPU.ReadState(ioState);
+    mIO.ReadState(ioState);
+    mCPU.ReadState(ioState);
+}
+
+
+void nestor::WriteState(SaveState& ioState) const
+{
+	ioState.mReadOffset = 0;
+	ioState.mData.clear();
+
+    mRom.WriteState(ioState);
+    mRam.WriteState(ioState);
+    mPPU.WriteState(ioState);
+    mAPU.WriteState(ioState);
+    mIO.WriteState(ioState);
+    mCPU.WriteState(ioState);
+}
+

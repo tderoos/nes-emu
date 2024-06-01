@@ -1,9 +1,4 @@
-//
-// Created by tderoos on 3/3/13.
-//
-// To change the template use AppCode | Preferences | File Templates.
-//
-
+// nes-emu Rom module
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -58,8 +53,8 @@ Rom::Rom(char const *inFilename) :
             size_t idx = mSavename.find(".nes");
             mSavename.replace(idx, idx + 4, ".sav");
             
-            FILE* savegame = fopen(mSavename.c_str(), "r");
-            if (savegame != NULL)
+			FILE* savegame = nullptr;
+			if (fopen_s(&savegame, mSavename.c_str(), "r") == 0)
             {
                 fread(mPRGRam, 1, 0x2000, savegame);
                 fclose(savegame);
@@ -108,4 +103,27 @@ void Rom::SaveGameState()
             fclose(savegame);
         }
     }
+}
+
+
+// State saving
+void Rom::ReadState(const SaveState& ioState)
+{
+    if (mSRam)
+        ioState.ReadRaw(mPRGRam, 0x2000);
+
+    mMapper->ReadState(ioState);
+
+    // Update the mapping after restoring the state
+    mMapper->UpdateMapping(mData + 0x10, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+}
+
+
+
+void Rom::WriteState(SaveState& ioState) const
+{
+    if (mSRam)
+        ioState.WriteRaw(mPRGRam, 0x2000);
+
+    mMapper->WriteState(ioState);
 }

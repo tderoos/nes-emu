@@ -9,6 +9,8 @@ add_library(LibNestor
 			Mapper.h
 			nestor.cpp
 			nestor.h
+			NROM.h
+			MMC1.h
 			PPU2C07.cpp
 			PPU2C07.h
 			Profiler.cpp
@@ -16,4 +18,5 @@ add_library(LibNestor
 			Ram.cpp
 			Ram.h
 			Rom.cpp 
-			Rom.h)
+			Rom.h
+			types.h)

@@ -1,15 +1,8 @@
-//
-//  types.h
-//  nestor
-//
-//  Created by Tommy de Roos on 3/12/13.
-//
-//
-
-#ifndef nestor_types_h
-#define nestor_types_h
+// nes-emu Types
+#pragma once
 
 #include <stdint.h>
+#include <vector>
 
 typedef int8_t      int8;
 typedef int16_t     int16;
@@ -21,4 +14,31 @@ typedef uint16_t    uint16;
 typedef uint32_t    uint32;
 typedef uint64_t    uint64;
 
-#endif
+struct SaveState
+{
+	template <typename taType>
+	void	Read(taType& inValue) const
+	{
+		ReadRaw((uint8*)&inValue, sizeof(taType));
+	}
+
+	void ReadRaw(uint8* outData, int inSize) const
+	{
+		memcpy(outData, &mData[mReadOffset], inSize);
+		mReadOffset += inSize;
+	}
+
+	template <typename taType>
+	void	Write(const taType& inValue)
+	{
+		WriteRaw((const uint8*)&inValue, sizeof(taType));
+	}
+
+	void	WriteRaw(const uint8* inData, int inSize)
+	{
+		mData.insert(mData.end(), inData, inData + inSize);
+	}
+
+	std::vector<uint8>	mData;
+	mutable int			mReadOffset = 0;
+};

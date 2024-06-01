@@ -1,11 +1,4 @@
-//
-//  Profiler.cpp
-//  nestor
-//
-//  Created by Tommy de Roos on 4/20/13.
-//
-//
-
+// nes-emu Profiler
 #include "Profiler.h"
 
 #ifdef ENABLE_PROFILING

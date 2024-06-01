@@ -1,14 +1,4 @@
-//
-//  APU.h
-//  nestor
-//
-//  Created by Tommy de Roos on 3/19/13.
-//
-//
-
-#ifndef __nestor__APU__
-#define __nestor__APU__
-
+// nes-emu APU Module
 #include "types.h"
 
 #define SETBIT(reg, bit, value)     { reg &= ~(1<<(bit)); reg |= (value)<<(bit); }
@@ -31,6 +21,10 @@ public:
     bool    GetInterrupt() const                            { return mInterrupt; }
     void    SetInterrupt()                                  { mInterrupt = true; }
     void    ClearInterrupt()                                { mInterrupt = false; }
+
+	// State saving
+	void    ReadState(const SaveState& ioState);
+	void    WriteState(SaveState& ioState) const;
     
 private:
     
@@ -166,6 +160,3 @@ private:
     uint8   mSequencerClock;
     mutable bool    mInterrupt;
 };
-
-
-#endif /* defined(__nestor__APU__) */

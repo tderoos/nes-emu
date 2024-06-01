@@ -1,13 +1,5 @@
-//
-//  MMC1.h
-//  nestor
-//
-//  Created by Tommy de Roos on 3/12/13.
-//
-//
-
-#ifndef nestor_MMC1_h
-#define nestor_MMC1_h
+// nes-emu MMC1 Module
+#pragma once
 
 #include "Mapper.h"
 #include <string.h>
@@ -17,15 +9,13 @@ class MMC1 : public Mapper
 public:
     MMC1(uint8 inNumPRG, uint8 inNumCHR) : Mapper(inNumPRG, inNumCHR)
     {
-        mShiftIndex = 0;
-        mTempReg    = 0;
         mControl    = 0x0C;
         mCHRReg0    = 0;
         mCHRReg1    = 0;
         mPRGReg     = 0;
     }
 
-    virtual void Store(uint16 inAddr, uint8 inData)
+    virtual void Store(uint16 inAddr, uint8 inData) override
     {
         // MMC1 uses a serial register write to update the mapping
         // Registers a 5 bit wide, addres at write of the 5th bit
@@ -57,7 +47,7 @@ public:
         }
     }
     
-    virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
+    virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const override
     {
         // Map PRG data
         uint8 bank_idx = mPRGReg&0x0F;
@@ -112,9 +102,26 @@ public:
         mDirty = false;
     }
 
+    // State saving
+    virtual void        ReadState(const SaveState& ioState) override
+    {
+        ioState.Read(mShiftIndex);
+        ioState.Read(mTempReg);
+        ioState.Read(mRegisters);
+    }
+
+
+    virtual void        WriteState(SaveState& ioState) const override
+    {
+        ioState.Write(mShiftIndex);
+        ioState.Write(mTempReg);
+        ioState.Write(mRegisters);
+    }
+
+
 private:
-    uint8   mShiftIndex;
-    uint8   mTempReg;
+    uint8   mShiftIndex = 0;
+	uint8   mTempReg    = 0;
 
     union {
         struct {
@@ -127,5 +134,3 @@ private:
     };
     
 };
-
-#endif

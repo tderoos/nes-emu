@@ -6,7 +6,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 project(Nestor VERSION 1.0)
 
 # supress ZERO_BUILD
-set(CMAKE_SUPPRESS_REGENERATION true)
+# set(CMAKE_SUPPRESS_REGENERATION true)
 
 add_subdirectory(nestor)
 add_subdirectory(SDL EXCLUDE_FROM_ALL)
