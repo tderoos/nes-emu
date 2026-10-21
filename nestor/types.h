@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <string.h>
 
 typedef int8_t      int8;
 typedef int16_t     int16;

@@ -1,6 +1,7 @@
 // nes-emu CPU module
 #include "CPU6502.h"
 #include "IO.h"
+#include <stdio.h>
 
 
 static uint8 sOpcodeMap[256];
