@@ -21,19 +21,19 @@ struct AppContext {
     SDL_AudioStream*	audio_stream;
     SDL_Joystick*		stick;
     nestor*				mNestor = nullptr;
-    SDL_bool			app_quit = SDL_FALSE;
+    bool			    app_quit = false;
 	SaveState			mSaveState;
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
 };
 
-int SDL_Fail() {
+SDL_AppResult SDL_Fail() {
     SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
-    return -1;
+    return SDL_APP_FAILURE;
 }
 
-int SDL_AppInit(void** appstate, int argc, char* argv[]) {
+SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     // init the library, here we make a window so we only need the Video capabilities.
-    if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS)) {
         return SDL_Fail();
     }
 
@@ -43,7 +43,7 @@ int SDL_AppInit(void** appstate, int argc, char* argv[]) {
         return SDL_Fail();
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
     if (!renderer) {
         return SDL_Fail();
     }
@@ -65,7 +65,7 @@ int SDL_AppInit(void** appstate, int argc, char* argv[]) {
     src.freq = 44056;
 
 
-    SDL_AudioDeviceID audio_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_OUTPUT, &want);
+    SDL_AudioDeviceID audio_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &want);
 
     SDL_AudioStream* stream = SDL_CreateAudioStream(&src, &want);
     int res = SDL_BindAudioStream(audio_device, stream);
@@ -101,31 +101,31 @@ int SDL_AppInit(void** appstate, int argc, char* argv[]) {
 
     SDL_Log("Application started successfully!");
 
-    return 0;
+    return SDL_APP_CONTINUE;
 }
 
-int SDL_AppEvent(void* appstate, const SDL_Event* event) 
+SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
     auto* app = (AppContext*)appstate;
 
 	// Handle quit event	
     if (event->type == SDL_EVENT_QUIT) {
-        app->app_quit = SDL_TRUE;
+        app->app_quit = true;
     }
 
 	// Handle keyboard events
 	if (event->type == SDL_EVENT_KEY_UP)
 	{
-		if (event->key.keysym.scancode == SDL_SCANCODE_K)
+		if (event->key.scancode == SDL_SCANCODE_K)
 			app->mSaveStateRequest = ESaveStateRequest::Save;
-		else if(event->key.keysym.scancode == SDL_SCANCODE_L)
+		else if(event->key.scancode == SDL_SCANCODE_L)
 			app->mSaveStateRequest = ESaveStateRequest::Load;
 	}
 
-    return 0;
+    return SDL_APP_CONTINUE;
 }
 
-int SDL_AppIterate(void* appstate) {
+SDL_AppResult SDL_AppIterate(void* appstate) {
     auto* app = (AppContext*)appstate;
 
 	// Handle load/save state request
@@ -173,12 +173,12 @@ int SDL_AppIterate(void* appstate) {
     int res = SDL_PutAudioStreamData(app->audio_stream, (void*)audio_buffer, audio_buffer_length);
     SDL_FlushAudioStream(app->audio_stream);
 
-    return app->app_quit;
+    return SDL_APP_CONTINUE;
 }
 
 
 
-void SDL_AppQuit(void* appstate) {
+void SDL_AppQuit(void* appstate, SDL_AppResult result) {
     auto* app = (AppContext*)appstate;
     if (app) {
         SDL_DestroyRenderer(app->renderer);
