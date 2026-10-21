@@ -12,8 +12,8 @@ Rom::Rom(char const *inFilename) :
     mData(NULL),
     mCHRData(NULL)
 {
-    FILE* fd = nullptr;
-    if (fopen_s(&fd, inFilename, "r") == 0)
+    FILE* fd = fopen(inFilename, "rb");
+    if (fd != nullptr)
     {
         fseek(fd, 0L, SEEK_END);
         int size = ftell(fd);
@@ -22,7 +22,7 @@ Rom::Rom(char const *inFilename) :
         mData = (uint8*) malloc(size);
         if (mData == nullptr)
             return;
-        fread_s(mData, size, 1, size, fd);
+        fread(mData, 1, size, fd);
         fclose(fd);
 
         uint8 num_prg = mData[4];
@@ -53,8 +53,8 @@ Rom::Rom(char const *inFilename) :
             size_t idx = mSavename.find(".nes");
             mSavename.replace(idx, idx + 4, ".sav");
             
-			FILE* savegame = nullptr;
-			if (fopen_s(&savegame, mSavename.c_str(), "r") == 0)
+			FILE* savegame = fopen(mSavename.c_str(), "rb");
+			if (savegame != nullptr)
             {
                 fread(mPRGRam, 1, 0x2000, savegame);
                 fclose(savegame);

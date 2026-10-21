@@ -2,7 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include "Nestor/nestor.h"
+#include "nestor/nestor.h"
 #include "nestor/types.h"
 
 
@@ -20,7 +20,7 @@ struct AppContext {
     SDL_AudioDeviceID	audio_device;
     SDL_AudioStream*	audio_stream;
     SDL_Joystick*		stick;
-    nestor*				nestor = nullptr;
+    nestor*				mNestor = nullptr;
     SDL_bool			app_quit = SDL_FALSE;
 	SaveState			mSaveState;
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
@@ -135,12 +135,12 @@ int SDL_AppIterate(void* appstate) {
 		break;
 
 	case ESaveStateRequest::Load:
-		app->nestor->ReadState(app->mSaveState);
+		app->mNestor->ReadState(app->mSaveState);
 		app->mSaveStateRequest = ESaveStateRequest::None;
 		break;
 
 	case ESaveStateRequest::Save:
-		app->nestor->WriteState(app->mSaveState);
+		app->mNestor->WriteState(app->mSaveState);
 		app->mSaveStateRequest = ESaveStateRequest::None;
 		break;
 	}
@@ -165,7 +165,7 @@ int SDL_AppIterate(void* appstate) {
     controller_input |= (hat & 8) ? 1 << 6 : 0;
     controller_input |= (hat & 2) ? 1 << 7 : 0;
 
-    app->nestor->RunToVBlank(controller_input, (uint32*)pixels, audio_buffer, &audio_buffer_length);
+    app->mNestor->RunToVBlank(controller_input, (uint32*)pixels, audio_buffer, &audio_buffer_length);
     SDL_UnlockTexture(app->texture);
     SDL_RenderTexture(app->renderer, app->texture, nullptr, nullptr);
     SDL_RenderPresent(app->renderer);
