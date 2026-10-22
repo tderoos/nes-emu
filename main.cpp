@@ -26,6 +26,21 @@ struct AppContext {
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
 };
 
+static void ROMSelected(void* userdata, const char* const* filelist, int filter)
+{
+    auto* app = (AppContext*)userdata;
+    if (filelist && *filelist)
+    {
+        delete app->mNestor;
+        app->mNestor = new nestor(*filelist);
+    }
+    else
+    {
+        SDL_Log("No ROM selected, quitting.");
+        app->app_quit = true;
+    }
+}
+
 SDL_AppResult SDL_Fail() {
     SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
     return SDL_APP_FAILURE;
@@ -73,7 +88,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 
     int count;
     SDL_JoystickID* sticks = SDL_GetJoysticks(&count);
-    SDL_Joystick* stick = SDL_OpenJoystick(sticks[0]);
+    SDL_Joystick* stick = nullptr;
+    if (sticks && count > 0)
+        stick = SDL_OpenJoystick(sticks[0]);
+    SDL_free(sticks);
 
     // print some information about the window
     SDL_ShowWindow(window);
@@ -96,8 +114,15 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
        audio_device,
        stream,
        stick,
-       new nestor("C:\\Users\\Tommy de Roos\\Projects\\nes-emu\\Roms\\smb1.nes")
+       nullptr
     };
+
+    // ask the user which ROM to load
+    static const SDL_DialogFileFilter filters[] = {
+        { "NES ROM", "nes" },
+        { "All files", "*" }
+    };
+    SDL_ShowOpenFileDialog(ROMSelected, *appstate, window, filters, 2, nullptr, false);
 
     SDL_Log("Application started successfully!");
 
@@ -128,6 +153,10 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 SDL_AppResult SDL_AppIterate(void* appstate) {
     auto* app = (AppContext*)appstate;
 
+    // Nothing to run until a ROM is selected
+    if (!app->mNestor)
+        return app->app_quit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
+
 	// Handle load/save state request
 	switch (app->mSaveStateRequest)
 	{
@@ -154,16 +183,19 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     memset(audio_buffer, 127, 768);
 
     uint8 controller_input = 0;
-    controller_input |= SDL_GetJoystickButton(app->stick, 0) << 0;
-    controller_input |= SDL_GetJoystickButton(app->stick, 1) << 1;
-    controller_input |= SDL_GetJoystickButton(app->stick, 4) << 2;
-    controller_input |= SDL_GetJoystickButton(app->stick, 6) << 3;
+    if (app->stick)
+    {
+        controller_input |= SDL_GetJoystickButton(app->stick, 0) << 0;
+        controller_input |= SDL_GetJoystickButton(app->stick, 1) << 1;
+        controller_input |= SDL_GetJoystickButton(app->stick, 4) << 2;
+        controller_input |= SDL_GetJoystickButton(app->stick, 6) << 3;
 
-    uint8 hat = SDL_GetJoystickHat(app->stick, 0);
-    controller_input |= (hat & 1) ? 1 << 4 : 0;
-    controller_input |= (hat & 4) ? 1 << 5 : 0;
-    controller_input |= (hat & 8) ? 1 << 6 : 0;
-    controller_input |= (hat & 2) ? 1 << 7 : 0;
+        uint8 hat = SDL_GetJoystickHat(app->stick, 0);
+        controller_input |= (hat & 1) ? 1 << 4 : 0;
+        controller_input |= (hat & 4) ? 1 << 5 : 0;
+        controller_input |= (hat & 8) ? 1 << 6 : 0;
+        controller_input |= (hat & 2) ? 1 << 7 : 0;
+    }
 
     app->mNestor->RunToVBlank(controller_input, (uint32*)pixels, audio_buffer, &audio_buffer_length);
     SDL_UnlockTexture(app->texture);
