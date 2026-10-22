@@ -24,6 +24,7 @@ struct AppContext {
     bool			    app_quit = false;
 	SaveState			mSaveState;
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
+	uint32				mPixelBuffer[256*256];
 };
 
 static void ROMSelected(void* userdata, const char* const* filelist, int filter)
@@ -174,9 +175,6 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 		break;
 	}
 
-    void* pixels;
-    int pitch;
-    SDL_LockTexture(app->texture, nullptr, &pixels, &pitch);
 
     uint8 audio_buffer[768];
     uint32 audio_buffer_length = 0;
@@ -197,7 +195,14 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
         controller_input |= (hat & 2) ? 1 << 7 : 0;
     }
 
-    app->mNestor->RunToVBlank(controller_input, (uint32*)pixels, audio_buffer, &audio_buffer_length);
+    app->mNestor->RunToVBlank(controller_input, app->mPixelBuffer, audio_buffer, &audio_buffer_length);
+
+    // Upload, honoring the texture's row pitch (GPU backends may not be tightly packed)
+    void* pixels;
+    int pitch;
+    SDL_LockTexture(app->texture, nullptr, &pixels, &pitch);
+    for (int y = 0; y < 256; ++y)
+        memcpy((uint8*)pixels + y * pitch, app->mPixelBuffer + y * 256, 256 * sizeof(uint32));
     SDL_UnlockTexture(app->texture);
     SDL_RenderTexture(app->renderer, app->texture, nullptr, nullptr);
     SDL_RenderPresent(app->renderer);
