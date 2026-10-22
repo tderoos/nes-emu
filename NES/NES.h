@@ -9,10 +9,10 @@
 #include "APU.h"
 #include "types.h"
 
-class nestor
+class NES
 {
 public:
-                    nestor(const char* inRom);
+                    NES(const char* inRom);
     void            onExit();
 
     void            RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount);

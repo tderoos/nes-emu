@@ -1,9 +1,9 @@
 // nes-emu 
-#include "nestor.h"
+#include "NES.h"
 
 
 
-nestor::nestor(const char* inRom) :
+NES::NES(const char* inRom) :
     mRom(inRom),
     mRam(0x8000),
     mPPU(&mRom),
@@ -13,13 +13,13 @@ nestor::nestor(const char* inRom) :
 }
 
 
-void nestor::onExit()
+void NES::onExit()
 {
     mRom.SaveGameState();
 }
 
 
-void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount)
+void NES::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount)
 {
     mIO.SetButtonState(inButtonState);
     mPPU.SetFrameBuffer(ioFrameBuffer);
@@ -47,7 +47,7 @@ void nestor::RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAud
 
 
 // State saving
-void nestor::ReadState(const SaveState& ioState)
+void NES::ReadState(const SaveState& ioState)
 {
 	if (ioState.mData.empty())
 		return;
@@ -62,7 +62,7 @@ void nestor::ReadState(const SaveState& ioState)
 }
 
 
-void nestor::WriteState(SaveState& ioState) const
+void NES::WriteState(SaveState& ioState) const
 {
 	ioState.mReadOffset = 0;
 	ioState.mData.clear();

@@ -2,8 +2,8 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include "nestor/nestor.h"
-#include "nestor/types.h"
+#include "NES/NES.h"
+#include "NES/types.h"
 
 
 
@@ -21,7 +21,7 @@ struct AppContext
     SDL_AudioDeviceID	mAudioDevice;
     SDL_AudioStream*	mAudioStream;
     SDL_Joystick*		mStick;
-    nestor*				mNestor = nullptr;
+    NES*				mNestor = nullptr;
     bool			    mAppQuit = false;
 	SaveState			mSaveState;
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
@@ -33,7 +33,7 @@ static void ROMSelected(void* userdata, const char* const* filelist, int filter)
     if (filelist && *filelist)
     {
         delete app->mNestor;
-        app->mNestor = new nestor(*filelist);
+        app->mNestor = new NES(*filelist);
     }
     else
     {

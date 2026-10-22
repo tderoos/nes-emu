@@ -1,4 +1,4 @@
-add_library(LibNestor 	
+add_library(LibNES 	
 			APU.cpp
 			APU.h
 			CPU6502.cpp
@@ -7,8 +7,8 @@ add_library(LibNestor
 			IO.h
 			Mapper.cpp
 			Mapper.h
-			nestor.cpp
-			nestor.h
+			NES.cpp
+			NES.h
 			NROM.h
 			MMC1.h
 			PPU2C07.cpp
