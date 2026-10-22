@@ -119,7 +119,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 
     // ask the user which ROM to load
     static const SDL_DialogFileFilter filters[] = {
-        { "NES ROM", "*.nes" },
+        { "NES ROM", "nes" },
         { "All files", "*" }
     };
     SDL_ShowOpenFileDialog(ROMSelected, *appstate, window, filters, 2, nullptr, false);
