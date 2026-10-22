@@ -13,15 +13,16 @@ enum class ESaveStateRequest
 };
 
 
-struct AppContext {
-    SDL_Window*			window;
-    SDL_Renderer*		renderer;
-    SDL_Texture*		texture;
-    SDL_AudioDeviceID	audio_device;
-    SDL_AudioStream*	audio_stream;
-    SDL_Joystick*		stick;
+struct AppContext
+{
+    SDL_Window*			mWindow;
+    SDL_Renderer*		mRenderer;
+    SDL_Texture*		mTexture;
+    SDL_AudioDeviceID	mAudioDevice;
+    SDL_AudioStream*	mAudioStream;
+    SDL_Joystick*		mStick;
     nestor*				mNestor = nullptr;
-    bool			    app_quit = false;
+    bool			    mAppQuit = false;
 	SaveState			mSaveState;
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
 };
@@ -37,36 +38,35 @@ static void ROMSelected(void* userdata, const char* const* filelist, int filter)
     else
     {
         SDL_Log("No ROM selected, quitting.");
-        app->app_quit = true;
+        app->mAppQuit = true;
     }
 }
 
-SDL_AppResult SDL_Fail() {
+SDL_AppResult SDL_Fail()
+{
     SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
     return SDL_APP_FAILURE;
 }
 
-SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
+SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
+{
     // init the library, here we make a window so we only need the Video capabilities.
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS))
         return SDL_Fail();
-    }
 
     // create a window
     SDL_Window* window = SDL_CreateWindow("Window", 512, 512, SDL_WINDOW_RESIZABLE);
-    if (!window) {
+    if (!window)
         return SDL_Fail();
-    }
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
-    if (!renderer) {
+    if (!renderer)
         return SDL_Fail();
-    }
 
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
     if (!texture)
         return SDL_Fail();
-    
+
     SDL_AudioSpec want;
     SDL_memset(&want, 0, sizeof(want)); /* or SDL_zero(want) */
     want.format = SDL_AUDIO_S8;
@@ -96,18 +96,22 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     // print some information about the window
     SDL_ShowWindow(window);
     {
+        const char* rname = SDL_GetRendererName(renderer);
+        SDL_Log("Renderer: %s", rname);
+
         int width, height, bbwidth, bbheight;
         SDL_GetWindowSize(window, &width, &height);
         SDL_GetWindowSizeInPixels(window, &bbwidth, &bbheight);
         SDL_Log("Window size: %ix%i", width, height);
         SDL_Log("Backbuffer size: %ix%i", bbwidth, bbheight);
-        if (width != bbwidth) {
+        if (width != bbwidth)
+        {
             SDL_Log("This is a highdpi environment.");
         }
     }
 
     // set up the application data
-    *appstate = new AppContext{
+    *appstate = new AppContext {
        window,
        renderer,
        texture,
@@ -118,7 +122,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     };
 
     // ask the user which ROM to load
-    static const SDL_DialogFileFilter filters[] = {
+    static const SDL_DialogFileFilter filters[] =
+    {
         { "NES ROM", "nes" },
         { "All files", "*" }
     };
@@ -133,10 +138,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
     auto* app = (AppContext*)appstate;
 
-	// Handle quit event	
-    if (event->type == SDL_EVENT_QUIT) {
-        app->app_quit = true;
-    }
+	// Handle quit event
+    if (event->type == SDL_EVENT_QUIT)
+        app->mAppQuit = true;
 
 	// Handle keyboard events
 	if (event->type == SDL_EVENT_KEY_UP)
@@ -150,12 +154,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppIterate(void* appstate) {
+SDL_AppResult SDL_AppIterate(void* appstate)
+{
     auto* app = (AppContext*)appstate;
 
     // Nothing to run until a ROM is selected
     if (!app->mNestor)
-        return app->app_quit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
+        return app->mAppQuit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
 
 	// Handle load/save state request
 	switch (app->mSaveStateRequest)
@@ -174,47 +179,53 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 		break;
 	}
 
-    void* pixels;
-    int pitch;
-    SDL_LockTexture(app->texture, nullptr, &pixels, &pitch);
-
     uint8 audio_buffer[768];
     uint32 audio_buffer_length = 0;
     memset(audio_buffer, 127, 768);
 
     uint8 controller_input = 0;
-    if (app->stick)
+    if (app->mStick)
     {
-        controller_input |= SDL_GetJoystickButton(app->stick, 0) << 0;
-        controller_input |= SDL_GetJoystickButton(app->stick, 1) << 1;
-        controller_input |= SDL_GetJoystickButton(app->stick, 4) << 2;
-        controller_input |= SDL_GetJoystickButton(app->stick, 6) << 3;
+        controller_input |= SDL_GetJoystickButton(app->mStick, 0) << 0;
+        controller_input |= SDL_GetJoystickButton(app->mStick, 1) << 1;
+        controller_input |= SDL_GetJoystickButton(app->mStick, 4) << 2;
+        controller_input |= SDL_GetJoystickButton(app->mStick, 6) << 3;
 
-        uint8 hat = SDL_GetJoystickHat(app->stick, 0);
+        uint8 hat = SDL_GetJoystickHat(app->mStick, 0);
         controller_input |= (hat & 1) ? 1 << 4 : 0;
         controller_input |= (hat & 4) ? 1 << 5 : 0;
         controller_input |= (hat & 8) ? 1 << 6 : 0;
         controller_input |= (hat & 2) ? 1 << 7 : 0;
     }
 
-    app->mNestor->RunToVBlank(controller_input, (uint32*)pixels, audio_buffer, &audio_buffer_length);
-    SDL_UnlockTexture(app->texture);
-    SDL_RenderTexture(app->renderer, app->texture, nullptr, nullptr);
-    SDL_RenderPresent(app->renderer);
+    uint32 pixel_buffer[256*256];
+    app->mNestor->RunToVBlank(controller_input, pixel_buffer, audio_buffer, &audio_buffer_length);
 
-    int res = SDL_PutAudioStreamData(app->audio_stream, (void*)audio_buffer, audio_buffer_length);
-    SDL_FlushAudioStream(app->audio_stream);
+    void* pixels;
+    int pitch;
+    SDL_LockTexture(app->mTexture, nullptr, &pixels, &pitch);
+    for (int i = 0; i < 256; i++)
+        memcpy((uint8*) pixels + i * pitch, pixel_buffer + i * 256, 256*sizeof(uint32));
+    SDL_UnlockTexture(app->mTexture);
+
+    SDL_RenderTexture(app->mRenderer, app->mTexture, nullptr, nullptr);
+    SDL_RenderPresent(app->mRenderer);
+
+    int res = SDL_PutAudioStreamData(app->mAudioStream, (void*)audio_buffer, audio_buffer_length);
+    SDL_FlushAudioStream(app->mAudioStream);
 
     return SDL_APP_CONTINUE;
 }
 
 
 
-void SDL_AppQuit(void* appstate, SDL_AppResult result) {
+void SDL_AppQuit(void* appstate, SDL_AppResult result)
+{
     auto* app = (AppContext*)appstate;
-    if (app) {
-        SDL_DestroyRenderer(app->renderer);
-        SDL_DestroyWindow(app->window);
+    if (app)
+    {
+        SDL_DestroyRenderer(app->mRenderer);
+        SDL_DestroyWindow(app->mWindow);
         delete app;
     }
 
