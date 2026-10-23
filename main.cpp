@@ -15,6 +15,7 @@ enum class ESaveStateRequest
 
 struct AppContext
 {
+    SDL_Semaphore*		mFrameSem = nullptr;
     SDL_Window*			mWindow;
     SDL_Renderer*		mRenderer;
     SDL_Texture*		mTexture;
@@ -42,6 +43,16 @@ static void ROMSelected(void* userdata, const char* const* filelist, int filter)
     }
 }
 
+// Called on the audio device's own thread, exactly when it needs more data.
+// Signal the main thread to emulate a frame; the sound card's clock is the
+// master clock, so the emulator is pulled along at perfect, drift-free pace.
+static void AudioDataRequested(void* userdata, SDL_AudioStream* stream, int additional_amount, int total_amount)
+{
+    auto* app = (AppContext*)userdata;
+    if (app->mNES != nullptr)
+        SDL_SignalSemaphore(app->mFrameSem);
+}
+
 SDL_AppResult SDL_Fail()
 {
     SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
@@ -58,6 +69,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_Window* window = SDL_CreateWindow("NES", 512, 512, SDL_WINDOW_RESIZABLE);
     if (!window)
         return SDL_Fail();
+
+    // vsync paces presentation to the display refresh
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
     if (!renderer)
@@ -80,18 +94,35 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     src.freq = 44056;
 
 
-    SDL_AudioDeviceID audio_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &want);
-
-    SDL_AudioStream* stream = SDL_CreateAudioStream(&src, &want);
-    int res = SDL_BindAudioStream(audio_device, stream);
-    SDL_ResumeAudioDevice(audio_device);
-
     int count;
     SDL_JoystickID* sticks = SDL_GetJoysticks(&count);
     SDL_Joystick* stick = nullptr;
     if (sticks && count > 0)
         stick = SDL_OpenJoystick(sticks[0]);
     SDL_free(sticks);
+
+    // set up the application data
+    *appstate = new AppContext {
+       SDL_CreateSemaphore(0),
+       window,
+       renderer,
+       texture,
+       0,
+       nullptr,
+       stick,
+       nullptr
+    };
+
+    // The audio device pulls the emulator: its get-callback fires on the
+    // audio thread whenever the device needs more data, waking the main
+    // thread to run exactly one frame. The sound card's clock is the master.
+    SDL_AudioDeviceID audio_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &want);
+    SDL_AudioStream* stream = SDL_CreateAudioStream(&src, &want);
+    int res = SDL_BindAudioStream(audio_device, stream);
+    ((AppContext*)*appstate)->mAudioDevice = audio_device;
+    ((AppContext*)*appstate)->mAudioStream = stream;
+    SDL_SetAudioStreamGetCallback(stream, AudioDataRequested, *appstate);
+    SDL_ResumeAudioDevice(audio_device);
 
     // print some information about the window
     SDL_ShowWindow(window);
@@ -109,17 +140,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
             SDL_Log("This is a highdpi environment.");
         }
     }
-
-    // set up the application data
-    *appstate = new AppContext {
-       window,
-       renderer,
-       texture,
-       audio_device,
-       stream,
-       stick,
-       nullptr
-    };
 
     // ask the user which ROM to load
     static const SDL_DialogFileFilter filters[] =
@@ -171,6 +191,14 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     if (app->mNES == nullptr)
         return SDL_APP_CONTINUE;
 
+    // Wait for the audio device to request more data - it fires when the
+    // stream runs low, pulling the emulator at the sound card's own rate.
+    // No timers, no polling, no sleep-granularity stutter. The timeout
+    // lets us notice quit requests even if the stream stays full (e.g.
+    // after a long stall while the queue drains).
+    while (!SDL_WaitSemaphoreTimeout(app->mFrameSem, 100) && !app->mAppQuit)
+        ;
+
 	// Handle load/save state request
 	switch (app->mSaveStateRequest)
 	{
@@ -221,7 +249,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     SDL_RenderPresent(app->mRenderer);
 
     int res = SDL_PutAudioStreamData(app->mAudioStream, (void*)audio_buffer, audio_buffer_length);
-    SDL_FlushAudioStream(app->mAudioStream);
 
     return SDL_APP_CONTINUE;
 }
