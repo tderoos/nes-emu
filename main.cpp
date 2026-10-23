@@ -15,6 +15,7 @@ enum class ESaveStateRequest
 
 struct AppContext
 {
+    Uint64				mNextFrameTicks = 0;
     SDL_Window*			mWindow;
     SDL_Renderer*		mRenderer;
     SDL_Texture*		mTexture;
@@ -58,6 +59,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_Window* window = SDL_CreateWindow("NES", 512, 512, SDL_WINDOW_RESIZABLE);
     if (!window)
         return SDL_Fail();
+
+    // vsync paces presentation to the display refresh
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
     if (!renderer)
@@ -112,6 +116,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // set up the application data
     *appstate = new AppContext {
+       0,
        window,
        renderer,
        texture,
@@ -171,6 +176,15 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     if (app->mNES == nullptr)
         return SDL_APP_CONTINUE;
 
+    // Pace to the NES frame rate (~60.0988 Hz), not the host's max speed.
+    // Wake up just before the next frame is due and let vsync (enabled via
+    // the SDL_HINT_RENDER_VSYNC hint at init) absorb any small remainder.
+    constexpr Uint64 kFramePeriodNS = 16639264;   // 1e9 / 60.0988
+    const Uint64 now = SDL_GetTicksNS();
+    if (app->mNextFrameTicks > now)
+        SDL_DelayPrecise(app->mNextFrameTicks - now);
+    app->mNextFrameTicks = SDL_GetTicksNS() + kFramePeriodNS;
+
 	// Handle load/save state request
 	switch (app->mSaveStateRequest)
 	{
@@ -221,7 +235,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     SDL_RenderPresent(app->mRenderer);
 
     int res = SDL_PutAudioStreamData(app->mAudioStream, (void*)audio_buffer, audio_buffer_length);
-    SDL_FlushAudioStream(app->mAudioStream);
 
     return SDL_APP_CONTINUE;
 }
