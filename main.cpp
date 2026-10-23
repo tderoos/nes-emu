@@ -15,7 +15,6 @@ enum class ESaveStateRequest
 
 struct AppContext
 {
-    Uint64				mNextFrameTicks = 0;
     SDL_Window*			mWindow;
     SDL_Renderer*		mRenderer;
     SDL_Texture*		mTexture;
@@ -116,7 +115,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // set up the application data
     *appstate = new AppContext {
-       0,
        window,
        renderer,
        texture,
@@ -176,14 +174,15 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     if (app->mNES == nullptr)
         return SDL_APP_CONTINUE;
 
-    // Pace to the NES frame rate (~60.0988 Hz), not the host's max speed.
-    // Wake up just before the next frame is due and let vsync (enabled via
-    // the SDL_HINT_RENDER_VSYNC hint at init) absorb any small remainder.
-    constexpr Uint64 kFramePeriodNS = 16639264;   // 1e9 / 60.0988
-    const Uint64 now = SDL_GetTicksNS();
-    if (app->mNextFrameTicks > now)
-        SDL_DelayPrecise(app->mNextFrameTicks - now);
-    app->mNextFrameTicks = SDL_GetTicksNS() + kFramePeriodNS;
+    // The audio stream is the master clock: it drains at the hardware
+    // sample rate, giving smooth, drift-free pacing. Only emulate the
+    // next frame once the queued audio has drained below ~1 frame.
+    // Emulation slightly oversupplies audio (736 smp @44056Hz per frame),
+    // so the queue naturally settles at the threshold - no unbounded
+    // latency growth, and stalls self-correct by refilling immediately.
+    const int kQueuedThreshold = 768;
+    while (SDL_GetAudioStreamQueued(app->mAudioStream) > kQueuedThreshold)
+        SDL_Delay(1);
 
 	// Handle load/save state request
 	switch (app->mSaveStateRequest)
