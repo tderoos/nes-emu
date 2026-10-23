@@ -21,7 +21,7 @@ struct AppContext
     SDL_AudioDeviceID	mAudioDevice;
     SDL_AudioStream*	mAudioStream;
     SDL_Joystick*		mStick;
-    NES*				mNestor = nullptr;
+    NES*				mNES = nullptr;
     bool			    mAppQuit = false;
 	SaveState			mSaveState;
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
@@ -32,8 +32,8 @@ static void ROMSelected(void* userdata, const char* const* filelist, int filter)
     auto* app = (AppContext*)userdata;
     if (filelist && *filelist)
     {
-        delete app->mNestor;
-        app->mNestor = new NES(*filelist);
+        delete app->mNES;
+        app->mNES = new NES(*filelist);
     }
     else
     {
@@ -55,7 +55,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_Fail();
 
     // create a window
-    SDL_Window* window = SDL_CreateWindow("Window", 512, 512, SDL_WINDOW_RESIZABLE);
+    SDL_Window* window = SDL_CreateWindow("NES", 512, 512, SDL_WINDOW_RESIZABLE);
     if (!window)
         return SDL_Fail();
 
@@ -142,6 +142,11 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     if (event->type == SDL_EVENT_QUIT)
         app->mAppQuit = true;
 
+    // Handle the window close button
+    if (event->type == SDL_EVENT_WINDOW_CLOSE_REQUESTED
+        && event->window.windowID == SDL_GetWindowID(app->mWindow))
+        app->mAppQuit = true;
+
 	// Handle keyboard events
 	if (event->type == SDL_EVENT_KEY_UP)
 	{
@@ -158,9 +163,13 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
     auto* app = (AppContext*)appstate;
 
+    // Handle quit request
+    if (app->mAppQuit)
+        return SDL_APP_SUCCESS;
+
     // Nothing to run until a ROM is selected
-    if (!app->mNestor)
-        return app->mAppQuit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
+    if (app->mNES == nullptr)
+        return SDL_APP_CONTINUE;
 
 	// Handle load/save state request
 	switch (app->mSaveStateRequest)
@@ -169,12 +178,12 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		break;
 
 	case ESaveStateRequest::Load:
-		app->mNestor->ReadState(app->mSaveState);
+		app->mNES->ReadState(app->mSaveState);
 		app->mSaveStateRequest = ESaveStateRequest::None;
 		break;
 
 	case ESaveStateRequest::Save:
-		app->mNestor->WriteState(app->mSaveState);
+		app->mNES->WriteState(app->mSaveState);
 		app->mSaveStateRequest = ESaveStateRequest::None;
 		break;
 	}
@@ -199,7 +208,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     }
 
     uint32 pixel_buffer[256*256];
-    app->mNestor->RunToVBlank(controller_input, pixel_buffer, audio_buffer, &audio_buffer_length);
+    app->mNES->RunToVBlank(controller_input, pixel_buffer, audio_buffer, &audio_buffer_length);
 
     void* pixels;
     int pitch;
