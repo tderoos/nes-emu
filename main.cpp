@@ -16,7 +16,6 @@ enum class ESaveStateRequest
 struct AppContext
 {
     SDL_Semaphore*		mFrameSem = nullptr;
-    int					mAudioDebt = 0;
     SDL_Window*			mWindow;
     SDL_Renderer*		mRenderer;
     SDL_Texture*		mTexture;
@@ -29,6 +28,8 @@ struct AppContext
 	ESaveStateRequest	mSaveStateRequest = ESaveStateRequest::None;
 };
 
+static void RunFrame(AppContext* app);
+
 static void ROMSelected(void* userdata, const char* const* filelist, int filter)
 {
     auto* app = (AppContext*)userdata;
@@ -36,6 +37,11 @@ static void ROMSelected(void* userdata, const char* const* filelist, int filter)
     {
         delete app->mNES;
         app->mNES = new NES(*filelist);
+
+        // Prime the stream: run one frame immediately so the audio device
+        // has data on its very first request, and the callback never starts
+        // out waiting on the emulator.
+        RunFrame(app);
     }
     else
     {
@@ -44,13 +50,13 @@ static void ROMSelected(void* userdata, const char* const* filelist, int filter)
     }
 }
 
-// Called on the audio device's own thread, when it needs more data.
-// The callback cadence follows the device's buffer requests, which may
-// arrive in bursts - not the NES frame cadence. So account the stream's
-// audio deficit (input-format bytes needed) and signal the main thread
-// once per NES-frame's worth of audio consumed (~736 samples, mono S8).
-// Total supply always matches total demand, so emulation speed locks to
-// real time; the accounting threshold only sets the steady-state latency.
+// Called on the audio device's own thread, right before it consumes data.
+// The emulator runs one frame AHEAD: the stream always holds >= 1 frame of
+// audio, so the callback can consume immediately - it never waits for the
+// emulator. The signal is a watermark: when less than a frame's worth is
+// left queued, tell the main thread to emulate the next frame. That keeps
+// supply locked to the sound card's consumption rate (master clock), with
+// ~1 frame of latency.
 static void AudioDataRequested(void* userdata, SDL_AudioStream* stream, int additional_amount, int total_amount)
 {
     auto* app = (AppContext*)userdata;
@@ -58,12 +64,8 @@ static void AudioDataRequested(void* userdata, SDL_AudioStream* stream, int addi
         return;
 
     constexpr int kFrameAudioBytes = 736;   // 44056Hz / 60.0988fps, mono S8
-    app->mAudioDebt += additional_amount;
-    while (app->mAudioDebt >= kFrameAudioBytes)
-    {
-        app->mAudioDebt -= kFrameAudioBytes;
+    if (SDL_GetAudioStreamQueued(stream) < kFrameAudioBytes)
         SDL_SignalSemaphore(app->mFrameSem);
-    }
 }
 
 SDL_AppResult SDL_Fail()
@@ -117,7 +119,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     // set up the application data
     *appstate = new AppContext {
        SDL_CreateSemaphore(0),
-       0,
        window,
        renderer,
        texture,
@@ -213,6 +214,19 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     while (!SDL_WaitSemaphoreTimeout(app->mFrameSem, 100) && !app->mAppQuit)
         ;
 
+    RunFrame(app);
+
+    return SDL_APP_CONTINUE;
+}
+
+// Emulate one frame, publish the video, and supply its audio to the stream.
+// Called on the main thread: once at ROM load (to prime the stream) and once
+// per watermark signal from the audio callback thereafter.
+static void RunFrame(AppContext* app)
+{
+    if (app->mNES == nullptr)
+        return;
+
 	// Handle load/save state request
 	switch (app->mSaveStateRequest)
 	{
@@ -262,9 +276,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     SDL_RenderTexture(app->mRenderer, app->mTexture, nullptr, nullptr);
     SDL_RenderPresent(app->mRenderer);
 
-    int res = SDL_PutAudioStreamData(app->mAudioStream, (void*)audio_buffer, audio_buffer_length);
-
-    return SDL_APP_CONTINUE;
+    SDL_PutAudioStreamData(app->mAudioStream, (void*)audio_buffer, audio_buffer_length);
 }
 
 
