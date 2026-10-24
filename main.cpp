@@ -16,6 +16,7 @@ enum class ESaveStateRequest
 struct AppContext
 {
     SDL_Semaphore*		mFrameSem = nullptr;
+    int					mAudioDebt = 0;
     SDL_Window*			mWindow;
     SDL_Renderer*		mRenderer;
     SDL_Texture*		mTexture;
@@ -43,14 +44,26 @@ static void ROMSelected(void* userdata, const char* const* filelist, int filter)
     }
 }
 
-// Called on the audio device's own thread, exactly when it needs more data.
-// Signal the main thread to emulate a frame; the sound card's clock is the
-// master clock, so the emulator is pulled along at perfect, drift-free pace.
+// Called on the audio device's own thread, when it needs more data.
+// The callback cadence follows the device's buffer requests, which may
+// arrive in bursts - not the NES frame cadence. So account the stream's
+// audio deficit (input-format bytes needed) and signal the main thread
+// once per NES-frame's worth of audio consumed (~736 samples, mono S8).
+// Total supply always matches total demand, so emulation speed locks to
+// real time; the accounting threshold only sets the steady-state latency.
 static void AudioDataRequested(void* userdata, SDL_AudioStream* stream, int additional_amount, int total_amount)
 {
     auto* app = (AppContext*)userdata;
-    if (app->mNES != nullptr)
+    if (app->mNES == nullptr)
+        return;
+
+    constexpr int kFrameAudioBytes = 736;   // 44056Hz / 60.0988fps, mono S8
+    app->mAudioDebt += additional_amount;
+    while (app->mAudioDebt >= kFrameAudioBytes)
+    {
+        app->mAudioDebt -= kFrameAudioBytes;
         SDL_SignalSemaphore(app->mFrameSem);
+    }
 }
 
 SDL_AppResult SDL_Fail()
@@ -104,6 +117,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     // set up the application data
     *appstate = new AppContext {
        SDL_CreateSemaphore(0),
+       0,
        window,
        renderer,
        texture,
