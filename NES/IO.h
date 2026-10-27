@@ -13,7 +13,7 @@ public:
     
     IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU);
     
-    void		SetButtonState(char inState) { mButtonState = inState; }
+    void		SetButtonState(uint8 inState) { mButtonState = inState; }
 
     void		Tick();
     void		Load(uint16 inAddr, uint8* outValue);
@@ -34,7 +34,7 @@ private:
     PPU2C07*    mPPU;
     APU*        mAPU;
 
-    char        mButtonState;
+    uint8       mButtonState;
     uint8       mButtonReadMask;
     
     enum EDMAState{

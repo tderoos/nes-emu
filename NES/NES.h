@@ -15,7 +15,7 @@ public:
                     NES(const char* inRom);
     void            onExit();
 
-    void            RunToVBlank(char inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount);
+    void            RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount);
     const uint32*   GetFrameBuffer() const          { return mFrameBuffer; }
 
     // State saving
