@@ -19,7 +19,7 @@ void NES::onExit()
 }
 
 
-void NES::RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* sampleCount)
+void NES::RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* ioSampleCount)
 {
     mIO.SetButtonState(inButtonState);
     mPPU.SetFrameBuffer(ioFrameBuffer);
@@ -38,8 +38,8 @@ void NES::RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudio
         cycles++;
     }
     while (!mPPU.SwapBuffer());
-    if (sampleCount)
-        *sampleCount = mAPU.GetSampleCount();
+    if (ioSampleCount)
+        *ioSampleCount = mAPU.GetSampleCount();
 }
 
 //7458.333333333333333
