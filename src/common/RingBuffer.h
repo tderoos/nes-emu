@@ -4,10 +4,12 @@
 #include <cstring>
 #include <stdint.h>
 
-#include "Mutex.h"
-
 /**
- * @brief Fixed-size thread-safe ring buffer
+ * @brief Fixed-size ring buffer (not internally locked)
+ *
+ * Locking is the caller's responsibility: hold an external mutex (see
+ * Mutex.h) when sharing across threads, or use unlocked for single-
+ * threaded access.
  *
  * @tparam taType  Element type
  * @tparam taSize  Capacity in elements
@@ -20,8 +22,6 @@ public:
 
 	int	Push(const taType* inData, uint32_t inCount)
 	{
-		AutoLockMutex lock(mMutex);
-
 		const uint32_t count = std::min<uint32_t>(inCount, taSize - mSize);
 		const uint32_t size1 = std::min<uint32_t>(count, taSize - mWriteIndex);
 		const uint32_t size2 = count - size1;
@@ -39,18 +39,6 @@ public:
 
 	int	Pop(taType* outData, uint32_t inCount)
 	{
-		int remaining_size = 0;
-		return Pop(outData, inCount, &remaining_size);
-	}
-
-	/**
-	 * @brief Pop up to inCount elements; outRemainingSize reports how many
-	 * elements are left in the buffer after this pop (atomically).
-	 */
-	int	Pop(taType* outData, uint32_t inCount, int* outRemainingSize)
-	{
-		AutoLockMutex lock(mMutex);
-
 		const uint32_t count = std::min<uint32_t>(inCount, mSize);
 		const uint32_t size1 = std::min<uint32_t>(count, taSize - mReadIndex);
 		const uint32_t size2 = count - size1;
@@ -63,14 +51,11 @@ public:
 		}
 
 		mSize -= count;
-		if (outRemainingSize)
-			*outRemainingSize = mSize;
 		return count;
 	}
 
 	void Clear()
 	{
-		AutoLockMutex lock(mMutex);
 		mSize = mReadIndex = mWriteIndex = 0;
 	}
 
@@ -78,7 +63,4 @@ public:
 	int		mReadIndex = 0;
 	int		mWriteIndex = 0;
 	taType	mData[taSize] = {0};
-
-private:
-	Mutex	mMutex;
 };

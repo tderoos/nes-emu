@@ -87,6 +87,7 @@ private:
 	Mutex				mFrameBufferMutex;
 
 	AudioBuffer			mAudioBuffer;
+	Mutex				mAudioBufferMutex;
 };
 
 /**
@@ -282,7 +283,10 @@ void NESApp::RunFrame()
 	FrameBuffer pixel_buffer;
 	mNES->RunToVBlank(GetControllerData(), pixel_buffer, audio_buffer, &audio_buffer_length);
 
-	mAudioBuffer.Push(audio_buffer, audio_buffer_length);
+	{
+		AutoLockMutex lock(mAudioBufferMutex);
+		mAudioBuffer.Push(audio_buffer, audio_buffer_length);
+	}
 	{
 		AutoLockMutex lock(mFrameBufferMutex);
 		memcpy(mFrameBuffer, pixel_buffer, sizeof(FrameBuffer));
@@ -387,8 +391,12 @@ void NESApp::sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, in
 
 	// Get sample data
 	uint8 sample_buffer[AudioBuffer::sMaxSize];
-	int buffer_size = 0;
-	const int sample_count = app.mAudioBuffer.Pop(sample_buffer, inTotalAmount, &buffer_size);
+	int sample_count, buffer_size;
+	{
+		AutoLockMutex lock(app.mAudioBufferMutex);
+		sample_count = app.mAudioBuffer.Pop(sample_buffer, inTotalAmount);
+		buffer_size  = app.mAudioBuffer.mSize;
+	}
 
 	// Check for buffer underflow
 	if (sample_count < inAdditionalAmount)
