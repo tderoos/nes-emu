@@ -7,7 +7,8 @@
 #include "CPU6502.h"
 #include "PPU2C07.h"
 #include "APU.h"
-#include "types.h"
+#include "common/types.h"
+#include "SaveState.h"
 
 class NES
 {

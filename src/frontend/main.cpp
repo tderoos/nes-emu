@@ -8,7 +8,8 @@
 #include "common/Thread.h"
 #include "common/RingBuffer.h"
 #include "cores/nes/NES.h"
-#include "cores/nes/types.h"
+#include "common/types.h"
+#include "cores/nes/SaveState.h"
 
 
 static constexpr int kNESSampleFrequency = 44056;

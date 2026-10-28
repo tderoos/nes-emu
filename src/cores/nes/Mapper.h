@@ -1,7 +1,8 @@
 // nes-emu Mapper interface
 #pragma once
 
-#include "types.h"
+#include "common/types.h"
+#include "SaveState.h"
 
 // Rom info
 enum EVRamLayout

@@ -1,7 +1,8 @@
 // nes-emu Ram module
 #pragma once
 
-#include "types.h"
+#include "common/types.h"
+#include "SaveState.h"
 
 
 class Ram
