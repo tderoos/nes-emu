@@ -1,0 +1,19 @@
+# nes-emu code style, derived from the existing codebase
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForContinuationAndIndentation
+ColumnLimit: 120
+AccessModifierOffset: -4
+BreakBeforeBraces: Allman
+PointerAlignment: Left
+AlignConsecutiveDeclarations: AcrossEmptyLines
+AlignConsecutiveMacros: AcrossEmptyLines
+AlignAfterOpenBracket: Align
+AlwaysBreakTemplateDeclarations: Yes
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+IndentCaseLabels: false
+SortIncludes: CaseInsensitive
+IncludeBlocks: Preserve
+SpacesBeforeTrailingComments: 1
