@@ -7,8 +7,8 @@
 #include <SDL3/SDL_mutex.h>
 #include <SDL3/SDL_thread.h>
 #include <SDL3/SDL_joystick.h>
-#include "NES/NES.h"
-#include "NES/types.h"
+#include "cores/nes/NES.h"
+#include "cores/nes/types.h"
 
 
 static constexpr int kNESSampleFrequency = 44056;
