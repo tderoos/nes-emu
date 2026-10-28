@@ -23,8 +23,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_subdirectory(src/cores/nes)
 add_subdirectory(extern/SDL EXCLUDE_FROM_ALL)
 
+add_library(Common
+			src/common/Thread.cpp)
+target_include_directories(Common PUBLIC src)
+target_link_libraries(Common PUBLIC SDL3::SDL3)
+
 add_executable(NES src/frontend/main.cpp)
 target_include_directories(NES PUBLIC src)
 target_link_libraries(NES PUBLIC LibCoreNES)
+target_link_libraries(NES PUBLIC Common)
 target_link_libraries(NES PUBLIC SDL3::SDL3)
 target_compile_definitions(NES PUBLIC SDL_MAIN_USE_CALLBACKS)

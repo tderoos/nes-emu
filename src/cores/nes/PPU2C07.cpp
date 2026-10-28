@@ -1,5 +1,5 @@
 // nes-emu PPU Module
-#include "types.h"
+#include "common/types.h"
 #include "Profiler.h"
 
 /*

@@ -1,7 +1,8 @@
 // nes-emu CPU module
 #pragma once
 
-#include "types.h"
+#include "common/types.h"
+#include "SaveState.h"
 
 class IO;
 

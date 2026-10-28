@@ -5,7 +5,7 @@
 
 #ifdef ENABLE_PROFILING
 
-#include "types.h"
+#include "common/types.h"
 #include <mach/mach_time.h>
 #include <stdio.h>
 #include <utility>

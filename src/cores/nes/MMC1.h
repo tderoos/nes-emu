@@ -1,8 +1,10 @@
 // nes-emu MMC1 Module
 #pragma once
 
-#include "Mapper.h"
 #include <string.h>
+
+#include "Mapper.h"
+#include "SaveState.h"
 
 class MMC1 : public Mapper
 {

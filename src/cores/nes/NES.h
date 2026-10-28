@@ -1,13 +1,14 @@
 // nes-emu
 #pragma once
 
-#include "Rom.h"
-#include "Ram.h"
-#include "IO.h"
-#include "CPU6502.h"
-#include "PPU2C07.h"
 #include "APU.h"
-#include "types.h"
+#include "common/types.h"
+#include "CPU6502.h"
+#include "IO.h"
+#include "PPU2C07.h"
+#include "Ram.h"
+#include "Rom.h"
+#include "SaveState.h"
 
 class NES
 {

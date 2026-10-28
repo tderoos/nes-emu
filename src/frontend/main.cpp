@@ -1,14 +1,16 @@
 // nes-emu main
 
-#include <cassert>
 #include <atomic>
+#include <cstring>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include <SDL3/SDL_mutex.h>
-#include <SDL3/SDL_thread.h>
-#include <SDL3/SDL_joystick.h>
+
+#include "common/Mutex.h"
+#include "common/RingBuffer.h"
+#include "common/Thread.h"
+#include "common/types.h"
 #include "cores/nes/NES.h"
-#include "cores/nes/types.h"
+#include "cores/nes/SaveState.h"
 
 
 static constexpr int kNESSampleFrequency = 44056;
@@ -29,151 +31,6 @@ static void SafeDelete(taType* &ioPtr) {
 	ioPtr = nullptr;
 }
 
-/**
- *
- */
-class Mutex
-{
-public:
-					Mutex()				{ mMutex = SDL_CreateMutex(); }
-					~Mutex()			{ SDL_DestroyMutex(mMutex); }
-
-	void			Lock() const		{ SDL_LockMutex(mMutex); }
-	void			Unlock() const		{ SDL_UnlockMutex(mMutex); }
-
-private:
-	SDL_Mutex*		mMutex = nullptr;
-};
-
-/**
- *
- */
-struct AutoLockMutex
-{
-	AutoLockMutex(const Mutex& inMutex) : mMutex(inMutex)	{ mMutex.Lock(); }
-	~AutoLockMutex()										{ mMutex.Unlock(); }
-
-private:
-	const Mutex&	mMutex;
-};
-
-/**
- *
- * @tparam taType
- * @tparam taSize
- */
-template <typename taType, size_t taSize>
-class RingBuffer
-{
-public:
-	static constexpr size_t sMaxSize = taSize;
-
-	int		Push(const taType* inData, uint32 inCount)
-	{
-		const uint32 count = std::min<uint32>(inCount, taSize - mSize);
-		const uint32 size1 = std::min<uint32>(count, taSize - mWriteIndex);
-		const uint32 size2 = count - size1;
-
-		memcpy(&mData[mWriteIndex], inData, size1);
-		mWriteIndex += size1;
-		if (size2) {
-			memcpy(&mData[0], inData+size1, size2);
-			mWriteIndex = size2;
-		}
-
-		mSize += count;
-		return count;
-	}
-
-	int		Pop(taType* outData, uint32 inCount)
-	{
-		const uint32 count = std::min<uint32>(inCount, mSize);
-		const uint32 size1 = std::min<uint32>(count, taSize - mReadIndex);
-		const uint32 size2 = count - size1;
-
-		memcpy(outData, &mData[mReadIndex], size1);
-		mReadIndex += size1;
-		if (size2) {
-			memcpy(outData + size1, &mData[0], size2);
-			mReadIndex = size2;
-		}
-
-		mSize -= count;
-		return count;
-	}
-
-	void Clear() {
-		mSize = mReadIndex = mWriteIndex = 0;
-	}
-
-	int		mSize = 0;
-	int		mReadIndex = 0;
-	int		mWriteIndex = 0;
-	taType	mData[taSize] = {0};
-};
-
-/**
- * Thread helper object
- */
-class Thread
-{
-public:
-					Thread() = default;
-					~Thread() { Destroy(); }
-
-	using ThreadFunc = int (*) (void *data);
-
-	static bool		sCreateThread(Thread& ioThread, ThreadFunc inFunc, const char* inName, void* inUserData = nullptr)
-	{
-		assert(ioThread.mThread == nullptr);
-
-		struct sdl_thread_context
-		{
-			Thread*		mThread;
-			ThreadFunc	mFunc;
-			void*		mUserData;
-		};
-
-		auto sdl_thread_func = [](void* inContext)
-		{
-			auto ctx = static_cast<sdl_thread_context*>(inContext);
-			sCurrentThread = ctx->mThread;
-			const int val = ctx->mFunc(ctx->mUserData);
-			sCurrentThread = nullptr;
-			delete ctx;
-			return val;
-		};
-
-		sdl_thread_context* thread_context = new sdl_thread_context(&ioThread, inFunc, inUserData);
-		ioThread.mExit   = false;
-		ioThread.mThread = SDL_CreateThread(sdl_thread_func, inName, new sdl_thread_context(&ioThread, inFunc, inUserData));
-
-		if (!ioThread.mThread)
-			delete thread_context;
-
-		return ioThread.mThread != nullptr;
-	}
-
-	void			Destroy()
-	{
-		if (!mThread)
-			return;
-
-		mExit = true;
-		SDL_WaitThread(mThread, nullptr);
-		mThread = nullptr;
-	}
-
-	bool			IsExit() const				{ return mExit; }
-	static const Thread* sGetCurrentThread()	{ return sCurrentThread; }
-
-private:
-	static thread_local	Thread* sCurrentThread;
-	bool						mExit   = false;
-	SDL_Thread*					mThread = nullptr;
-};
-
-thread_local Thread* Thread::sCurrentThread;
 
 /**
  *
