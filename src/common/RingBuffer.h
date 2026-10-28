@@ -5,11 +5,7 @@
 #include <stdint.h>
 
 /**
- * @brief Fixed-size ring buffer (not internally locked)
- *
- * Locking is the caller's responsibility: hold an external mutex (see
- * Mutex.h) when sharing across threads, or use unlocked for single-
- * threaded access.
+ * @brief Fixed-size ring buffer
  *
  * @tparam taType  Element type
  * @tparam taSize  Capacity in elements

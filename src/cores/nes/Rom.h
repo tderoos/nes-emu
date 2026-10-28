@@ -1,10 +1,11 @@
 // nes-emu Rom module
 #pragma once
 
-#include "common/types.h"
-#include "SaveState.h"
-#include "Mapper.h"
 #include <string>
+
+#include "common/types.h"
+#include "Mapper.h"
+#include "SaveState.h"
 
 class Mapper;
 

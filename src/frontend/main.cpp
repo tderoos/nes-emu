@@ -4,11 +4,12 @@
 #include <cstring>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+
 #include "common/Mutex.h"
-#include "common/Thread.h"
 #include "common/RingBuffer.h"
-#include "cores/nes/NES.h"
+#include "common/Thread.h"
 #include "common/types.h"
+#include "cores/nes/NES.h"
 #include "cores/nes/SaveState.h"
 
 
