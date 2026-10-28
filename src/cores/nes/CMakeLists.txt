@@ -1,4 +1,4 @@
-add_library(LibNES 	
+add_library(LibCoreNES 	
 			APU.cpp
 			APU.h
 			CPU6502.cpp

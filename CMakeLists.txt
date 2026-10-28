@@ -20,10 +20,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # supress ZERO_BUILD
 # set(CMAKE_SUPPRESS_REGENERATION true)
 
-add_subdirectory(NES)
-add_subdirectory(SDL EXCLUDE_FROM_ALL)
+add_subdirectory(src/cores/nes)
+add_subdirectory(extern/SDL EXCLUDE_FROM_ALL)
 
-add_executable(NES main.cpp)
-target_link_libraries(NES PUBLIC LibNES)
+add_executable(NES src/frontend/main.cpp)
+target_include_directories(NES PUBLIC src)
+target_link_libraries(NES PUBLIC LibCoreNES)
 target_link_libraries(NES PUBLIC SDL3::SDL3)
 target_compile_definitions(NES PUBLIC SDL_MAIN_USE_CALLBACKS)
