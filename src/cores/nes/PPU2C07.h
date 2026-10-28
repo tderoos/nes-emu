@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "Rom.h"
+#include "SaveState.h"
 
 
 class PPU2C07 {

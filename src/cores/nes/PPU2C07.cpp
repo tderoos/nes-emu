@@ -1,6 +1,5 @@
 // nes-emu PPU Module
 #include "common/types.h"
-#include "SaveState.h"
 #include "Profiler.h"
 
 /*
