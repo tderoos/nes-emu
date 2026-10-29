@@ -508,7 +508,7 @@ void APU::Noise::ClockLength()
 float APU::Noise::ClockDAC()
 {
     if (mLength != 0)
-        return mEnvelope.Volume() *  (mNoise & 0x01) ? 15.0f : 0.0f;
+        return mEnvelope.Volume() * ((mNoise & 0x01) ? 15.0f : 0.0f);
     return 0.0f;
 }
 
