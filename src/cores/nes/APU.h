@@ -2,162 +2,177 @@
 #include "common/types.h"
 #include "SaveState.h"
 
-#define SETBIT(reg, bit, value)     { reg &= ~(1<<(bit)); reg |= (value)<<(bit); }
-#define GETBIT(reg, bit)            ((reg) >> (bit) & 1)
+#define SETBIT(reg, bit, value)                                                                                        \
+	{                                                                                                                  \
+		reg &= ~(1 << (bit));                                                                                          \
+		reg |= (value) << (bit);                                                                                       \
+	}
+#define GETBIT(reg, bit) ((reg) >> (bit) & 1)
 
 class APU
 {
 public:
-            APU();
-    void    SetAudioBuffer(uint8* ioAudioBuffer);
-    uint32  GetSampleCount() const                          { return mAudioBufferOffset; }
+	APU();
+	void   SetAudioBuffer(uint8* ioAudioBuffer);
+	uint32 GetSampleCount() const { return mAudioBufferOffset; }
 
-    void    Tick();
-    
-    // Access
-    void    Load(uint16 inAddr, uint8* outValue) const;
-    void    Store(uint16 inAddr, uint8 inValue);
-    
-    // Interrupt
-    bool    GetInterrupt() const                            { return mInterrupt; }
-    void    SetInterrupt()                                  { mInterrupt = true; }
-    void    ClearInterrupt()                                { mInterrupt = false; }
+	void	Tick();
+
+	// Access
+	void Load(uint16 inAddr, uint8* outValue) const;
+	void Store(uint16 inAddr, uint8 inValue);
+
+	// Interrupt
+	bool GetInterrupt() const { return mInterrupt; }
+	void SetInterrupt() { mInterrupt = true; }
+	void ClearInterrupt() { mInterrupt = false; }
 
 	// State saving
-	void    ReadState(const SaveState& ioState);
-	void    WriteState(SaveState& ioState) const;
-    
+	void ReadState(const SaveState& ioState);
+	void WriteState(SaveState& ioState) const;
+
 private:
-    
-    void    UpdateSequencer();
-    void    ClockEnvelope();
-    void    ClockLength();
-    void    UpdateDAC();
-    
-    struct Channel
-    {
-        uint8   mRegister[4];
-        
-        uint16  Period()                                    { return mRegister[2] | (mRegister[3]&0x07)<<8; }
-    };
-    
-    struct EnvelopeGenerator
-    {
-        void    Tick();
-        void    Set(uint8 inValue)                          { mRegister = inValue; mReset = true; }
-        float   Volume() const                              { return (float)(GETBIT(mRegister, 4) ? mRegister & 0x0F : mValue) / 15.0f; }
-        
-        uint8   mRegister;
-        uint8   mDivider;
-        uint8   mValue;
-        bool    mReset;
-    };
-    
-    struct SweepUnit
-    {
-        void    Tick(int inIdx, uint16& ioPeriod);
-        void    Set(uint8 inValue)                          { mRegister = inValue; mReset = true; }
+	void UpdateSequencer();
+	void ClockEnvelope();
+	void ClockLength();
+	void UpdateDAC();
 
-        uint8   mRegister;
-        uint8   mDivider;
-        bool    mReset;
-    };
-    
-    
-    struct Square
-    {
-        Square(uint8 inIdx) : mIdx(inIdx), mPhase(0.0f)     { }
-        
-        inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
-        inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
-        
-        void    Store(uint8 inAddr, uint8 inValue);
-        
-        void    ClockLength();
-        float   ClockDAC();
-        
-        EnvelopeGenerator mEnvelope;
-        SweepUnit         mSweep;
-        
-        uint8   mIdx;
-        uint16  mPeriod;
-        bool    mLengthEnabled;
-        uint8   mLength;
+	struct Channel
+	{
+		uint8  mRegister[4] = {};
 
-        uint8   mRegisters[2];
-        
-        float   mPhase;
-    };
-    Square  mSquare1;
-    Square  mSquare2;
-    
-    struct Triangle
-    {   
-        Triangle() : mPhase(0.0f)                           { }
-        
-        inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
-        inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
-        
-        void    Store(uint8 inAddr, uint8 inValue);
+		uint16 Period() const { return mRegister[2] | (mRegister[3] & 0x07) << 8; }
+	};
 
-        void    ClockLength();
-        float   ClockDAC();
+	struct EnvelopeGenerator
+	{
+		void Tick();
+		void Set(uint8 inValue)
+		{
+			mRegister = inValue;
+			mReset = true;
+		}
+		float Volume() const { return (float)(GETBIT(mRegister, 4) ? mRegister & 0x0F : mValue) / 15.0f; }
 
-        uint16  mPeriod;
-        bool    mLengthEnabled;
-        uint8   mLength;
-        
-        uint8   mRegisters[1];
-        float   mPhase;
-    };
-    Triangle mTriangle;
-    
-    struct Noise
-    {
-        void    Reset();
-        void    Tick();
-        
-        inline void SetLengthCtrEnabled(bool inValue)       { mLengthEnabled = inValue; if (!inValue) mLength = 0; }
-        inline bool GetLengthCtrEnabled() const             { return mLengthEnabled; }
-        
-        void    Store(uint8 inAddr, uint8 inValue);
-        
-        void    ClockLength();
-        float   ClockDAC();
-        
-        EnvelopeGenerator mEnvelope;
+		uint8 mRegister = 0;
+		uint8 mDivider = 0;
+		uint8 mValue = 0;
+		bool  mReset = false;
+	};
 
-        uint16  mPeriod;
-        bool    mLengthEnabled;
-        uint8   mLength;
-        bool    mShortMode;
-        uint16  mNoise;
-        uint16  mDivider;
-        
+	struct SweepUnit
+	{
+		void Tick(int inIdx, uint16& ioPeriod);
+		void Set(uint8 inValue)
+		{
+			mRegister = inValue;
+			mReset = true;
+		}
 
-        uint8   mRegisters[1];
-    };
-    Noise mNoise;
-    
-    struct DMC
-    {
-        void    Store(uint8 inAddr, uint8 inValue)          { }
-        float   ClockDAC();
-    };
-    DMC mDMC;
+		uint8 mRegister = 0;
+		uint8 mDivider = 0;
+		bool  mReset = false;
+	};
 
-    enum EAPURegister {
-        NUM_APU_REGISTERS = 0x18
-    };
+	struct Square
+	{
+		Square(uint8 inIdx) : mIdx(inIdx) {}
 
-    uint8*  mAudioBuffer;
-    uint32  mAudioBufferOffset;
-    uint32  mDACDivider;
-    
-    uint8   mRegisters[NUM_APU_REGISTERS];
-    
-    uint16  mAPUClock;
-    uint8   mMode;
-    uint8   mSequencerClock;
-    mutable bool    mInterrupt;
+		void SetLengthCtrEnabled(bool inValue)
+		{
+			mLengthEnabled = inValue;
+			if (!inValue)
+				mLength = 0;
+		}
+		bool			  GetLengthCtrEnabled() const { return mLengthEnabled; }
+
+		void			  Store(uint8 inAddr, uint8 inValue);
+
+		void			  ClockLength();
+		float			  ClockDAC();
+
+		EnvelopeGenerator mEnvelope;
+		SweepUnit		  mSweep;
+
+		uint8			  mIdx = 0;
+		uint16			  mPeriod = 0;
+		bool			  mLengthEnabled = false;
+		uint8			  mLength = 0;
+		uint8			  mRegisters[2] = {};
+		float			  mPhase = 0.0f;
+	};
+	Square mSquare1;
+	Square mSquare2;
+
+	struct Triangle
+	{
+		Triangle() : mPhase(0.0f) {}
+
+		void SetLengthCtrEnabled(bool inValue)
+		{
+			mLengthEnabled = inValue;
+			if (!inValue)
+				mLength = 0;
+		}
+		bool   GetLengthCtrEnabled() const { return mLengthEnabled; }
+
+		void   Store(uint8 inAddr, uint8 inValue);
+
+		void   ClockLength();
+		float  ClockDAC();
+
+		uint16 mPeriod = 0;
+		bool   mLengthEnabled = false;
+		uint8  mLength = 0;
+
+		uint8  mRegisters[1] = {};
+		float  mPhase = 0.0f;
+	};
+	Triangle mTriangle;
+
+	struct Noise
+	{
+		void		Reset();
+		void		Tick();
+
+		void SetLengthCtrEnabled(bool inValue)
+		{
+			mLengthEnabled = inValue;
+			if (!inValue)
+				mLength = 0;
+		}
+		bool			  GetLengthCtrEnabled() const { return mLengthEnabled; }
+
+		void			  Store(uint8 inAddr, uint8 inValue);
+
+		void			  ClockLength();
+		float			  ClockDAC();
+
+		EnvelopeGenerator mEnvelope;
+
+		uint16			  mPeriod = 0;
+		bool			  mLengthEnabled = false;
+		uint8			  mLength = 0;
+		bool			  mShortMode = false;
+		uint16			  mNoise = 0;
+		uint16			  mDivider = 0;
+
+		uint8			  mRegisters[1] = {};
+	};
+	Noise mNoise;
+
+	struct DMC
+	{
+		void  Store(uint8 inAddr, uint8 inValue) {}
+		float ClockDAC();
+	};
+	DMC					 mDMC;
+
+	uint8*				 mAudioBuffer = nullptr;
+	uint32				 mAudioBufferOffset = 0;
+	uint32				 mDACDivider = 2;
+	uint16				 mAPUClock = 1;
+	uint8				 mMode = 0;
+	uint8				 mSequencerClock = 0;
+	mutable bool		 mInterrupt = false;
 };

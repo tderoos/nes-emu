@@ -3,7 +3,7 @@
 # nothing below applies to vendor code.
 
 # Warnings for all our targets, all configurations
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -Wno-unused-parameter)
 
 # Custom configuration with LTO enabled, for when maximum runtime
 # speed matters. Plain Release stays debuggable (no LTO); use this
