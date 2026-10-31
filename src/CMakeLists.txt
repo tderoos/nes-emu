@@ -38,8 +38,14 @@ if(APPLE)
 		MACOSX_BUNDLE_BUNDLE_VERSION	  "1.0"
 		MACOSX_BUNDLE_LONG_VERSION_STRING "1.0"
 		MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
-		# BUNDLE_ICON_FILE: add nes-emu.icns to Resources to give the app an icon
 	)
+	# App icon: generated from assets/nes-emu.png (see assets/)
+	set(APP_ICON "${CMAKE_SOURCE_DIR}/assets/nes-emu.icns")
+	if(EXISTS "${APP_ICON}")
+		set_target_properties(NES PROPERTIES MACOSX_BUNDLE_ICON_FILE nes-emu)
+		target_sources(NES PRIVATE "${APP_ICON}")
+		set_source_files_properties("${APP_ICON}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+	endif()
 
 	# Find the SDL3 shared library next to the executable (build tree).
 	# For distributing the bundle, copy SDL3 into Frameworks/ and add
