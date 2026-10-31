@@ -1,6 +1,7 @@
 // nes-emu main
 
 #include <atomic>
+#include <cstring>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
@@ -10,8 +11,6 @@
 #include "common/types.h"
 #include "cores/nes/NES.h"
 #include "cores/nes/SaveState.h"
-
-
 
 static constexpr int kNESSampleFrequency = 44056;
 
@@ -272,15 +271,15 @@ uint8 NESApp::GetControllerData() const
 	AutoLockMutex lock(mPadMutex);
 	if (mPad)
 	{
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_SOUTH)		<< 0; // A
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_EAST)			<< 1; // B
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_BACK)			<< 2; // Select
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_START)		<< 3; // Start
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_SOUTH) << 0; // A
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_EAST) << 1;  // B
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_BACK) << 2;  // Select
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_START) << 3; // Start
 
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_UP)		<< 4; // Up
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_DOWN)	<< 5; // Down
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_LEFT)	<< 6; // Left
-		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT)	<< 7; // Right
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_UP) << 4;	// Up
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_DOWN) << 5;	// Down
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_LEFT) << 6;	// Left
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT) << 7; // Right
 	}
 
 	return controller_input;
@@ -413,7 +412,8 @@ void NESApp::sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, in
 
 	// Check for buffer underflow
 	if (sample_count < inAdditionalAmount)
-		SDL_LogDebug(SDL_LOG_CATEGORY_AUDIO, "underflow (%d - %d - %d)\n", inTotalAmount, inAdditionalAmount, sample_count);
+		SDL_LogDebug(SDL_LOG_CATEGORY_AUDIO, "underflow (%d - %d - %d)\n", inTotalAmount, inAdditionalAmount,
+					 sample_count);
 
 	// Output samples
 	SDL_PutAudioStreamData(inStream, sample_buffer, sample_count);
