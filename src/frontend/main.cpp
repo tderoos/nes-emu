@@ -12,6 +12,8 @@
 #include "cores/nes/NES.h"
 #include "cores/nes/SaveState.h"
 
+#include <cassert>
+
 static constexpr int kNESSampleFrequency = 44056;
 
 static SDL_AppResult SDL_Fail()
@@ -83,8 +85,8 @@ private:
 	SDL_AudioDeviceID mAudioDevice = 0;
 	SDL_AudioStream*  mAudioStream = nullptr;
 
-	SDL_Joystick*	  mStick = nullptr;
-	Mutex			  mStickMutex;
+	SDL_Gamepad*	  mPad = nullptr;
+	Mutex			  mPadMutex;
 
 	FrameBuffer		  mFrameBuffer = {0};
 	Mutex			  mFrameBufferMutex;
@@ -118,6 +120,7 @@ SDL_AppResult NESApp::Init()
 
 	// vsync paces presentation to the display refresh
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+	SDL_SetHint(SDL_HINT_EVENT_LOGGING, "1");
 
 	// Audio source format is 44056Hz, target format is 44100Hz
 	constexpr SDL_AudioSpec src{.format = SDL_AUDIO_S8, .channels = 1, .freq = kNESSampleFrequency};
@@ -265,22 +268,23 @@ void NESApp::EmulatorThreadFunction()
  */
 uint8 NESApp::GetControllerData() const
 {
-	uint8		  controller_input = 0;
+	uint8 controller_input = 0;
 
-	AutoLockMutex lock(mStickMutex);
-	if (mStick)
+	AutoLockMutex lock(mPadMutex);
+	if (mPad)
 	{
-		controller_input |= SDL_GetJoystickButton(mStick, 0) << 0;
-		controller_input |= SDL_GetJoystickButton(mStick, 1) << 1;
-		controller_input |= SDL_GetJoystickButton(mStick, 4) << 2;
-		controller_input |= SDL_GetJoystickButton(mStick, 6) << 3;
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_SOUTH)		<< 0; // A
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_EAST)			<< 1; // B
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_BACK)			<< 2; // Select
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_START)		<< 3; // Start
 
-		uint8 hat = SDL_GetJoystickHat(mStick, 0);
-		controller_input |= (hat & 1) ? 1 << 4 : 0;
-		controller_input |= (hat & 4) ? 1 << 5 : 0;
-		controller_input |= (hat & 8) ? 1 << 6 : 0;
-		controller_input |= (hat & 2) ? 1 << 7 : 0;
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_UP)		<< 4; // Up
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_DOWN)	<< 5; // Down
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_LEFT)	<< 6; // Left
+		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT)	<< 7; // Right
 	}
+
+	printf("%d\n", controller_input);
 	return controller_input;
 }
 
@@ -349,32 +353,32 @@ SDL_AppResult NESApp::OnSDLEvent(const SDL_Event& inEvent)
 		else if (inEvent.key.scancode == SDL_SCANCODE_L)
 			mSaveStateRequest = ESaveStateRequest::Load;
 	}
-	else if (event_type == SDL_EVENT_JOYSTICK_ADDED)
+	else if (event_type == SDL_EVENT_GAMEPAD_ADDED)
 	{
-		AutoLockMutex lock(mStickMutex);
-		if (mStick == nullptr)
+		AutoLockMutex lock(mPadMutex);
+		if (mPad == nullptr)
+			mPad = SDL_OpenGamepad(inEvent.gdevice.which);
+	}
+	else if (event_type == SDL_EVENT_GAMEPAD_REMOVED)
+	{
+		AutoLockMutex lock(mPadMutex);
+		if (mPad != nullptr && SDL_GetGamepadID(mPad) == inEvent.gdevice.which)
 		{
+			mPad = nullptr;
 			int				count;
-			SDL_JoystickID* sticks = SDL_GetJoysticks(&count);
+			SDL_JoystickID* pads = SDL_GetGamepads(&count);
 
-			if (sticks && count > 0)
-				mStick = SDL_OpenJoystick(sticks[0]);
-			SDL_free(sticks);
+			if (pads && count > 0)
+				mPad = SDL_OpenGamepad(pads[0]);
+			SDL_free(pads);
 		}
 	}
-	else if (event_type == SDL_EVENT_JOYSTICK_REMOVED)
+	else if (event_type == SDL_EVENT_GAMEPAD_BUTTON_DOWN)
 	{
-		AutoLockMutex lock(mStickMutex);
-		if (mStick != nullptr && SDL_GetJoystickID(mStick) == inEvent.jdevice.which)
-		{
-			mStick = nullptr;
-			int				count;
-			SDL_JoystickID* sticks = SDL_GetJoysticks(&count);
-
-			if (sticks && count > 0)
-				mStick = SDL_OpenJoystick(sticks[0]);
-			SDL_free(sticks);
-		}
+		SDL_Log("GP button down: %d (south=%d east=%d)",
+				(int)inEvent.gbutton.button,
+				SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_SOUTH),
+				SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_EAST));
 	}
 
 	return SDL_APP_CONTINUE;
