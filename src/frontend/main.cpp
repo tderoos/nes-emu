@@ -281,6 +281,19 @@ uint8 NESApp::GetControllerData() const
 		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_LEFT) << 6;	// Left
 		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT) << 7; // Right
 	}
+	else
+	{
+		const bool* key_state = SDL_GetKeyboardState(nullptr);
+		controller_input |= key_state[SDL_SCANCODE_K] << 0; // A
+		controller_input |= key_state[SDL_SCANCODE_O] << 1;  // B
+		controller_input |= key_state[SDL_SCANCODE_SPACE] << 2;  // Select
+		controller_input |= key_state[SDL_SCANCODE_RETURN] << 3; // Start
+
+		controller_input |= key_state[SDL_SCANCODE_W] << 4;	// Up
+		controller_input |= key_state[SDL_SCANCODE_S] << 5;	// Down
+		controller_input |= key_state[SDL_SCANCODE_A] << 6;	// Left
+		controller_input |= key_state[SDL_SCANCODE_D] << 7; // Right
+	}
 
 	return controller_input;
 }
