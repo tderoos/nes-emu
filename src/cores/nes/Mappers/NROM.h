@@ -1,7 +1,7 @@
 // nes-emu 
 #pragma once 
 
-#include "Mapper.h"
+#include "../Mapper.h"
 #include <string.h>
 
 class NROM : public Mapper

@@ -1,6 +1,5 @@
 // nes-emu PPU Module
 #include "common/types.h"
-#include "Profiler.h"
 
 /*
 const uint32 palette[64] = {

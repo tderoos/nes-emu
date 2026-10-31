@@ -3,8 +3,6 @@
 #include "cartridge/CartridgeData.h"
 #include "Mapper.h"
 
-
-
 Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 {
 	const uint8* cartridge_data = inCartridge.GetData();

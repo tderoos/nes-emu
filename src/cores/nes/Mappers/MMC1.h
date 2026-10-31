@@ -3,8 +3,8 @@
 
 #include <string.h>
 
-#include "Mapper.h"
-#include "SaveState.h"
+#include "../Mapper.h"
+#include "../SaveState.h"
 
 class MMC1 : public Mapper
 {
@@ -17,7 +17,7 @@ public:
         mPRGReg     = 0;
     }
 
-    virtual void Store(uint16 inAddr, uint8 inData) override
+	void Store(uint16 inAddr, uint8 inData) override
     {
         // MMC1 uses a serial register write to update the mapping
         // Registers a 5 bit wide, addres at write of the 5th bit
@@ -49,7 +49,7 @@ public:
         }
     }
     
-    virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const override
+	void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const override
     {
         // Map PRG data
         uint8 bank_idx = mPRGReg&0x0F;
@@ -105,7 +105,7 @@ public:
     }
 
     // State saving
-    virtual void        ReadState(const SaveState& ioState) override
+	void        ReadState(const SaveState& ioState) override
     {
         ioState.Read(mShiftIndex);
         ioState.Read(mTempReg);
@@ -113,13 +113,12 @@ public:
     }
 
 
-    virtual void        WriteState(SaveState& ioState) const override
+	void        WriteState(SaveState& ioState) const override
     {
         ioState.Write(mShiftIndex);
         ioState.Write(mTempReg);
         ioState.Write(mRegisters);
     }
-
 
 private:
     uint8   mShiftIndex = 0;
@@ -134,5 +133,4 @@ private:
         };
         uint8  mRegisters[4];
     };
-    
 };

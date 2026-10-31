@@ -7,14 +7,12 @@ add_library(LibCoreNES
 			IO.h
 			Mapper.cpp
 			Mapper.h
+			Mappers/NROM.h
+			Mappers/MMC1.h
 			NES.cpp
 			NES.h
-			NROM.h
-			MMC1.h
 			PPU2C07.cpp
 			PPU2C07.h
-			Profiler.cpp
-			Profiler.h
 			Ram.cpp
 			Ram.h
 			Rom.cpp 
