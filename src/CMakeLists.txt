@@ -17,7 +17,9 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASELTO ON)
 add_subdirectory(common)
 add_subdirectory(cores/nes)
 
-add_executable(NES frontend/main.cpp)
+add_executable(NES frontend/main.cpp
+		cores/CartridgeData.cpp
+		cores/CartridgeData.h)
 target_include_directories(NES PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 target_link_libraries(NES PUBLIC LibCoreNES)
 target_link_libraries(NES PUBLIC Common)
@@ -51,8 +53,8 @@ if(APPLE)
 	# For distributing the bundle, copy SDL3 into Frameworks/ and add
 	# that to the rpath - BundleUtilities handles that at install time.
 	set_target_properties(NES PROPERTIES
-		BUILD_WITH_INSTALL_RPATH		FALSE
+		BUILD_WITH_INSTALL_RPATH	FALSE
 		MACOSX_RPATH				TRUE
 		INSTALL_RPATH				"@loader_path"
-		BUILD_RPATH				"@loader_path")
+		BUILD_RPATH					"@loader_path")
 endif()

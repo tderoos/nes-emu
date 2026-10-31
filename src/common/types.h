@@ -1,7 +1,7 @@
-// nes-emu Types
+// Types
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 typedef int8_t      int8;
 typedef int16_t     int16;

@@ -10,10 +10,13 @@
 #include "Rom.h"
 #include "SaveState.h"
 
+// Forward declarations
+class CartridgeData;
+
 class NES
 {
 public:
-	NES(const char* inRom);
+	NES(const CartridgeData& inCartridge);
 	void onExit();
 
 	void RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* ioSampleCount);

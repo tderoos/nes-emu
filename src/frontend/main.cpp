@@ -9,6 +9,7 @@
 #include "common/RingBuffer.h"
 #include "common/Thread.h"
 #include "common/types.h"
+#include "cores/CartridgeData.h"
 #include "cores/nes/NES.h"
 #include "cores/nes/SaveState.h"
 
@@ -70,6 +71,8 @@ private:
 	using LoadSaveRequest = std::atomic<ESaveStateRequest>;
 	using FrameBuffer = uint32[256 * 256];
 	using AudioBuffer = RingBuffer<uint8, 4096>;
+
+	CartridgeData	  mCartridge;
 
 	NES*			  mNES = nullptr;
 	SaveState		  mSaveState;
@@ -166,7 +169,10 @@ void NESApp::InsertRom(const char* inPath)
 	if (mNES != nullptr)
 		EjectRom();
 
-	mNES = new NES(inPath);
+	if (!mCartridge.Load(inPath))
+		return;
+
+	mNES = new NES(mCartridge);
 	Thread::sCreateThread(
 		mEmulatorThread,
 		[](void* inAppState)
@@ -188,6 +194,8 @@ void NESApp::EjectRom()
 		mEmulatorThread.Destroy();
 		SafeDelete(mNES);
 	}
+
+	mCartridge.Clear();
 }
 
 /**

@@ -1,7 +1,7 @@
 // nes-emu
 #include "NES.h"
 
-NES::NES(const char* inRom) : mRom(inRom), mRam(0x8000), mPPU(&mRom), mIO(&mRam, &mRom, &mPPU, &mAPU), mCPU(&mIO) {}
+NES::NES(const CartridgeData& inCartridge) : mRom(inCartridge), mRam(0x8000), mPPU(&mRom), mIO(&mRam, &mRom, &mPPU, &mAPU), mCPU(&mIO) {}
 
 void NES::onExit()
 {
