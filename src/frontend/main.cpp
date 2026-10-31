@@ -120,7 +120,7 @@ SDL_AppResult NESApp::Init()
 
 	// vsync paces presentation to the display refresh
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-	SDL_SetHint(SDL_HINT_EVENT_LOGGING, "1");
+	SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
 
 	// Audio source format is 44056Hz, target format is 44100Hz
 	constexpr SDL_AudioSpec src{.format = SDL_AUDIO_S8, .channels = 1, .freq = kNESSampleFrequency};
@@ -284,7 +284,6 @@ uint8 NESApp::GetControllerData() const
 		controller_input |= SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT)	<< 7; // Right
 	}
 
-	printf("%d\n", controller_input);
 	return controller_input;
 }
 
@@ -372,13 +371,6 @@ SDL_AppResult NESApp::OnSDLEvent(const SDL_Event& inEvent)
 				mPad = SDL_OpenGamepad(pads[0]);
 			SDL_free(pads);
 		}
-	}
-	else if (event_type == SDL_EVENT_GAMEPAD_BUTTON_DOWN)
-	{
-		SDL_Log("GP button down: %d (south=%d east=%d)",
-				(int)inEvent.gbutton.button,
-				SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_SOUTH),
-				SDL_GetGamepadButton(mPad, SDL_GAMEPAD_BUTTON_EAST));
 	}
 
 	return SDL_APP_CONTINUE;
