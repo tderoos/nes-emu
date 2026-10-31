@@ -1,6 +1,6 @@
 // nes-emu Rom module
 #include "Rom.h"
-#include "cores/CartridgeData.h"
+#include "cartridge/CartridgeData.h"
 #include "Mapper.h"
 
 

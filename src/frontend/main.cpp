@@ -9,7 +9,7 @@
 #include "common/RingBuffer.h"
 #include "common/Thread.h"
 #include "common/types.h"
-#include "cores/CartridgeData.h"
+#include "cartridge/CartridgeData.h"
 #include "cores/nes/NES.h"
 #include "cores/nes/SaveState.h"
 
