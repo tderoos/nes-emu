@@ -1,7 +1,6 @@
 // nes-emu main
 
 #include <atomic>
-#include <cstring>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
@@ -12,7 +11,7 @@
 #include "cores/nes/NES.h"
 #include "cores/nes/SaveState.h"
 
-#include <cassert>
+
 
 static constexpr int kNESSampleFrequency = 44056;
 
@@ -355,6 +354,8 @@ SDL_AppResult NESApp::OnSDLEvent(const SDL_Event& inEvent)
 	else if (event_type == SDL_EVENT_GAMEPAD_ADDED)
 	{
 		AutoLockMutex lock(mPadMutex);
+
+		// If no pad connected, connect to the pad just attached
 		if (mPad == nullptr)
 			mPad = SDL_OpenGamepad(inEvent.gdevice.which);
 	}
@@ -363,12 +364,17 @@ SDL_AppResult NESApp::OnSDLEvent(const SDL_Event& inEvent)
 		AutoLockMutex lock(mPadMutex);
 		if (mPad != nullptr && SDL_GetGamepadID(mPad) == inEvent.gdevice.which)
 		{
+			// Clear the old pad.
 			mPad = nullptr;
+
+			// Look for any pad that is not the one just removed.
 			int				count;
 			SDL_JoystickID* pads = SDL_GetGamepads(&count);
 
-			if (pads && count > 0)
-				mPad = SDL_OpenGamepad(pads[0]);
+			for (int i = 0; i < count && mPad == nullptr; ++i)
+				if (pads[i] != inEvent.gdevice.which)
+					mPad = SDL_OpenGamepad(pads[i]);
+
 			SDL_free(pads);
 		}
 	}
@@ -407,7 +413,7 @@ void NESApp::sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, in
 
 	// Check for buffer underflow
 	if (sample_count < inAdditionalAmount)
-		printf("underflow (%d - %d - %d)\n", inTotalAmount, inAdditionalAmount, sample_count);
+		SDL_LogDebug(SDL_LOG_CATEGORY_AUDIO, "underflow (%d - %d - %d)\n", inTotalAmount, inAdditionalAmount, sample_count);
 
 	// Output samples
 	SDL_PutAudioStreamData(inStream, sample_buffer, sample_count);
