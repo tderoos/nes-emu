@@ -4,21 +4,21 @@
 #include "../Mapper.h"
 #include <string.h>
 
-class NROM : public Mapper
+class NROM final : public Mapper
 {
 public:
     NROM(uint8 inNumPRG, uint8 inNumCHR) : Mapper(inNumPRG, inNumCHR)
     {
     }
 
-    
-    virtual void Store(uint16 inAddr, uint8 inData)
+
+	void Store(uint16 inAddr, uint8 inData) override
     {
         // Ignore - no mapping
     }
     
     
-    virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const
+	void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const override
     {
         if (mNumPRG == 1)
         {

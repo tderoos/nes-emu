@@ -17,7 +17,6 @@ class NES
 {
 public:
 	NES(const CartridgeData& inCartridge);
-	void onExit();
 
 	void RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* ioSampleCount);
 

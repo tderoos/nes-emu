@@ -1,58 +1,48 @@
 // nes-emu Rom module
 #include "Rom.h"
+
+#include <algorithm>
+#include <cstring>
 #include "cartridge/CartridgeData.h"
 #include "Mapper.h"
 
 Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 {
-	const uint8* cartridge_data = inCartridge.GetData();
+	mHeader = reinterpret_cast<const RomHeader*>(inCartridge.GetData());
 
-	uint8 num_prg = cartridge_data[4];
-	uint8 num_chr = cartridge_data[5];
-
-	uint8 mapper_id = cartridge_data[6] >> 4;
-	mapper_id = mapper_id | (cartridge_data[7] & 0xF0);
-
-	mSRam = (cartridge_data[10] & 0x10) != 0;
-	mSRamBattery = (cartridge_data[6] & 0x02) != 0;
-
-	switch (cartridge_data[6] & 9)
-	{
-	case 0:
-		mVRamMirrorRom = HORIZONTAL;
-		break;
-	case 1:
-		mVRamMirrorRom = VERTICAL;
-		break;
-	case 8:
-		mVRamMirrorRom = FOUR_SCREEN;
-		break;
-	}
+	// Determine name-table mapping
+	if (mHeader->mAlternativeNameTable == 0)
+		mVRamMirrorRom = mHeader->mNametableArrangement == 0 ? EVRamLayout::Horizontal : EVRamLayout::Vertical;
+	else
+		mVRamMirrorRom = EVRamLayout::FourScreen;
 	mVRamMirrorMapped = mVRamMirrorRom;
 
-	mRomData = cartridge_data + 16; // sizeof(header);
+	const uint8 mapper_id = mHeader->mMapperIDLo | mHeader->mMapperIDHi << 4;
+	mMapper = Mapper::sCreate(mapper_id, mHeader->mNumPRG, mHeader->mNumCHR);
 
-	printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRM:%d SR:%d SRB:%d)\n", mCartridge.GetFilename().c_str(), num_prg, num_chr, mapper_id,
-		   (int)GetVRamMirroring(), (int)mSRam, (int)mSRamBattery);
-
-	mMapper = Mapper::sCreate(mapper_id, num_prg, num_chr);
+	printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRM:%d SRB:%d)\n", mCartridge.GetFilename().c_str(), mHeader->mNumPRG, mHeader->mNumCHR, mapper_id,
+		   (int)GetVRamMirroring(), (int)mHeader->mSRamBattery);
 
 	// Load savegame
-	if (mSRamBattery)
-	{
-		mSavename = mCartridge.GetFilename();
-		size_t idx = mSavename.find(".nes");
-		mSavename.replace(idx, idx + 4, ".sav");
+	memset(mPRGRam, 0, 0x2000);
 
-		FILE* savegame = fopen(mSavename.c_str(), "rb");
-		if (savegame != nullptr)
-		{
-			fread(mPRGRam, 1, 0x2000, savegame);
-			fclose(savegame);
-		}
-		else
-			memset(mPRGRam, 0, 0x2000);
+	if (mHeader->mSRamBattery)
+	{
+		std::span<uint8> persistent_state;
+		if (mCartridge.GetPersistentState(persistent_state))
+			memcpy(mPRGRam, persistent_state.data(), std::min(persistent_state.size(), (size_t)0x2000));
 	}
+}
+
+
+
+Rom::~Rom()
+{
+	if (mHeader->mSRamBattery)
+		mCartridge.SetPersistentState(mPRGRam);
+
+	if (mMapper)
+		delete mMapper;
 }
 
 
@@ -61,7 +51,7 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 void Rom::SetVRam(uint8* mVRam)
 {
 	mCHRData = mVRam;
-	mMapper->UpdateMapping(mRomData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+	mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 }
 
 
@@ -76,45 +66,29 @@ void Rom::Store(uint16 inAddr, uint8 inValue)
 	else
 	{
 		mMapper->Store(inAddr, inValue);
-
 		if (mMapper->IsDirty())
-			mMapper->UpdateMapping(mRomData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+			mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 	}
 }
 
-
-
-// If rom has SRam - save state on exit
-void Rom::SaveGameState() const
-{
-	if (mSRamBattery)
-	{
-		FILE* savegame = fopen(mSavename.c_str(), "w");
-		if (savegame != nullptr)
-		{
-			fwrite(mPRGRam, 1, 0x2000, savegame);
-			fclose(savegame);
-		}
-	}
-}
 
 
 
 void Rom::ReadState(const SaveState& ioState)
 {
-	if (mSRam)
+	if (mHeader->mSRamBattery)
 		ioState.ReadRaw(mPRGRam, 0x2000);
 
 	mMapper->ReadState(ioState);
 
 	// Update the mapping after restoring the state
-	mMapper->UpdateMapping(mRomData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+	mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 }
 
 
 void Rom::WriteState(SaveState& ioState) const
 {
-	if (mSRam)
+	if (mHeader->mSRamBattery)
 		ioState.WriteRaw(mPRGRam, 0x2000);
 
 	mMapper->WriteState(ioState);

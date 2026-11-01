@@ -5,36 +5,37 @@
 #include "SaveState.h"
 
 // Rom info
-enum EVRamLayout
+enum class EVRamLayout
 {
-    VERTICAL,
-    HORIZONTAL,
-    FOUR_SCREEN,
-    SINGLE_LOWER,
-    SINGLE_UPPER
+	Vertical,
+	Horizontal,
+	FourScreen,
+	SingleLower,
+	SingleUpper
 };
 
 class Mapper
 {
 public:
-    static Mapper* sCreate(uint8 inType, uint8 inNumPRG, uint8 inNumCHR);
+	virtual ~Mapper() = default;
 
-    Mapper(uint8 inNumPRG, uint8 inNumCHR) :
-        mNumPRG(inNumPRG),
-        mNumCHR(inNumCHR),
-        mDirty(true)                        { }
+	// Factory
+	static Mapper* sCreate(uint8 inType, uint8 inNumPRG, uint8 inNumCHR);
 
-    inline bool     IsDirty() const         { return mDirty; }
-    
-    virtual void    Store(uint16 inAddr, uint8 inData) = 0;
-    virtual void    UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const = 0;
+	bool		 IsDirty() const { return mDirty; }
 
-    // State saving
-    virtual void    ReadState(const SaveState& ioState) {}
-    virtual void    WriteState(SaveState& ioState) const {}
-    
+	virtual void Store(uint16 inAddr, uint8 inData) = 0;
+	virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout,
+							   EVRamLayout* outMappedLayout) const = 0;
+
+	// State saving
+	virtual void ReadState(const SaveState& ioState) {}
+	virtual void WriteState(SaveState& ioState) const {}
+
 protected:
-    uint8           mNumPRG;
-    uint8           mNumCHR;
-    mutable bool    mDirty;
+	Mapper(uint8 inNumPRG, uint8 inNumCHR) : mNumPRG(inNumPRG), mNumCHR(inNumCHR), mDirty(true) {}
+
+	uint8		 mNumPRG;
+	uint8		 mNumCHR;
+	mutable bool mDirty;
 };

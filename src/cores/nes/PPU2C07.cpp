@@ -182,35 +182,35 @@ void PPU2C07::UpdateMirroring()
 {
     switch (mRom->GetVRamMirroring())
     {
-        case HORIZONTAL:
+        case EVRamLayout::Horizontal:
             mNameTable[0] = 0x2000;
             mNameTable[1] = 0x2000;
             mNameTable[2] = 0x2400;
             mNameTable[3] = 0x2400;
             break;
 
-        case VERTICAL:
+        case EVRamLayout::Vertical:
             mNameTable[0] = 0x2000;
             mNameTable[1] = 0x2400;
             mNameTable[2] = 0x2000;
             mNameTable[3] = 0x2400;
             break;
      
-        case SINGLE_LOWER:
+        case EVRamLayout::SingleLower:
             mNameTable[0] = 0x2000;
             mNameTable[1] = 0x2000;
             mNameTable[2] = 0x2000;
             mNameTable[3] = 0x2000;
             break;
 
-        case SINGLE_UPPER:
+        case EVRamLayout::SingleUpper:
             mNameTable[0] = 0x2400;
             mNameTable[1] = 0x2400;
             mNameTable[2] = 0x2400;
             mNameTable[3] = 0x2400;
             break;
 
-        case FOUR_SCREEN:
+        case EVRamLayout::FourScreen:
             mNameTable[0] = 0x2000;
             mNameTable[1] = 0x2400;
             mNameTable[2] = 0x2800;
