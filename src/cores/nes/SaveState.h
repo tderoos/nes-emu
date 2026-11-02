@@ -19,6 +19,8 @@ struct SaveState
 		mReadOffset += inSize;
 	}
 
+	void Skip(int inSize) const { mReadOffset += inSize; }
+
 	template <typename taType>
 	void Write(const taType& inValue)
 	{

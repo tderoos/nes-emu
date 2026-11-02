@@ -4,7 +4,7 @@
 #include "common/types.h"
 #include "SaveState.h"
 
-#include <vector>
+#include <memory>
 
 class Ram
 {
@@ -20,6 +20,6 @@ public:
 	void WriteState(SaveState& ioState) const;
 
 private:
-	uint16			   mSize;
-	std::vector<uint8> mData;
+	uint16					 mSize;
+	std::unique_ptr<uint8[]> mData;
 };
