@@ -8,7 +8,7 @@
 #include "PPU2C07.h"
 #include "Ram.h"
 #include "Rom.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
 
 // Forward declarations
 class CartridgeData;

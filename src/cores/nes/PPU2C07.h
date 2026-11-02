@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Rom.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
 
 class PPU2C07
 {

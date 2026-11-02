@@ -5,7 +5,7 @@
 
 #include "common/types.h"
 #include "Mapper.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
 
 // Forward declarations
 class CartridgeData;

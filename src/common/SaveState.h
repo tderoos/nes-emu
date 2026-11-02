@@ -27,10 +27,7 @@ struct SaveState
 		WriteRaw((const uint8*)&inValue, sizeof(taType));
 	}
 
-	void WriteRaw(const uint8* inData, int inSize)
-	{
-		mData.insert(mData.end(), inData, inData + inSize);
-	}
+	void			   WriteRaw(const uint8* inData, int inSize) { mData.insert(mData.end(), inData, inData + inSize); }
 
 	std::vector<uint8> mData;
 	mutable int		   mReadOffset = 0;

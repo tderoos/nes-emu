@@ -1,4 +1,7 @@
+# Platform-agnostic support code: threading primitives, types,
+# serialization (SaveState).
 add_library(Common
-			Thread.cpp)
+			Thread.cpp
+			SaveState.h)
 target_include_directories(Common PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(Common PUBLIC SDL3::SDL3)

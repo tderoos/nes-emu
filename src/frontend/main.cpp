@@ -11,7 +11,7 @@
 #include "common/Thread.h"
 #include "common/types.h"
 #include "cores/nes/NES.h"
-#include "cores/nes/SaveState.h"
+#include "common/SaveState.h"
 
 static constexpr int kNESSampleFrequency = 44056;
 

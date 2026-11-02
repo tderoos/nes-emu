@@ -2,7 +2,7 @@
 #pragma once
 
 #include "common/types.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
 
 // Rom info
 enum class EVRamLayout

@@ -1,6 +1,6 @@
 // nes-emu APU Module
 #include "common/types.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
 
 #define SETBIT(reg, bit, value)                                                                                        \
 	{                                                                                                                  \

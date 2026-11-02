@@ -16,7 +16,7 @@ add_library(LibCoreNES
 			Ram.h
 			Rom.cpp
 			Rom.h
-			SaveState.h)
+			)
 
 
 target_include_directories(LibCoreNES PUBLIC ${CMAKE_SOURCE_DIR}/src)

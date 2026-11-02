@@ -2,7 +2,7 @@
 #pragma once
 
 #include "common/types.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
 
 /**
  * NES Ram module - 2KiB Memory module mapped to 0x0000 - 0x07FF

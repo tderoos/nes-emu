@@ -1,8 +1,23 @@
 #include "CartridgeData.h"
 
 #include <cstdio>
+#include <cstring>
 
-static bool sReadFile(const std::string& inFilename, std::vector<uint8>& outData)
+// .sav container format (little-endian):
+//   [magic   8 bytes]  "NESSAVE\0"
+//   [version 4 bytes]  1
+//   [flags   4 bytes]  bit0: battery section present
+//                       bit1: snapshot section present
+//   [battery section]  [size 4 bytes][data]     (if bit0)
+//   [snapshot section] [size 4 bytes][data]    (if bit1)
+// A file without the magic is not a valid .sav and is ignored.
+
+static constexpr char	sMagic[8] = {'N', 'E', 'S', 'S', 'A', 'V', 'E', '\0'};
+static constexpr uint32 sVersion = 1;
+static constexpr uint32 sFlagBattery = 1 << 0;
+static constexpr uint32 sFlagSnapshot = 1 << 1;
+
+static bool				sReadFile(const std::string& inFilename, std::vector<uint8>& outData)
 {
 	// Open file
 	FILE* fd = fopen(inFilename.c_str(), "rb");
@@ -42,34 +57,117 @@ bool CartridgeData::Load(const char* inFilename)
 	mType = CartridgeType::NES;
 
 	// Try to read persistent state data
-	if (!sReadFile(mFilename + ".sav", mPersistentState))
-		mPersistentState.clear();
+	std::vector<uint8> save_data;
+	if (!sReadFile(mFilename + ".sav", save_data))
+		return true;
+
+	// Parse the container (mismatched magic: not ours, ignore)
+	const size_t header_size = 8 + 4 + 4;
+	if (save_data.size() < header_size || memcmp(save_data.data(), sMagic, sizeof(sMagic)) != 0)
+		return true;
+
+	size_t offset = sizeof(sMagic);
+	uint32 version, flags;
+	memcpy(&version, &save_data[offset], sizeof(version));
+	offset += 4;
+	memcpy(&flags, &save_data[offset], sizeof(flags));
+	offset += 4;
+	if (version != sVersion)
+		return true; // future versions: ignore rather than misinterpret
+
+	for (uint32 bit : {sFlagBattery, sFlagSnapshot})
+	{
+		if ((flags & bit) == 0)
+			continue;
+
+		uint32 section_size;
+		if (offset + 4 > save_data.size())
+			return true;
+		memcpy(&section_size, &save_data[offset], 4);
+		offset += 4;
+		if (offset + section_size > save_data.size())
+			return true;
+
+		std::span<const uint8> section(save_data.data() + offset, section_size);
+		if (bit == sFlagBattery)
+			mBatteryState.assign(section.begin(), section.end());
+		else
+			mSnapshotState.assign(section.begin(), section.end());
+		offset += section_size;
+	}
 
 	return true;
 }
 
 void CartridgeData::SetPersistentState(std::span<uint8> inState) const
 {
-	mPersistentState.assign(inState.begin(), inState.end());
+	mBatteryState.assign(inState.begin(), inState.end());
 }
 
 bool CartridgeData::GetPersistentState(std::span<uint8>& outState) const
 {
-	if (mPersistentState.empty())
+	if (mBatteryState.empty())
 		return false;
 
-	outState = mPersistentState;
+	outState = mBatteryState;
 	return true;
+}
+
+void CartridgeData::SetSnapshot(std::span<const uint8> inState) const
+{
+	mSnapshotState.assign(inState.begin(), inState.end());
+}
+
+bool CartridgeData::GetSnapshot(std::span<const uint8>& outState) const
+{
+	if (mSnapshotState.empty())
+		return false;
+
+	outState = mSnapshotState;
+	return true;
+}
+
+void CartridgeData::ClearSnapshot() const
+{
+	mSnapshotState.clear();
 }
 
 void CartridgeData::SavePersistentState() const
 {
-	std::string save_filename = mFilename + ".sav";
-	FILE*		savegame = fopen(save_filename.c_str(), "w");
-	if (savegame != nullptr)
+	// Serialize the container
+	std::vector<uint8> out;
+	out.reserve(sizeof(sMagic) + 12 + 8 + mBatteryState.size() + mSnapshotState.size());
+
+	auto append = [&out](const void* inData, size_t inSize)
+	{ out.insert(out.end(), static_cast<const uint8*>(inData), static_cast<const uint8*>(inData) + inSize); };
+
+	uint32 flags = (mBatteryState.empty() ? 0 : sFlagBattery) | (mSnapshotState.empty() ? 0 : sFlagSnapshot);
+	append(sMagic, sizeof(sMagic));
+	append(&sVersion, sizeof(sVersion));
+	append(&flags, sizeof(flags));
+
+	for (const std::vector<uint8>* section : {&mBatteryState, &mSnapshotState})
 	{
-		fwrite(mPersistentState.data(), 1, mPersistentState.size(), savegame);
-		fclose(savegame);
+		if (section->empty())
+			continue;
+
+		uint32 size = static_cast<uint32>(section->size());
+		append(&size, sizeof(size));
+		append(section->data(), size);
+	}
+
+	// Write atomically: a crash mid-write never destroys the previous
+	// file (which may hold battery saves that are precious).
+	const std::string save_filename = mFilename + ".sav";
+	const std::string temp_filename = save_filename + ".tmp";
+	if (FILE* fd = fopen(temp_filename.c_str(), "wb"); fd != nullptr)
+	{
+		const size_t written = fwrite(out.data(), 1, out.size(), fd);
+		fclose(fd);
+		if (written == out.size())
+			rename(temp_filename.c_str(), save_filename.c_str());
+		else
+			remove(temp_filename.c_str());
 	}
 }
 

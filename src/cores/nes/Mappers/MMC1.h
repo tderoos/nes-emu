@@ -2,7 +2,7 @@
 #pragma once
 
 #include "../Mapper.h"
-#include "../SaveState.h"
+#include "common/SaveState.h"
 
 class MMC1 final : public Mapper
 {
