@@ -2,7 +2,7 @@
 #include "NES.h"
 
 NES::NES(const CartridgeData& inCartridge)
-	: mRom(inCartridge), mRam(0x8000), mPPU(&mRom), mIO(&mRam, &mRom, &mPPU, &mAPU), mCPU(&mIO)
+	: mRom(inCartridge), mPPU(&mRom), mIO(&mRam, &mRom, &mPPU, &mAPU), mCPU(&mIO)
 {
 }
 

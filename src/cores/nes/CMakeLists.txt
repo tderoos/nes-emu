@@ -13,7 +13,6 @@ add_library(LibCoreNES
 			NES.h
 			PPU2C07.cpp
 			PPU2C07.h
-			Ram.cpp
 			Ram.h
 			Rom.cpp 
 			Rom.h

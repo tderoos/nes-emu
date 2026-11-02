@@ -4,22 +4,25 @@
 #include "common/types.h"
 #include "SaveState.h"
 
-#include <memory>
-
+/**
+ * NES Ram module - 2KiB Memory module mapped to 0x0000 - 0x07FF
+ */
 class Ram
 {
 public:
-	explicit Ram(uint16 inSize);
+	// Settings
+	static constexpr int sSize = 0x0800;
+	static constexpr int sMask = sSize - 1;
 
 	// Access
-	void Load(uint16 inAddr, uint8* outValue) const { *outValue = mData[inAddr & 0x07FF]; }
-	void Store(uint16 inAddr, uint8 inValue) { mData[inAddr & 0x07FF] = inValue; }
+	void Load(uint16 inAddr, uint8* outValue) const { *outValue = mData[inAddr & sMask]; }
+	void Store(uint16 inAddr, uint8 inValue) { mData[inAddr & sMask] = inValue; }
 
 	// State saving
-	void ReadState(const SaveState& ioState);
-	void WriteState(SaveState& ioState) const;
+	void ReadState(const SaveState& ioState) { ioState.Read(mData); }
+	void WriteState(SaveState& ioState) const { ioState.Write(mData); }
 
 private:
-	uint16					 mSize;
-	std::unique_ptr<uint8[]> mData;
+	// Data
+	uint8 mData[sSize] = { 0xFF };
 };
