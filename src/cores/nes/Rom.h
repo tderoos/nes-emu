@@ -18,31 +18,31 @@ class Mapper;
  */
 struct RomHeader
 {
-	char	mID[4];
-	uint8	mNumPRG;
-	uint8	mNumCHR;
+	char  mID[4];
+	uint8 mNumPRG;
+	uint8 mNumCHR;
 
 	// FLags 6
-	uint8	mNametableArrangement : 1;
-	bool	mSRamBattery : 1;
-	bool	mTrainer : 1;
-	bool	mAlternativeNameTable : 1;
-	uint8	mMapperIDLo: 4;
+	uint8 mNametableArrangement : 1;
+	bool  mSRamBattery : 1;
+	bool  mTrainer : 1;
+	bool  mAlternativeNameTable : 1;
+	uint8 mMapperIDLo : 4;
 
 	// Flags 7
-	uint8	mVSUnitSystem : 1;
-	uint8	mPlayChoice10 : 1;
-	uint8	mIsNes2Header : 2;
-	uint8	mMapperIDHi : 4;
+	uint8 mVSUnitSystem : 1;
+	uint8 mPlayChoice10 : 1;
+	uint8 mIsNes2Header : 2;
+	uint8 mMapperIDHi : 4;
 
-	uint8	mPRGRamSize;
+	uint8 mPRGRamSize;
 
 	// Flags9
-	bool	mTVSystem : 1;
-	uint8	mPadding9 : 7;
+	bool  mTVSystem : 1;
+	uint8 mPadding9 : 7;
 
-	uint8	mPadding[6];	///< Padding
-	uint8	mData[];		///< Data starts here
+	uint8 mPadding[6]; ///< Padding
+	uint8 mData[];	   ///< Data starts here
 };
 
 class Rom

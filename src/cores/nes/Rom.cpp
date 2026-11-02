@@ -1,10 +1,12 @@
 // nes-emu Rom module
 #include "Rom.h"
 
-#include <algorithm>
-#include <cstring>
 #include "cartridge/CartridgeData.h"
 #include "Mapper.h"
+
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
 
 Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 {
@@ -20,8 +22,8 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 	const uint8 mapper_id = mHeader->mMapperIDLo | mHeader->mMapperIDHi << 4;
 	mMapper = Mapper::sCreate(mapper_id, mHeader->mNumPRG, mHeader->mNumCHR);
 
-	printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRM:%d SRB:%d)\n", mCartridge.GetFilename().c_str(), mHeader->mNumPRG, mHeader->mNumCHR, mapper_id,
-		   (int)GetVRamMirroring(), (int)mHeader->mSRamBattery);
+	printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRM:%d SRB:%d)\n", mCartridge.GetFilename().c_str(), mHeader->mNumPRG,
+		   mHeader->mNumCHR, mapper_id, static_cast<int>(GetVRamMirroring()), mHeader->mSRamBattery ? 1 : 0);
 
 	// Load savegame
 	memset(mPRGRam, 0, 0x2000);
@@ -30,11 +32,9 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 	{
 		std::span<uint8> persistent_state;
 		if (mCartridge.GetPersistentState(persistent_state))
-			memcpy(mPRGRam, persistent_state.data(), std::min(persistent_state.size(), (size_t)0x2000));
+			memcpy(mPRGRam, persistent_state.data(), std::min(persistent_state.size(), static_cast<size_t>(0x2000)));
 	}
 }
-
-
 
 Rom::~Rom()
 {
@@ -45,16 +45,12 @@ Rom::~Rom()
 		delete mMapper;
 }
 
-
-
 // Set VRam - allows mapper to update CHR page directly into VRam
 void Rom::SetVRam(uint8* mVRam)
 {
 	mCHRData = mVRam;
 	mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 }
-
-
 
 // Store are passed on to the mapper
 void Rom::Store(uint16 inAddr, uint8 inValue)
@@ -71,9 +67,6 @@ void Rom::Store(uint16 inAddr, uint8 inValue)
 	}
 }
 
-
-
-
 void Rom::ReadState(const SaveState& ioState)
 {
 	if (mHeader->mSRamBattery)
@@ -84,7 +77,6 @@ void Rom::ReadState(const SaveState& ioState)
 	// Update the mapping after restoring the state
 	mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 }
-
 
 void Rom::WriteState(SaveState& ioState) const
 {

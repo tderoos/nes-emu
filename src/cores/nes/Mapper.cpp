@@ -1,8 +1,8 @@
 // nes-emu Mapper interface
 #include "Mapper.h"
-#include <cassert>
 #include "Mappers/MMC1.h"
 #include "Mappers/NROM.h"
+#include <cassert>
 
 Mapper* Mapper::sCreate(uint8 inType, uint8 inNumPRG, uint8 inNumCHR)
 {

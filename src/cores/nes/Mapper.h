@@ -22,11 +22,11 @@ public:
 	// Factory
 	static Mapper* sCreate(uint8 inType, uint8 inNumPRG, uint8 inNumCHR);
 
-	bool		 IsDirty() const { return mDirty; }
+	bool		   IsDirty() const { return mDirty; }
 
-	virtual void Store(uint16 inAddr, uint8 inData) = 0;
-	virtual void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout,
-							   EVRamLayout* outMappedLayout) const = 0;
+	virtual void   Store(uint16 inAddr, uint8 inData) = 0;
+	virtual void   UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout,
+								 EVRamLayout* outMappedLayout) const = 0;
 
 	// State saving
 	virtual void ReadState(const SaveState& ioState) {}

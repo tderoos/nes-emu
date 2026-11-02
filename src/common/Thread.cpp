@@ -4,15 +4,15 @@
 
 thread_local Thread* Thread::sCurrentThread;
 
-bool Thread::sCreateThread(Thread& ioThread, ThreadFunc inFunc, const char* inName, void* inUserData)
+bool				 Thread::sCreateThread(Thread& ioThread, ThreadFunc inFunc, const char* inName, void* inUserData)
 {
 	assert(ioThread.mThread == nullptr);
 
 	struct sdl_thread_context
 	{
-		Thread*		mThread;
-		ThreadFunc	mFunc;
-		void*		mUserData;
+		Thread*	   mThread;
+		ThreadFunc mFunc;
+		void*	   mUserData;
 	};
 
 	auto sdl_thread_func = [](void* inContext)
@@ -26,7 +26,7 @@ bool Thread::sCreateThread(Thread& ioThread, ThreadFunc inFunc, const char* inNa
 	};
 
 	sdl_thread_context* thread_context = new sdl_thread_context(&ioThread, inFunc, inUserData);
-	ioThread.mExit   = false;
+	ioThread.mExit = false;
 	ioThread.mThread = SDL_CreateThread(sdl_thread_func, inName, thread_context);
 
 	if (!ioThread.mThread)

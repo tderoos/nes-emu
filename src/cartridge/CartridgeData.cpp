@@ -12,7 +12,7 @@ static bool sReadFile(const std::string& inFilename, std::vector<uint8>& outData
 	// Determine filesize
 	fseek(fd, 0L, SEEK_END);
 	const size_t size = ftell(fd);
-	fseek(fd, 0l, SEEK_SET);
+	fseek(fd, 0L, SEEK_SET);
 
 	// Resize buffer
 	std::vector<uint8> buffer;
@@ -28,8 +28,6 @@ static bool sReadFile(const std::string& inFilename, std::vector<uint8>& outData
 	outData.swap(buffer);
 	return true;
 }
-
-
 
 bool CartridgeData::Load(const char* inFilename)
 {
@@ -64,18 +62,16 @@ bool CartridgeData::GetPersistentState(std::span<uint8>& outState) const
 	return true;
 }
 
-
 void CartridgeData::SavePersistentState() const
 {
 	std::string save_filename = mFilename + ".sav";
-	FILE* savegame = fopen(save_filename.c_str(), "w");
+	FILE*		savegame = fopen(save_filename.c_str(), "w");
 	if (savegame != nullptr)
 	{
 		fwrite(mPersistentState.data(), 1, mPersistentState.size(), savegame);
 		fclose(savegame);
 	}
 }
-
 
 void CartridgeData::Clear()
 {

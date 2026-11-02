@@ -1,5 +1,5 @@
-// nes-emu 
-#pragma once 
+// nes-emu
+#pragma once
 
 #include "../Mapper.h"
 #include <string.h>
@@ -7,37 +7,34 @@
 class NROM final : public Mapper
 {
 public:
-    NROM(uint8 inNumPRG, uint8 inNumCHR) : Mapper(inNumPRG, inNumCHR)
-    {
-    }
-
+	NROM(uint8 inNumPRG, uint8 inNumCHR) : Mapper(inNumPRG, inNumCHR) {}
 
 	void Store(uint16 inAddr, uint8 inData) override
-    {
-        // Ignore - no mapping
-    }
-    
-    
-	void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout, EVRamLayout* outMappedLayout) const override
-    {
-        if (mNumPRG == 1)
-        {
-            // Mirror single PRG block in both hi and lo slot
-            memcpy(ioPRG,         inData, 0x4000);
-            memcpy(ioPRG+ 0x4000, inData, 0x4000);
-        }
-        else
-        {
-            memcpy(ioPRG, inData, 0x8000);
-        }
-        
-        // Chr data
-        if (mNumCHR != 0)
-            memcpy(ioCHR, inData + mNumPRG * 0x4000, 0x2000);
-        
-        // Follow rom VRam settings
-        *outMappedLayout = inRomLayout;
-        
-        mDirty = false;
-    }
+	{
+		// Ignore - no mapping
+	}
+
+	void UpdateMapping(const uint8* inData, uint8* ioPRG, uint8* ioCHR, EVRamLayout inRomLayout,
+					   EVRamLayout* outMappedLayout) const override
+	{
+		if (mNumPRG == 1)
+		{
+			// Mirror single PRG block in both hi and lo slot
+			memcpy(ioPRG, inData, 0x4000);
+			memcpy(ioPRG + 0x4000, inData, 0x4000);
+		}
+		else
+		{
+			memcpy(ioPRG, inData, 0x8000);
+		}
+
+		// Chr data
+		if (mNumCHR != 0)
+			memcpy(ioCHR, inData + mNumPRG * 0x4000, 0x2000);
+
+		// Follow rom VRam settings
+		*outMappedLayout = inRomLayout;
+
+		mDirty = false;
+	}
 };
