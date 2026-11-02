@@ -8,11 +8,7 @@
 void BREAK();
 
 IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU)
-	: mRam(inRam), mRom(inRom), mPPU(inPPU), mAPU(inAPU),
-
-	  mButtonState(0), mButtonReadMask(0),
-
-	  mDMAState(INACTIVE), mDMASrc(0x0000), mDMAValue(0)
+	: mRam(inRam), mRom(inRom), mPPU(inPPU), mAPU(inAPU)
 {
 }
 
@@ -30,22 +26,22 @@ void IO::Tick()
 {
 	switch (mDMAState)
 	{
-	case READ:
+	case DMAState::Read:
 		Load(mDMASrc++, &mDMAValue);
-		mDMAState = WRITE;
+		mDMAState = DMAState::Write;
 		break;
 
-	case WRITE:
+	case DMAState::Write:
 		mPPU->Store(0x2004, mDMAValue);
-		mDMAState = (mDMASrc & 0xFF) ? READ : INACTIVE;
+		mDMAState = (mDMASrc & 0xFF) ? DMAState::Read : DMAState::Inactive;
 		break;
 
-	case INACTIVE:
+	case DMAState::Inactive:
 		break;
 	}
 }
 
-void IO::Load(uint16 inAddr, uint8* outValue)
+void IO::Load(const uint16 inAddr, uint8* outValue)
 {
 	if (inAddr < 0x2000)
 		mRam->Load(inAddr, outValue);
@@ -77,7 +73,7 @@ void IO::Load(uint16 inAddr, uint8* outValue)
 		mRom->Load(inAddr, outValue);
 }
 
-void IO::Store(uint16 inAddr, uint8 inValue)
+void IO::Store(const uint16 inAddr, const uint8 inValue)
 {
 	if (inAddr < 0x2000)
 		mRam->Store(inAddr, inValue);
@@ -89,7 +85,7 @@ void IO::Store(uint16 inAddr, uint8 inValue)
 	else if (inAddr == 0x4014)
 	{
 		mDMASrc = inValue << 8;
-		mDMAState = READ;
+		mDMAState = DMAState::Read;
 	}
 
 	// Controller strobe

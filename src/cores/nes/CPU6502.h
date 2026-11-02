@@ -19,11 +19,6 @@ public:
 	void ReadState(const SaveState& ioState);
 	void WriteState(SaveState& ioState) const;
 
-	// private:
-
-	uint8 Load(uint16 inAddr);
-	void  Store(uint16 inAddr, uint8 inValue);
-
 	enum ERegister
 	{
 		SP = 0,
@@ -47,7 +42,7 @@ public:
 				uint8 mY;
 				uint8 mRegZero;
 			};
-			uint8 mReg[5];
+			uint8 mReg[5] = {};
 		};
 
 		union
@@ -67,6 +62,7 @@ public:
 		};
 	};
 
+private:
 	uint8  Handle00(uint8 opcode);
 	uint8  Handle01(uint8 opcode);
 	uint8  Handle10(uint8 opcode);

@@ -117,7 +117,7 @@ void APU::UpdateDAC()
 	float sq_out = 95.88f / ((8128.0f / (sq1 + sq2)) + 100.0f);
 	float tnd_out = 159.79f / ((1.0f / (tr + noise + dmc)) + 100.0f);
 
-	uint8 v8 = static_cast<uint8>((sq_out + tnd_out) * 127.0f);
+	const uint8 v8 = static_cast<uint8>((sq_out + tnd_out) * 127.0f);
 
 	if (mAudioBuffer != nullptr)
 		mAudioBuffer[mAudioBufferOffset++] = v8;

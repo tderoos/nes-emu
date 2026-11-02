@@ -1,8 +1,6 @@
 // nes-emu PPU module
 #pragma once
 
-#include <iostream>
-
 #include "Rom.h"
 #include "SaveState.h"
 
@@ -42,23 +40,23 @@ private:
 		uint8 mForeGround;
 	};
 
-	void	   UpdateMirroring();
-	int		   FetchScanlineSprites(ScanlineSprite* ioSprites);
-	uint16	   IncreaseScrollY(uint16 inV) const;
+	void		  UpdateMirroring();
+	int			  FetchScanlineSprites(ScanlineSprite* ioSprites) const;
+	static uint16 sIncreaseScrollY(uint16 inV);
 
-	const Rom* mRom;
-	uint32*	   mFrameBuffer;
-	uint16	   mClock;
-	bool	   mOddFrame;
+	const Rom*	  mRom;
+	uint32*		  mFrameBuffer = nullptr;
+	uint16		  mClock;
+	bool		  mOddFrame;
 
-	uint8	   mVRAM[0x4000];
-	uint8	   mOAM[64 * 4];
-	int16	   mScanline;
+	uint8		  mVRAM[0x4000] = {};
+	uint8		  mOAM[64 * 4] = {};
+	int16		  mScanline;
 
-	uint16	   mNameTable[4];
+	uint16		  mNameTable[4] = {};
 
-	uint8	   mPPUCtrl;
-	uint8	   mPPUMask;
+	uint8		  mPPUCtrl;
+	uint8		  mPPUMask;
 
 	// Loopy scrolling
 	// http://wiki.nesdev.com/w/index.php/The_skinny_on_NES_scrolling
@@ -100,9 +98,9 @@ private:
 		EAddrHiMaskTgt = 0xFF << EAddrHiShiftTgt
 	};
 
-	mutable uint8  mPPULoadBuffer;
+	mutable uint8  mPPULoadBuffer = 0;
 	mutable uint8  mPPUStatus;
-	mutable uint16 mPPUScroll;
+	mutable uint16 mPPUScroll = 0;
 	mutable uint8  mOAMAddr;
 	mutable bool   mNMILatch;
 };

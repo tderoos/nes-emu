@@ -14,13 +14,13 @@ class IO
 public:
 	IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU);
 
-	void SetButtonState(uint8 inState) { mButtonState = inState; }
+	void SetButtonState(const uint8 inState) { mButtonState = inState; }
 
 	void Tick();
 	void Load(uint16 inAddr, uint8* outValue);
 	void Store(uint16 inAddr, uint8 inValue);
 
-	bool IsDMA() const { return mDMAState != INACTIVE; }
+	bool IsDMA() const { return mDMAState != DMAState::Inactive; }
 	bool IRQ() const;
 	bool NMI() const;
 
@@ -34,16 +34,16 @@ private:
 	PPU2C07* mPPU;
 	APU*	 mAPU;
 
-	uint8	 mButtonState;
-	uint8	 mButtonReadMask;
+	uint8	 mButtonState = 0;
+	uint8	 mButtonReadMask = 0;
 
-	enum EDMAState
+	enum class DMAState
 	{
-		READ,
-		WRITE,
-		INACTIVE
+		Read,
+		Write,
+		Inactive
 	};
-	EDMAState mDMAState;
-	uint16	  mDMASrc;
-	uint8	  mDMAValue;
+	DMAState mDMAState = DMAState::Inactive;
+	uint16	 mDMASrc = 0;
+	uint8	 mDMAValue = 0;
 };

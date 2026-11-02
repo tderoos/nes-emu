@@ -1,4 +1,5 @@
 // nes-emu PPU Module
+#include "PPU2C07.h"
 #include "common/types.h"
 
 /*
@@ -56,9 +57,9 @@ static const uint8 BitReverseTable256[] = {
 
 static uint64 TileRemapper[4][256][256];
 
-#include "PPU2C07.h"
-
-void BREAKPPU() {}
+static void BREAKPPU()
+{
+}
 
 PPU2C07::PPU2C07(Rom* inRom) : mRom(inRom)
 {
@@ -195,7 +196,7 @@ void PPU2C07::UpdateMirroring()
 	}
 }
 
-uint16 PPU2C07::IncreaseScrollY(uint16 inV) const
+uint16 PPU2C07::sIncreaseScrollY(uint16 inV)
 {
 	// Increasing the Y scroll register updates the associated flags in mV
 	// Normally, Y wraps at 29, flipping the vertical nametable bit at the
@@ -222,7 +223,7 @@ uint16 PPU2C07::IncreaseScrollY(uint16 inV) const
 	return inV;
 }
 
-int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
+int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites) const
 {
 	// Determine sprite height
 	uint8		 sprite_h = (mPPUCtrl & 0x20) ? 16 : 8;
@@ -292,7 +293,7 @@ int PPU2C07::FetchScanlineSprites(ScanlineSprite* ioSprites)
 
 void PPU2C07::Scanline()
 {
-	// Tranfer VRam location from temp (loopy)
+	// Transfer VRam location from temp (loopy)
 	if (mScanline == 0)
 		mV = mT;
 
@@ -398,7 +399,7 @@ void PPU2C07::Scanline()
 	if (fine_y == 7)
 	{
 		fine_y = 0;
-		mV = IncreaseScrollY(mV);
+		mV = sIncreaseScrollY(mV);
 	}
 	else
 		fine_y++;

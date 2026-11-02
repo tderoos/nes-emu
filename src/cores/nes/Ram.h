@@ -15,8 +15,8 @@ public:
 	static constexpr int sMask = sSize - 1;
 
 	// Access
-	void Load(uint16 inAddr, uint8* outValue) const { *outValue = mData[inAddr & sMask]; }
-	void Store(uint16 inAddr, uint8 inValue) { mData[inAddr & sMask] = inValue; }
+	void Load(const uint16 inAddr, uint8* outValue) const { *outValue = mData[inAddr & sMask]; }
+	void Store(const uint16 inAddr, const uint8 inValue) { mData[inAddr & sMask] = inValue; }
 
 	// State saving
 	void ReadState(const SaveState& ioState) { ioState.Read(mData); }
