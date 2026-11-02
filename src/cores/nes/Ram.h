@@ -24,5 +24,5 @@ public:
 
 private:
 	// Data
-	uint8 mData[sSize] = { 0xFF };
+	uint8 mData[sSize] = {0xFF};
 };

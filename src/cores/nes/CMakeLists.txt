@@ -14,7 +14,7 @@ add_library(LibCoreNES
 			PPU2C07.cpp
 			PPU2C07.h
 			Ram.h
-			Rom.cpp 
+			Rom.cpp
 			Rom.h
 			SaveState.h)
 
