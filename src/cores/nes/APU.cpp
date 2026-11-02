@@ -117,7 +117,7 @@ void APU::UpdateDAC()
 	float sq_out = 95.88f / ((8128.0f / (sq1 + sq2)) + 100.0f);
 	float tnd_out = 159.79f / ((1.0f / (tr + noise + dmc)) + 100.0f);
 
-	uint8 v8 = (uint8)((sq_out + tnd_out) * 127.0f);
+	uint8 v8 = static_cast<uint8>((sq_out + tnd_out) * 127.0f);
 
 	if (mAudioBuffer != nullptr)
 		mAudioBuffer[mAudioBufferOffset++] = v8;
@@ -136,7 +136,7 @@ void APU::Load(uint16 inAddr, uint8* outValue) const
 
 void APU::Store(uint16 inAddr, uint8 inValue)
 {
-	uint8 reg = (uint8)(inAddr - 0x4000);
+	uint8 reg = static_cast<uint8>(inAddr - 0x4000);
 
 	if (reg < 0x4)
 		mSquare1.Store(reg, inValue);
@@ -288,7 +288,7 @@ float APU::Square::ClockDAC()
 
 	mPhase = (float)fmod(mPhase + (fr / 44100.0f), 1.0f);
 
-	int	  idx = (int)(mPhase * 8);
+	int	  idx = static_cast<int>(mPhase * 8);
 	float v = sSquareDuty[mRegisters[0] >> 6][idx] == 1 ? 15.0f : 0.0f;
 
 	v = mLength != 0 ? v : 0.0f;
@@ -338,7 +338,7 @@ float APU::Triangle::ClockDAC()
 
 	mPhase = (float)fmod(mPhase + (fr / 44100.0f), 1.0f);
 
-	int	  idx = (int)(mPhase * 32);
+	int	  idx = static_cast<int>(mPhase * 32);
 	float v = sTriangleDuty[idx];
 	v = mLength != 0 ? v : 0.0f;
 

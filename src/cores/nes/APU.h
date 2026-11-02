@@ -16,7 +16,7 @@ public:
 	void   SetAudioBuffer(uint8* ioAudioBuffer);
 	uint32 GetSampleCount() const { return mAudioBufferOffset; }
 
-	void	Tick();
+	void   Tick();
 
 	// Access
 	void Load(uint16 inAddr, uint8* outValue) const;
@@ -52,7 +52,7 @@ private:
 			mRegister = inValue;
 			mReset = true;
 		}
-		float Volume() const { return (float)(GETBIT(mRegister, 4) ? mRegister & 0x0F : mValue) / 15.0f; }
+		float Volume() const { return static_cast<float>(GETBIT(mRegister, 4) ? mRegister & 0x0F : mValue) / 15.0f; }
 
 		uint8 mRegister = 0;
 		uint8 mDivider = 0;
@@ -132,8 +132,8 @@ private:
 
 	struct Noise
 	{
-		void		Reset();
-		void		Tick();
+		void Reset();
+		void Tick();
 
 		void SetLengthCtrEnabled(bool inValue)
 		{
@@ -166,13 +166,13 @@ private:
 		void  Store(uint8 inAddr, uint8 inValue) {}
 		float ClockDAC();
 	};
-	DMC					 mDMC;
+	DMC			 mDMC;
 
-	uint8*				 mAudioBuffer = nullptr;
-	uint32				 mAudioBufferOffset = 0;
-	uint32				 mDACDivider = 2;
-	uint16				 mAPUClock = 1;
-	uint8				 mMode = 0;
-	uint8				 mSequencerClock = 0;
-	mutable bool		 mInterrupt = false;
+	uint8*		 mAudioBuffer = nullptr;
+	uint32		 mAudioBufferOffset = 0;
+	uint32		 mDACDivider = 2;
+	uint16		 mAPUClock = 1;
+	uint8		 mMode = 0;
+	uint8		 mSequencerClock = 0;
+	mutable bool mInterrupt = false;
 };

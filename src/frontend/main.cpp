@@ -5,11 +5,11 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#include "cartridge/CartridgeData.h"
 #include "common/Mutex.h"
 #include "common/RingBuffer.h"
 #include "common/Thread.h"
 #include "common/types.h"
-#include "cartridge/CartridgeData.h"
 #include "cores/nes/NES.h"
 #include "cores/nes/SaveState.h"
 
@@ -277,7 +277,7 @@ void NESApp::EmulatorThreadFunction()
  */
 uint8 NESApp::GetControllerData() const
 {
-	uint8 controller_input = 0;
+	uint8		  controller_input = 0;
 
 	AutoLockMutex lock(mPadMutex);
 	if (mPad)
@@ -295,14 +295,14 @@ uint8 NESApp::GetControllerData() const
 	else
 	{
 		const bool* key_state = SDL_GetKeyboardState(nullptr);
-		controller_input |= key_state[SDL_SCANCODE_K] << 0; // A
-		controller_input |= key_state[SDL_SCANCODE_O] << 1;  // B
-		controller_input |= key_state[SDL_SCANCODE_SPACE] << 2;  // Select
+		controller_input |= key_state[SDL_SCANCODE_K] << 0;		 // A
+		controller_input |= key_state[SDL_SCANCODE_O] << 1;		 // B
+		controller_input |= key_state[SDL_SCANCODE_SPACE] << 2;	 // Select
 		controller_input |= key_state[SDL_SCANCODE_RETURN] << 3; // Start
 
-		controller_input |= key_state[SDL_SCANCODE_W] << 4;	// Up
-		controller_input |= key_state[SDL_SCANCODE_S] << 5;	// Down
-		controller_input |= key_state[SDL_SCANCODE_A] << 6;	// Left
+		controller_input |= key_state[SDL_SCANCODE_W] << 4; // Up
+		controller_input |= key_state[SDL_SCANCODE_S] << 5; // Down
+		controller_input |= key_state[SDL_SCANCODE_A] << 6; // Left
 		controller_input |= key_state[SDL_SCANCODE_D] << 7; // Right
 	}
 
@@ -341,7 +341,7 @@ void NESApp::Present() const
 	{
 		AutoLockMutex lock(mFrameBufferMutex);
 		for (int i = 0; i < 256; i++)
-			memcpy((uint8*)pixels + i * pitch, mFrameBuffer + i * 256, 256 * sizeof(uint32));
+			memcpy(static_cast<uint8*>(pixels) + i * pitch, mFrameBuffer + i * 256, 256 * sizeof(uint32));
 	}
 	SDL_UnlockTexture(mTexture);
 

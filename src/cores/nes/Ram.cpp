@@ -1,42 +1,25 @@
 // nes-emu Ram module
 #include "Ram.h"
-#include <stdlib.h>
-#include <memory.h>
 
+#include <cstring>
 
-Ram::Ram(uint16 inSize)
-{
-    mSize = inSize;
-    mData = (uint8 *) malloc(inSize);
-    memset(mData, 0xFFFFFFFF, inSize);
-}
-
-
-
-Ram::~Ram()
-{
-    free(mData);
-}
-
-
+Ram::Ram(uint16 inSize) : mSize(inSize), mData(inSize, 0xFF) {}
 
 void Ram::ReadState(const SaveState& ioState)
 {
-    uint16 size;
-    ioState.Read(size);
-    if (size != mSize)
-    {
-        mData = (uint8*) realloc(mData, size);
-        mSize = size;
-    }
+	uint16 size;
+	ioState.Read(size);
+	if (size != mSize)
+	{
+		mData.resize(size);
+		mSize = size;
+	}
 
-    ioState.ReadRaw(mData, mSize);
+	ioState.ReadRaw(mData.data(), mSize);
 }
-
-
 
 void Ram::WriteState(SaveState& ioState) const
 {
-    ioState.Write(mSize);
-    ioState.WriteRaw(mData, mSize);
+	ioState.Write(mSize);
+	ioState.WriteRaw(mData.data(), mSize);
 }

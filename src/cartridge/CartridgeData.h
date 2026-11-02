@@ -1,8 +1,8 @@
 #pragma once
 #include "common/types.h"
+#include <span>
 #include <string>
 #include <vector>
-#include <span>
 
 enum class CartridgeType
 {
@@ -22,11 +22,11 @@ public:
 
 	// Properties
 	const std::string& GetFilename() const { return mFilename; }
-	CartridgeType GetType() const	{ return mType; }
+	CartridgeType	   GetType() const { return mType; }
 
 	// Data access
-	uint32 GetSize() const			{ return mData.size(); }
-	const uint8* GetData() const	{ return mData.data(); }
+	uint32		 GetSize() const { return mData.size(); }
+	const uint8* GetData() const { return mData.data(); }
 
 	// Persistent state
 	void SetPersistentState(std::span<uint8> inState) const;
@@ -34,9 +34,9 @@ public:
 	void SavePersistentState() const;
 
 private:
-	std::string mFilename;
-	CartridgeType mType = CartridgeType::Unknown;
+	std::string				   mFilename;
+	CartridgeType			   mType = CartridgeType::Unknown;
 
-	std::vector<uint8> mData;
+	std::vector<uint8>		   mData;
 	mutable std::vector<uint8> mPersistentState;
 };

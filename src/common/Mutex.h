@@ -8,14 +8,14 @@
 class Mutex
 {
 public:
-			Mutex()			{ mMutex = SDL_CreateMutex(); }
-			~Mutex()		{ SDL_DestroyMutex(mMutex); }
+	Mutex() { mMutex = SDL_CreateMutex(); }
+	~Mutex() { SDL_DestroyMutex(mMutex); }
 
-	void	Lock() const	{ SDL_LockMutex(mMutex); }
-	void	Unlock() const	{ SDL_UnlockMutex(mMutex); }
+	void Lock() const { SDL_LockMutex(mMutex); }
+	void Unlock() const { SDL_UnlockMutex(mMutex); }
 
 private:
-	SDL_Mutex*	mMutex = nullptr;
+	SDL_Mutex* mMutex = nullptr;
 };
 
 /**
@@ -23,9 +23,9 @@ private:
  */
 struct AutoLockMutex
 {
-	AutoLockMutex(const Mutex& inMutex) : mMutex(inMutex)	{ mMutex.Lock(); }
-	~AutoLockMutex()										{ mMutex.Unlock(); }
+	AutoLockMutex(const Mutex& inMutex) : mMutex(inMutex) { mMutex.Lock(); }
+	~AutoLockMutex() { mMutex.Unlock(); }
 
 private:
-	const Mutex&	mMutex;
+	const Mutex& mMutex;
 };
