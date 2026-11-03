@@ -2,8 +2,9 @@
 #pragma once
 
 #include "common/types.h"
-#include "common/SaveState.h"
 
+// Forward declarations
+class SaveState;
 class Ram;
 class Rom;
 class PPU2C07;

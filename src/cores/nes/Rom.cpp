@@ -70,7 +70,7 @@ void Rom::Store(uint16 inAddr, uint8 inValue)
 void Rom::ReadState(const SaveState& ioState)
 {
 	if (mHeader->mSRamBattery)
-		ioState.ReadRaw(mPRGRam, 0x2000);
+		ioState.Read(mPRGRam);
 
 	mMapper->ReadState(ioState);
 
@@ -81,7 +81,7 @@ void Rom::ReadState(const SaveState& ioState)
 void Rom::WriteState(SaveState& ioState) const
 {
 	if (mHeader->mSRamBattery)
-		ioState.WriteRaw(mPRGRam, 0x2000);
+		ioState.Write(mPRGRam);
 
 	mMapper->WriteState(ioState);
 }

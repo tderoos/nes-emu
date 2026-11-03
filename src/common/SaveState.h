@@ -5,30 +5,35 @@
 
 #include "common/types.h"
 
-struct SaveState
+/**
+ *
+ */
+class SaveState
 {
+public:
+	void Clear()
+	{
+		mData.clear();
+		mReadOffset = 0;
+	}
+	void Reset() const { mReadOffset = 0; }
+	bool IsEmpty() const { return mData.empty(); }
+
 	template <typename taType>
-	void Read(taType& inValue) const
+	void Read(taType& outValue) const
 	{
-		ReadRaw((uint8*)&inValue, sizeof(taType));
+		memcpy(&outValue, &mData[mReadOffset], sizeof(taType));
+		mReadOffset += sizeof(taType);
 	}
-
-	void ReadRaw(uint8* outData, int inSize) const
-	{
-		memcpy(outData, &mData[mReadOffset], inSize);
-		mReadOffset += inSize;
-	}
-
-	void Skip(int inSize) const { mReadOffset += inSize; }
 
 	template <typename taType>
 	void Write(const taType& inValue)
 	{
-		WriteRaw((const uint8*)&inValue, sizeof(taType));
+		const uint8* data = reinterpret_cast<const uint8*>(&inValue);
+		mData.insert(mData.end(), data, data+sizeof(taType));
 	}
 
-	void			   WriteRaw(const uint8* inData, int inSize) { mData.insert(mData.end(), inData, inData + inSize); }
-
+private:
 	std::vector<uint8> mData;
 	mutable int		   mReadOffset = 0;
 };

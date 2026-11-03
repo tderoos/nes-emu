@@ -1,26 +1,14 @@
 // nes-emu IO Module
 #include "IO.h"
 #include "APU.h"
+#include "common/SaveState.h"
 #include "PPU2C07.h"
 #include "Ram.h"
 #include "Rom.h"
 
 void BREAK();
 
-IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU)
-	: mRam(inRam), mRom(inRom), mPPU(inPPU), mAPU(inAPU)
-{
-}
-
-bool IO::IRQ() const
-{
-	return mAPU->GetInterrupt();
-}
-
-bool IO::NMI() const
-{
-	return mPPU->GetNMI();
-}
+IO::IO(Ram* inRam, Rom* inRom, PPU2C07* inPPU, APU* inAPU) : mRam(inRam), mRom(inRom), mPPU(inPPU), mAPU(inAPU) {}
 
 void IO::Tick()
 {
@@ -105,6 +93,16 @@ void IO::Store(const uint16 inAddr, const uint8 inValue)
 	}
 	else
 		mRom->Store(inAddr, inValue);
+}
+
+bool IO::IRQ() const
+{
+	return mAPU->GetInterrupt();
+}
+
+bool IO::NMI() const
+{
+	return mPPU->GetNMI();
 }
 
 void IO::ReadState(const SaveState& ioState)

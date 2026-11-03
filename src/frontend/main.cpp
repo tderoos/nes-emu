@@ -250,9 +250,14 @@ void NESApp::EmulatorThreadFunction()
 		switch (mSaveStateRequest)
 		{
 		case ESaveStateRequest::Load:
-			mNES->ReadState(mSaveState);
+			if (!mSaveState.IsEmpty())
+			{
+				mSaveState.Reset();
+				mNES->ReadState(mSaveState);
+			}
 			break;
 		case ESaveStateRequest::Save:
+			mSaveState.Clear();
 			mNES->WriteState(mSaveState);
 			break;
 		default:

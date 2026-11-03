@@ -17,7 +17,13 @@ static constexpr uint32 sVersion = 1;
 static constexpr uint32 sFlagBattery = 1 << 0;
 static constexpr uint32 sFlagSnapshot = 1 << 1;
 
-static bool				sReadFile(const std::string& inFilename, std::vector<uint8>& outData)
+/**
+ * @brief sReadFile
+ * @param inFilename Filename to rad
+ * @param outData Data read from file
+ * @return true if data was read successfully.
+ */
+static bool sReadFile(const std::string& inFilename, std::vector<uint8>& outData)
 {
 	// Open file
 	FILE* fd = fopen(inFilename.c_str(), "rb");
@@ -44,6 +50,11 @@ static bool				sReadFile(const std::string& inFilename, std::vector<uint8>& outD
 	return true;
 }
 
+/**
+ *
+ * @param inFilename
+ * @return
+ */
 bool CartridgeData::Load(const char* inFilename)
 {
 	// Clear old data

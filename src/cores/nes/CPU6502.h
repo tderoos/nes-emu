@@ -2,9 +2,10 @@
 #pragma once
 
 #include "common/types.h"
-#include "common/SaveState.h"
 
+// Forward declarations
 class IO;
+class SaveState;
 
 void BREAK();
 
@@ -30,7 +31,7 @@ public:
 
 	struct Status
 	{
-		uint16 mPC;
+		uint16 mPC = 0;
 
 		union
 		{
@@ -58,7 +59,7 @@ public:
 				uint8 mOverflow : 1;
 				uint8 mNeg : 1;
 			};
-			uint8 mFlags;
+			uint8 mFlags = 0;
 		};
 	};
 

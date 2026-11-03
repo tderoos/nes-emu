@@ -5,12 +5,11 @@
 
 #include "common/types.h"
 #include "Mapper.h"
-#include "common/SaveState.h"
 
 // Forward declarations
 class CartridgeData;
-
 class Mapper;
+class SaveState;
 
 /**
  * RomHeader - implements the basic iNes rom header format.

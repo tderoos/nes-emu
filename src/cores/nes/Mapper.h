@@ -4,6 +4,9 @@
 #include "common/types.h"
 #include "common/SaveState.h"
 
+// Forward declarations
+class SaveState;
+
 // Rom info
 enum class EVRamLayout
 {

@@ -1,5 +1,6 @@
 // nes-emu CPU module
 #include "CPU6502.h"
+#include "common/SaveState.h"
 #include "IO.h"
 
 #include <cstdio>
@@ -12,14 +13,14 @@ struct DebugTrace
 	uint16 mAddr;
 	uint8  mOp;
 };
-DebugTrace sTrace[256];
-int		   sTraceHead = 0;
+static DebugTrace sTrace[256];
+static int		  sTraceHead = 0;
 
 void	   BREAK()
 {
 	for (int i = 0; i < 256; ++i)
 	{
-		int idx = (sTraceHead + i) % 256;
+		const int idx = (sTraceHead + i) % 256;
 		printf("0x%4x $%2x\n", sTrace[idx].mAddr, sTrace[idx].mOp);
 	}
 }

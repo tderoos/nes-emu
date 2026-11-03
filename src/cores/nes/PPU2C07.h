@@ -2,7 +2,9 @@
 #pragma once
 
 #include "Rom.h"
-#include "common/SaveState.h"
+
+// Forward declarations
+class SaveState;
 
 class PPU2C07
 {

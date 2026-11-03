@@ -1,4 +1,4 @@
-// nes-emu
+// NES Emulator Core
 #include "NES.h"
 
 NES::NES(const CartridgeData& inCartridge)
@@ -30,10 +30,6 @@ void NES::RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudio
 // State saving
 void NES::ReadState(const SaveState& ioState)
 {
-	if (ioState.mData.empty())
-		return;
-
-	ioState.mReadOffset = 0;
 	mRom.ReadState(ioState);
 	mRam.ReadState(ioState);
 	mPPU.ReadState(ioState);
@@ -44,9 +40,6 @@ void NES::ReadState(const SaveState& ioState)
 
 void NES::WriteState(SaveState& ioState) const
 {
-	ioState.mReadOffset = 0;
-	ioState.mData.clear();
-
 	mRom.WriteState(ioState);
 	mRam.WriteState(ioState);
 	mPPU.WriteState(ioState);
