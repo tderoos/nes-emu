@@ -172,6 +172,13 @@ void NESApp::InsertRom(const char* inPath)
 	if (!mCartridge.Load(inPath))
 		return;
 
+	// Adopt a snapshot stored in the .sav (if any) as the active save state,
+	// so pressing L restores it.
+	mSaveState.Clear();
+	CartridgeData::SaveDataSpan snapshot;
+	if (mCartridge.GetSnapshot(snapshot))
+		mSaveState.SetData(snapshot);
+
 	mNES = new NES(mCartridge);
 	Thread::sCreateThread(
 		mEmulatorThread,
@@ -194,7 +201,11 @@ void NESApp::EjectRom()
 		mEmulatorThread.Destroy();
 		SafeDelete(mNES);
 
-		// Save persistent game-state
+		// Save persistent game-state, including the active save state (if any)
+		if (!mSaveState.IsEmpty())
+			mCartridge.SetSnapshot(mSaveState.GetData());
+		else
+			mCartridge.ClearSnapshot();
 		mCartridge.StoreSaveData();
 	}
 

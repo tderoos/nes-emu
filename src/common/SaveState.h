@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <span>
 #include <vector>
 
 #include "common/types.h"
@@ -18,6 +19,14 @@ public:
 	}
 	void Reset() const { mReadOffset = 0; }
 	bool IsEmpty() const { return mData.empty(); }
+
+	// Raw blob access (e.g. to adopt a snapshot loaded from a .sav file)
+	void					SetData(std::span<const uint8> inData)
+	{
+		mData.assign(inData.begin(), inData.end());
+		mReadOffset = 0;
+	}
+	std::span<const uint8> GetData() const { return mData; }
 
 	template <typename taType>
 	bool Read(taType& outValue) const
