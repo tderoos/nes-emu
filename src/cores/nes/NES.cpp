@@ -28,18 +28,24 @@ void NES::RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudio
 // 7458.333333333333333
 
 // State saving
-void NES::ReadState(const SaveState& ioState)
+bool NES::ReadState(const SaveState& ioState)
 {
+	uint32 state_version = 0;
+	if (!ioState.Read(state_version) || state_version != sStateVersion)
+		return false;
+
 	mRom.ReadState(ioState);
 	mRam.ReadState(ioState);
 	mPPU.ReadState(ioState);
 	mAPU.ReadState(ioState);
 	mIO.ReadState(ioState);
 	mCPU.ReadState(ioState);
+	return true;
 }
 
 void NES::WriteState(SaveState& ioState) const
 {
+	ioState.Write(sStateVersion);
 	mRom.WriteState(ioState);
 	mRam.WriteState(ioState);
 	mPPU.WriteState(ioState);

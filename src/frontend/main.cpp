@@ -253,7 +253,8 @@ void NESApp::EmulatorThreadFunction()
 			if (!mSaveState.IsEmpty())
 			{
 				mSaveState.Reset();
-				mNES->ReadState(mSaveState);
+				if (!mNES->ReadState(mSaveState))
+					SDL_Log("Failed to load save state: incompatible or corrupt core state");
 			}
 			break;
 		case ESaveStateRequest::Save:

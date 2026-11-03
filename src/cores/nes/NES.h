@@ -20,8 +20,11 @@ public:
 
 	void RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* ioSampleCount);
 
-	// State saving
-	void ReadState(const SaveState& ioState);
+	// State saving. The snapshot starts with sStateVersion so the core can
+	// reject or migrate snapshots written by an incompatible core version.
+	static constexpr uint32 sStateVersion = 1;
+
+	bool ReadState(const SaveState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 private:

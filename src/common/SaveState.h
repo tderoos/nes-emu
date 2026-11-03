@@ -19,11 +19,17 @@ public:
 	void Reset() const { mReadOffset = 0; }
 	bool IsEmpty() const { return mData.empty(); }
 
+	size_t Remaining() const { return mData.size() > static_cast<size_t>(mReadOffset) ? mData.size() - mReadOffset : 0; }
+	bool   CanRead(size_t inSize) const { return inSize <= Remaining(); }
+
 	template <typename taType>
-	void Read(taType& outValue) const
+	bool Read(taType& outValue) const
 	{
+		if (!CanRead(sizeof(taType)))
+			return false;
 		memcpy(&outValue, &mData[mReadOffset], sizeof(taType));
 		mReadOffset += sizeof(taType);
+		return true;
 	}
 
 	template <typename taType>

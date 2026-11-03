@@ -4,15 +4,17 @@
 #include <cstring>
 
 // .sav container format (little-endian):
-//   [magic   8 bytes]  "NESSAVE\0"
-//   [version 4 bytes]  1
+//   [magic   8 bytes]  "EMUSAVE\0"
+//   [version 4 bytes]  container format version (1)
 //   [flags   4 bytes]  bit0: battery section present
 //                       bit1: snapshot section present
 //   [battery section]  [size 4 bytes][data]     (if bit0)
 //   [snapshot section] [size 4 bytes][data]    (if bit1)
-// A file without the magic is not a valid .sav and is ignored.
+// The snapshot blob is core-specific: its first field is the core's own
+// state version, written/checked by the core (e.g. NES), not by this container.
+// A file without the magic is not a valid .sav and is reported as failed.
 
-static constexpr char	sMagic[8] = {'N', 'E', 'S', 'S', 'A', 'V', 'E', '\0'};
+static constexpr char	sMagic[8] = {'E', 'M', 'U', 'S', 'A', 'V', 'E', '\0'};
 static constexpr uint32 sVersion = 1;
 static constexpr uint32 sFlagBattery = 1 << 0;
 static constexpr uint32 sFlagSnapshot = 1 << 1;
@@ -67,15 +69,29 @@ bool CartridgeData::Load(const char* inFilename)
 	mFilename = inFilename;
 	mType = CartridgeType::NES;
 
-	// Try to read persistent state data
+	// Try to read persistent state data. A missing .sav is fine; a corrupt
+	// or incompatible one is logged but must not fail loading the cartridge.
+	if (!LoadSaveData())
+		fprintf(stderr, "CartridgeData: failed to load '%s.sav' (corrupt or unsupported), ignoring it\n",
+				mFilename.c_str());
+
+	return true;
+}
+
+/**
+ * @brief Load the <rom>.sav container into mBatteryState / mSnapshotState
+ * @return true if there is no .sav or it parsed successfully, false on any parse failure.
+ */
+bool CartridgeData::LoadSaveData()
+{
 	std::vector<uint8> save_data;
 	if (!sReadFile(mFilename + ".sav", save_data))
-		return true;
+		return true; // no save file yet: nothing to load
 
-	// Parse the container (mismatched magic: not ours, ignore)
+	// Parse the container
 	const size_t header_size = 8 + 4 + 4;
 	if (save_data.size() < header_size || memcmp(save_data.data(), sMagic, sizeof(sMagic)) != 0)
-		return true;
+		return false;
 
 	size_t offset = sizeof(sMagic);
 	uint32 version, flags;
@@ -84,7 +100,7 @@ bool CartridgeData::Load(const char* inFilename)
 	memcpy(&flags, &save_data[offset], sizeof(flags));
 	offset += 4;
 	if (version != sVersion)
-		return true; // future versions: ignore rather than misinterpret
+		return false; // future versions: refuse rather than misinterpret
 
 	for (uint32 bit : {sFlagBattery, sFlagSnapshot})
 	{
@@ -93,11 +109,11 @@ bool CartridgeData::Load(const char* inFilename)
 
 		uint32 section_size;
 		if (offset + 4 > save_data.size())
-			return true;
+			return false;
 		memcpy(&section_size, &save_data[offset], 4);
 		offset += 4;
 		if (offset + section_size > save_data.size())
-			return true;
+			return false;
 
 		std::span<const uint8> section(save_data.data() + offset, section_size);
 		if (bit == sFlagBattery)

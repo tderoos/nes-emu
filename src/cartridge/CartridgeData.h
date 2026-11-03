@@ -49,6 +49,8 @@ public:
 	void SavePersistentState() const;
 
 private:
+	bool LoadSaveData();
+
 	std::string				   mFilename;
 	CartridgeType			   mType = CartridgeType::Unknown;
 
