@@ -12,6 +12,7 @@
 // Forward declarations
 class CartridgeData;
 class SaveState;
+class LoadState;
 
 class NES
 {
@@ -24,7 +25,7 @@ public:
 	// reject or migrate snapshots written by an incompatible core version.
 	static constexpr uint32 sStateVersion = 1;
 
-	bool ReadState(const SaveState& ioState);
+	bool ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 private:
@@ -34,5 +35,4 @@ private:
 	APU		  mAPU;
 	IO		  mIO;
 	CPU6502	  mCPU;
-	SaveState mSaveState;
 };

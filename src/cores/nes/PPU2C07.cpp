@@ -600,7 +600,7 @@ void PPU2C07::Store(uint16 inAddr, uint8 inValue)
 }
 
 // State saving
-void PPU2C07::ReadState(const SaveState& ioState)
+void PPU2C07::ReadState(const LoadState& ioState)
 {
 	ioState.Read(mClock);
 	ioState.Read(mOddFrame);

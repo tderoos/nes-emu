@@ -28,7 +28,7 @@ void NES::RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudio
 // 7458.333333333333333
 
 // State saving
-bool NES::ReadState(const SaveState& ioState)
+bool NES::ReadState(const LoadState& ioState)
 {
 	uint32 state_version = 0;
 	if (!ioState.Read(state_version) || state_version != sStateVersion)

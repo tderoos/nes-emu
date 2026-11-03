@@ -953,7 +953,7 @@ void CPU6502::Tick(uint16 inPPUClock, int16 inScanline)
 }
 
 // State saving
-void CPU6502::ReadState(const SaveState& ioState)
+void CPU6502::ReadState(const LoadState& ioState)
 {
 	ioState.Read(mNMI);
 	ioState.Read(mInstrTimer);

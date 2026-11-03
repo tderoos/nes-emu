@@ -112,7 +112,7 @@ public:
 	}
 
 	// State saving
-	void ReadState(const SaveState& ioState) override
+	void ReadState(const LoadState& ioState) override
 	{
 		ioState.Read(mShiftIndex);
 		ioState.Read(mTempReg);

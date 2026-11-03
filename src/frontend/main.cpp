@@ -75,7 +75,6 @@ private:
 	CartridgeData	  mCartridge;
 
 	NES*			  mNES = nullptr;
-	SaveState		  mSaveState;
 	LoadSaveRequest	  mSaveStateRequest = ESaveStateRequest::None;
 
 	Thread			  mEmulatorThread;
@@ -172,13 +171,6 @@ void NESApp::InsertRom(const char* inPath)
 	if (!mCartridge.Load(inPath))
 		return;
 
-	// Adopt a snapshot stored in the .sav (if any) as the active save state,
-	// so pressing L restores it.
-	mSaveState.Clear();
-	CartridgeData::SaveDataSpan snapshot;
-	if (mCartridge.GetSnapshot(snapshot))
-		mSaveState.SetData(snapshot);
-
 	mNES = new NES(mCartridge);
 	Thread::sCreateThread(
 		mEmulatorThread,
@@ -202,10 +194,6 @@ void NESApp::EjectRom()
 		SafeDelete(mNES);
 
 		// Save persistent game-state, including the active save state (if any)
-		if (!mSaveState.IsEmpty())
-			mCartridge.SetSnapshot(mSaveState.GetData());
-		else
-			mCartridge.ClearSnapshot();
 		mCartridge.StoreSaveData();
 	}
 
@@ -261,17 +249,19 @@ void NESApp::EmulatorThreadFunction()
 		switch (mSaveStateRequest)
 		{
 		case ESaveStateRequest::Load:
-			if (!mSaveState.IsEmpty())
-			{
-				mSaveState.Reset();
-				if (!mNES->ReadState(mSaveState))
+		{
+			LoadState load_state = mCartridge.GetLoadState();
+			if (!load_state.IsEmpty())
+				if (!mNES->ReadState(load_state))
 					SDL_Log("Failed to load save state: incompatible or corrupt core state");
-			}
 			break;
+		}
 		case ESaveStateRequest::Save:
-			mSaveState.Clear();
-			mNES->WriteState(mSaveState);
+		{
+			SaveState save_state = mCartridge.GetSaveState();
+			mNES->WriteState(save_state);
 			break;
+		}
 		default:
 			break;
 		}

@@ -1,4 +1,5 @@
 #pragma once
+#include "common/SaveState.h"
 #include "common/types.h"
 #include <span>
 #include <string>
@@ -24,8 +25,6 @@ class CartridgeData
 {
 public:
 	using RomData = std::vector<uint8>;
-	using SaveData = std::vector<uint8>;
-	using SaveDataSpan = std::span<const uint8>;
 
 	// Loading data
 	bool Load(const char* inFilename);
@@ -40,25 +39,24 @@ public:
 	const uint8* GetData() const { return mData.data(); }
 
 	// Battery state (battery-backed cartridge memory)
-	void SetPersistentState(SaveDataSpan inState) const;
-	bool GetPersistentState(SaveDataSpan& outState) const;
+	void SetPersistentState(StateDataSpan inState) const;
+	bool GetPersistentState(StateDataSpan& outState) const;
 
-	// Machine snapshot (full core state, core-specific layout)
-	void SetSnapshot(SaveDataSpan inState);
-	bool GetSnapshot(SaveDataSpan& outState) const;
-	bool HasSnapshot() const { return !mSnapshotState.empty(); }
-	void ClearSnapshot() { mSnapshotState.clear(); }
+	// Load/Save state
+	LoadState GetLoadState() const;
+	SaveState GetSaveState();
 
 	// Write the .sav file (battery + snapshot sections)
 	void StoreSaveData() const;
 
 private:
+	// Load state from .sav
 	bool LoadSaveData();
 
-	std::string				   mFilename;
-	CartridgeType			   mType = CartridgeType::Unknown;
-
-	RomData					   mData;
-	mutable SaveData		   mBatteryState;
-	SaveData				   mSnapshotState;
+	// Data
+	std::string		 mFilename;
+	CartridgeType	 mType = CartridgeType::Unknown;
+	RomData			 mData;
+	mutable StateData mBatteryState;
+	StateData		 mSnapshotState;
 };

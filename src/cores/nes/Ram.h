@@ -19,7 +19,7 @@ public:
 	void Store(const uint16 inAddr, const uint8 inValue) { mData[inAddr & sMask] = inValue; }
 
 	// State saving
-	void ReadState(const SaveState& ioState) { ioState.Read(mData); }
+	void ReadState(const LoadState& ioState) { ioState.Read(mData); }
 	void WriteState(SaveState& ioState) const { ioState.Write(mData); }
 
 private:

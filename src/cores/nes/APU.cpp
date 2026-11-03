@@ -182,7 +182,7 @@ void APU::Store(uint16 inAddr, uint8 inValue)
 }
 
 // State saving
-void APU::ReadState(const SaveState& ioState) {}
+void APU::ReadState(const LoadState& ioState) {}
 void APU::WriteState(SaveState& ioState) const {}
 
 /// EnvelopeGenerator

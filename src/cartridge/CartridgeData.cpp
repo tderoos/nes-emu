@@ -99,12 +99,12 @@ bool CartridgeData::Load(const char* inFilename)
 	return true;
 }
 
-void CartridgeData::SetPersistentState(SaveDataSpan inState) const
+void CartridgeData::SetPersistentState(StateDataSpan inState) const
 {
 	mBatteryState.assign(inState.begin(), inState.end());
 }
 
-bool CartridgeData::GetPersistentState(SaveDataSpan& outState) const
+bool CartridgeData::GetPersistentState(StateDataSpan& outState) const
 {
 	if (mBatteryState.empty())
 		return false;
@@ -113,18 +113,15 @@ bool CartridgeData::GetPersistentState(SaveDataSpan& outState) const
 	return true;
 }
 
-void CartridgeData::SetSnapshot(SaveDataSpan inState)
+LoadState CartridgeData::GetLoadState() const
 {
-	mSnapshotState.assign(inState.begin(), inState.end());
+	return LoadState(mSnapshotState);
 }
 
-bool CartridgeData::GetSnapshot(SaveDataSpan& outState) const
+SaveState CartridgeData::GetSaveState()
 {
-	if (mSnapshotState.empty())
-		return false;
-
-	outState = mSnapshotState;
-	return true;
+	mSnapshotState.clear();
+	return SaveState(mSnapshotState);
 }
 
 void CartridgeData::StoreSaveData() const
@@ -145,7 +142,7 @@ void CartridgeData::StoreSaveData() const
 	append(&header, sizeof(SaveDataHeader));
 
 	// Append save sections
-	auto append_section = [&append](const SaveData& inSection)
+	auto append_section = [&append](const StateData& inSection)
 	{
 		const uint32 size = static_cast<uint32>(inSection.size());
 		append(&size, sizeof(size));
@@ -203,7 +200,7 @@ bool CartridgeData::LoadSaveData()
 	if (!read_value(header) || !header.IsValid())
 		return false;
 
-	auto read_save_section = [&read_value, &read_range](SaveData& outData)
+	auto read_save_section = [&read_value, &read_range](StateData& outData)
 	{
 		uint32 section_size;
 		if (!read_value(section_size))

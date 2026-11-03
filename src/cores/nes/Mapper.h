@@ -32,7 +32,7 @@ public:
 								 EVRamLayout* outMappedLayout) const = 0;
 
 	// State saving
-	virtual void ReadState(const SaveState& ioState) {}
+	virtual void ReadState(const LoadState& ioState) {}
 	virtual void WriteState(SaveState& ioState) const {}
 
 protected:

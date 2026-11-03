@@ -30,7 +30,7 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 
 	if (mHeader->mSRamBattery)
 	{
-		CartridgeData::SaveDataSpan persistent_state;
+		StateDataSpan persistent_state;
 		if (mCartridge.GetPersistentState(persistent_state) && persistent_state.size() == sizeof(mPRGRam))
 			memcpy(mPRGRam, persistent_state.data(),  sizeof(mPRGRam));
 	}
@@ -67,7 +67,7 @@ void Rom::Store(uint16 inAddr, uint8 inValue)
 	}
 }
 
-void Rom::ReadState(const SaveState& ioState)
+void Rom::ReadState(const LoadState& ioState)
 {
 	if (mHeader->mSRamBattery)
 		ioState.Read(mPRGRam);

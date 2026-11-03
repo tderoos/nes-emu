@@ -6,6 +6,7 @@
 // Forward declarations
 class IO;
 class SaveState;
+class LoadState;
 
 void BREAK();
 
@@ -17,7 +18,7 @@ public:
 	void Tick(uint16 inPPUClock, int16 inScanline);
 
 	// State saving
-	void ReadState(const SaveState& ioState);
+	void ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 	enum ERegister

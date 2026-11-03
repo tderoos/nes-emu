@@ -105,7 +105,7 @@ bool IO::NMI() const
 	return mPPU->GetNMI();
 }
 
-void IO::ReadState(const SaveState& ioState)
+void IO::ReadState(const LoadState& ioState)
 {
 	ioState.Read(mButtonState);
 	ioState.Read(mButtonReadMask);
