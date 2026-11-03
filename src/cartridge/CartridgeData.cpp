@@ -1,6 +1,5 @@
 #include "CartridgeData.h"
 
-#include <__filesystem/filesystem_error.h>
 #include <cstring>
 #include <filesystem>
 
