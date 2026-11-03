@@ -30,9 +30,9 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 
 	if (mHeader->mSRamBattery)
 	{
-		std::span<uint8> persistent_state;
-		if (mCartridge.GetPersistentState(persistent_state))
-			memcpy(mPRGRam, persistent_state.data(), std::min(persistent_state.size(), static_cast<size_t>(0x2000)));
+		CartridgeData::SaveDataSpan persistent_state;
+		if (mCartridge.GetPersistentState(persistent_state) && persistent_state.size() == sizeof(mPRGRam))
+			memcpy(mPRGRam, persistent_state.data(),  sizeof(mPRGRam));
 	}
 }
 

@@ -195,7 +195,7 @@ void NESApp::EjectRom()
 		SafeDelete(mNES);
 
 		// Save persistent game-state
-		mCartridge.SavePersistentState();
+		mCartridge.StoreSaveData();
 	}
 
 	mCartridge.Clear();

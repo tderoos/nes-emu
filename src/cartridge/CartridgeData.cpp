@@ -1,7 +1,11 @@
 #include "CartridgeData.h"
 
-#include <cstdio>
+#include <__filesystem/filesystem_error.h>
 #include <cstring>
+#include <filesystem>
+
+using std::filesystem::remove;
+using std::filesystem::rename;
 
 // .sav container format (little-endian):
 //   [magic   8 bytes]  "EMUSAVE\0"
@@ -18,6 +22,21 @@ static constexpr char	sMagic[8] = {'E', 'M', 'U', 'S', 'A', 'V', 'E', '\0'};
 static constexpr uint32 sVersion = 1;
 static constexpr uint32 sFlagBattery = 1 << 0;
 static constexpr uint32 sFlagSnapshot = 1 << 1;
+
+struct SaveDataHeader
+{
+	SaveDataHeader()
+	{
+		memcpy(mMagic, sMagic, sizeof(sMagic));
+		mVersion = sVersion;
+		mFlags = 0;
+	}
+	bool   IsValid() const { return memcmp(mMagic, sMagic, sizeof(sMagic)) == 0 && mVersion == sVersion; }
+
+	char   mMagic[8] = {};
+	uint32 mVersion;
+	uint32 mFlags;
+};
 
 /**
  * @brief sReadFile
@@ -63,7 +82,10 @@ bool CartridgeData::Load(const char* inFilename)
 	Clear();
 
 	if (!sReadFile(inFilename, mData))
+	{
+		fprintf(stderr, "Failed to load '%s'\n", mFilename.c_str());
 		return false;
+	}
 
 	// Store values
 	mFilename = inFilename;
@@ -72,11 +94,85 @@ bool CartridgeData::Load(const char* inFilename)
 	// Try to read persistent state data. A missing .sav is fine; a corrupt
 	// or incompatible one is logged but must not fail loading the cartridge.
 	if (!LoadSaveData())
-		fprintf(stderr, "CartridgeData: failed to load '%s.sav' (corrupt or unsupported), ignoring it\n",
-				mFilename.c_str());
+		fprintf(stderr, "Failed to load '%s.sav' (corrupt or unsupported), ignoring it\n", mFilename.c_str());
 
 	return true;
 }
+
+void CartridgeData::SetPersistentState(SaveDataSpan inState) const
+{
+	mBatteryState.assign(inState.begin(), inState.end());
+}
+
+bool CartridgeData::GetPersistentState(SaveDataSpan& outState) const
+{
+	if (mBatteryState.empty())
+		return false;
+
+	outState = mBatteryState;
+	return true;
+}
+
+void CartridgeData::SetSnapshot(SaveDataSpan inState)
+{
+	mSnapshotState.assign(inState.begin(), inState.end());
+}
+
+bool CartridgeData::GetSnapshot(SaveDataSpan& outState) const
+{
+	if (mSnapshotState.empty())
+		return false;
+
+	outState = mSnapshotState;
+	return true;
+}
+
+void CartridgeData::StoreSaveData() const
+{
+	// Serialize the container
+	std::vector<uint8> out;
+	out.reserve(sizeof(SaveDataHeader) + 8 + mBatteryState.size() + mSnapshotState.size());
+
+	auto append = [&out](const void* inData, size_t inSize)
+	{
+		const uint8* data = static_cast<const uint8*>(inData);
+		out.insert(out.end(), data, data + inSize);
+	};
+
+	// Append header
+	SaveDataHeader header;
+	header.mFlags = (mBatteryState.empty() ? 0 : sFlagBattery) | (mSnapshotState.empty() ? 0 : sFlagSnapshot);
+	append(&header, sizeof(SaveDataHeader));
+
+	// Append save sections
+	auto append_section = [&append](const SaveData& inSection)
+	{
+		const uint32 size = static_cast<uint32>(inSection.size());
+		append(&size, sizeof(size));
+		append(inSection.data(), size);
+	};
+
+	if (header.mFlags & sFlagBattery)
+		append_section(mBatteryState);
+
+	if (header.mFlags & sFlagSnapshot)
+		append_section(mSnapshotState);
+
+	// Write atomically: a crash mid-write never destroys the previous
+	// file (which may hold battery saves that are precious).
+	const std::string save_filename = mFilename + ".sav";
+	const std::string temp_filename = save_filename + ".tmp";
+	if (FILE* fd = fopen(temp_filename.c_str(), "wb"); fd != nullptr)
+	{
+		const size_t written = fwrite(out.data(), 1, out.size(), fd);
+		fclose(fd);
+		if (written == out.size())
+			rename(temp_filename, save_filename);
+		else
+			remove(temp_filename);
+	}
+}
+
 
 /**
  * @brief Load the <rom>.sav container into mBatteryState / mSnapshotState
@@ -88,115 +184,46 @@ bool CartridgeData::LoadSaveData()
 	if (!sReadFile(mFilename + ".sav", save_data))
 		return true; // no save file yet: nothing to load
 
-	// Parse the container
-	const size_t header_size = 8 + 4 + 4;
-	if (save_data.size() < header_size || memcmp(save_data.data(), sMagic, sizeof(sMagic)) != 0)
+	auto iter = save_data.begin();
+	auto read_range = [&iter, end = save_data.end()](uint8* outDest, uint32 inSize)
+	{
+		if (iter + inSize > end)
+			return false;
+		memcpy(outDest, &(*iter), inSize);
+		iter += inSize;
+		return true;
+	};
+
+	auto read_value = [&read_range]<typename taType>(taType& outValue) -> bool
+	{
+		return read_range(reinterpret_cast<uint8*>(&outValue), sizeof(taType));
+	};
+
+	SaveDataHeader header;
+	if (!read_value(header) || !header.IsValid())
 		return false;
 
-	size_t offset = sizeof(sMagic);
-	uint32 version, flags;
-	memcpy(&version, &save_data[offset], sizeof(version));
-	offset += 4;
-	memcpy(&flags, &save_data[offset], sizeof(flags));
-	offset += 4;
-	if (version != sVersion)
-		return false; // future versions: refuse rather than misinterpret
-
-	for (uint32 bit : {sFlagBattery, sFlagSnapshot})
+	auto read_save_section = [&read_value, &read_range](SaveData& outData)
 	{
-		if ((flags & bit) == 0)
-			continue;
-
 		uint32 section_size;
-		if (offset + 4 > save_data.size())
-			return false;
-		memcpy(&section_size, &save_data[offset], 4);
-		offset += 4;
-		if (offset + section_size > save_data.size())
+		if (!read_value(section_size))
 			return false;
 
-		std::span<const uint8> section(save_data.data() + offset, section_size);
-		if (bit == sFlagBattery)
-			mBatteryState.assign(section.begin(), section.end());
-		else
-			mSnapshotState.assign(section.begin(), section.end());
-		offset += section_size;
-	}
+		outData.resize(section_size);
+		return read_range(outData.data(), section_size);
+	};
+
+	if (header.mFlags & sFlagBattery)
+		if (!read_save_section(mBatteryState))
+			return false;
+
+	if (header.mFlags & sFlagSnapshot)
+		if (!read_save_section(mSnapshotState))
+			return false;
 
 	return true;
 }
 
-void CartridgeData::SetPersistentState(std::span<uint8> inState) const
-{
-	mBatteryState.assign(inState.begin(), inState.end());
-}
-
-bool CartridgeData::GetPersistentState(std::span<uint8>& outState) const
-{
-	if (mBatteryState.empty())
-		return false;
-
-	outState = mBatteryState;
-	return true;
-}
-
-void CartridgeData::SetSnapshot(std::span<const uint8> inState) const
-{
-	mSnapshotState.assign(inState.begin(), inState.end());
-}
-
-bool CartridgeData::GetSnapshot(std::span<const uint8>& outState) const
-{
-	if (mSnapshotState.empty())
-		return false;
-
-	outState = mSnapshotState;
-	return true;
-}
-
-void CartridgeData::ClearSnapshot() const
-{
-	mSnapshotState.clear();
-}
-
-void CartridgeData::SavePersistentState() const
-{
-	// Serialize the container
-	std::vector<uint8> out;
-	out.reserve(sizeof(sMagic) + 12 + 8 + mBatteryState.size() + mSnapshotState.size());
-
-	auto append = [&out](const void* inData, size_t inSize)
-	{ out.insert(out.end(), static_cast<const uint8*>(inData), static_cast<const uint8*>(inData) + inSize); };
-
-	uint32 flags = (mBatteryState.empty() ? 0 : sFlagBattery) | (mSnapshotState.empty() ? 0 : sFlagSnapshot);
-	append(sMagic, sizeof(sMagic));
-	append(&sVersion, sizeof(sVersion));
-	append(&flags, sizeof(flags));
-
-	for (const std::vector<uint8>* section : {&mBatteryState, &mSnapshotState})
-	{
-		if (section->empty())
-			continue;
-
-		uint32 size = static_cast<uint32>(section->size());
-		append(&size, sizeof(size));
-		append(section->data(), size);
-	}
-
-	// Write atomically: a crash mid-write never destroys the previous
-	// file (which may hold battery saves that are precious).
-	const std::string save_filename = mFilename + ".sav";
-	const std::string temp_filename = save_filename + ".tmp";
-	if (FILE* fd = fopen(temp_filename.c_str(), "wb"); fd != nullptr)
-	{
-		const size_t written = fwrite(out.data(), 1, out.size(), fd);
-		fclose(fd);
-		if (written == out.size())
-			rename(temp_filename.c_str(), save_filename.c_str());
-		else
-			remove(temp_filename.c_str());
-	}
-}
 
 void CartridgeData::Clear()
 {

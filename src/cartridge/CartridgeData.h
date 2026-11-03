@@ -23,6 +23,10 @@ enum class CartridgeType
 class CartridgeData
 {
 public:
+	using RomData = std::vector<uint8>;
+	using SaveData = std::vector<uint8>;
+	using SaveDataSpan = std::span<const uint8>;
+
 	// Loading data
 	bool Load(const char* inFilename);
 	void Clear();
@@ -36,17 +40,17 @@ public:
 	const uint8* GetData() const { return mData.data(); }
 
 	// Battery state (battery-backed cartridge memory)
-	void SetPersistentState(std::span<uint8> inState) const;
-	bool GetPersistentState(std::span<uint8>& outState) const;
+	void SetPersistentState(SaveDataSpan inState) const;
+	bool GetPersistentState(SaveDataSpan& outState) const;
 
 	// Machine snapshot (full core state, core-specific layout)
-	void SetSnapshot(std::span<const uint8> inState) const;
-	bool GetSnapshot(std::span<const uint8>& outState) const;
+	void SetSnapshot(SaveDataSpan inState);
+	bool GetSnapshot(SaveDataSpan& outState) const;
 	bool HasSnapshot() const { return !mSnapshotState.empty(); }
-	void ClearSnapshot() const;
+	void ClearSnapshot() { mSnapshotState.clear(); }
 
 	// Write the .sav file (battery + snapshot sections)
-	void SavePersistentState() const;
+	void StoreSaveData() const;
 
 private:
 	bool LoadSaveData();
@@ -54,7 +58,7 @@ private:
 	std::string				   mFilename;
 	CartridgeType			   mType = CartridgeType::Unknown;
 
-	std::vector<uint8>		   mData;
-	mutable std::vector<uint8> mBatteryState;
-	mutable std::vector<uint8> mSnapshotState;
+	RomData					   mData;
+	mutable SaveData		   mBatteryState;
+	SaveData				   mSnapshotState;
 };
