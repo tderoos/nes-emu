@@ -11,7 +11,7 @@
 #include "common/Thread.h"
 #include "common/types.h"
 #include "cores/nes/NES.h"
-#include "cores/nes/SaveState.h"
+#include "common/SaveState.h"
 
 static constexpr int kNESSampleFrequency = 44056;
 
@@ -75,7 +75,6 @@ private:
 	CartridgeData	  mCartridge;
 
 	NES*			  mNES = nullptr;
-	SaveState		  mSaveState;
 	LoadSaveRequest	  mSaveStateRequest = ESaveStateRequest::None;
 
 	Thread			  mEmulatorThread;
@@ -194,8 +193,8 @@ void NESApp::EjectRom()
 		mEmulatorThread.Destroy();
 		SafeDelete(mNES);
 
-		// Save persistent game-state
-		mCartridge.SavePersistentState();
+		// Save persistent game-state, including the active save state (if any)
+		mCartridge.StoreSaveData();
 	}
 
 	mCartridge.Clear();
@@ -250,11 +249,19 @@ void NESApp::EmulatorThreadFunction()
 		switch (mSaveStateRequest)
 		{
 		case ESaveStateRequest::Load:
-			mNES->ReadState(mSaveState);
+		{
+			LoadState load_state = mCartridge.GetLoadState();
+			if (!load_state.IsEmpty())
+				if (!mNES->ReadState(load_state))
+					SDL_Log("Failed to load save state: incompatible or corrupt core state");
 			break;
+		}
 		case ESaveStateRequest::Save:
-			mNES->WriteState(mSaveState);
+		{
+			SaveState save_state = mCartridge.GetSaveState();
+			mNES->WriteState(save_state);
 			break;
+		}
 		default:
 			break;
 		}

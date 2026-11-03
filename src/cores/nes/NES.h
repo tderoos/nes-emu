@@ -8,10 +8,11 @@
 #include "PPU2C07.h"
 #include "Ram.h"
 #include "Rom.h"
-#include "SaveState.h"
 
 // Forward declarations
 class CartridgeData;
+class SaveState;
+class LoadState;
 
 class NES
 {
@@ -20,8 +21,11 @@ public:
 
 	void RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* ioSampleCount);
 
-	// State saving
-	void ReadState(const SaveState& ioState);
+	// State saving. The snapshot starts with sStateVersion so the core can
+	// reject or migrate snapshots written by an incompatible core version.
+	static constexpr uint32 sStateVersion = 1;
+
+	bool ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 private:
@@ -31,5 +35,4 @@ private:
 	APU		  mAPU;
 	IO		  mIO;
 	CPU6502	  mCPU;
-	SaveState mSaveState;
 };

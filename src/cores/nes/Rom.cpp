@@ -30,9 +30,9 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 
 	if (mHeader->mSRamBattery)
 	{
-		std::span<uint8> persistent_state;
-		if (mCartridge.GetPersistentState(persistent_state))
-			memcpy(mPRGRam, persistent_state.data(), std::min(persistent_state.size(), static_cast<size_t>(0x2000)));
+		StateDataSpan persistent_state;
+		if (mCartridge.GetPersistentState(persistent_state) && persistent_state.size() == sizeof(mPRGRam))
+			memcpy(mPRGRam, persistent_state.data(),  sizeof(mPRGRam));
 	}
 }
 
@@ -67,10 +67,10 @@ void Rom::Store(uint16 inAddr, uint8 inValue)
 	}
 }
 
-void Rom::ReadState(const SaveState& ioState)
+void Rom::ReadState(const LoadState& ioState)
 {
 	if (mHeader->mSRamBattery)
-		ioState.ReadRaw(mPRGRam, 0x2000);
+		ioState.Read(mPRGRam);
 
 	mMapper->ReadState(ioState);
 
@@ -81,7 +81,7 @@ void Rom::ReadState(const SaveState& ioState)
 void Rom::WriteState(SaveState& ioState) const
 {
 	if (mHeader->mSRamBattery)
-		ioState.WriteRaw(mPRGRam, 0x2000);
+		ioState.Write(mPRGRam);
 
 	mMapper->WriteState(ioState);
 }

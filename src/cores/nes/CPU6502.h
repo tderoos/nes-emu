@@ -2,9 +2,11 @@
 #pragma once
 
 #include "common/types.h"
-#include "SaveState.h"
 
+// Forward declarations
 class IO;
+class SaveState;
+class LoadState;
 
 void BREAK();
 
@@ -16,7 +18,7 @@ public:
 	void Tick(uint16 inPPUClock, int16 inScanline);
 
 	// State saving
-	void ReadState(const SaveState& ioState);
+	void ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 	enum ERegister
@@ -30,7 +32,7 @@ public:
 
 	struct Status
 	{
-		uint16 mPC;
+		uint16 mPC = 0;
 
 		union
 		{
@@ -58,7 +60,7 @@ public:
 				uint8 mOverflow : 1;
 				uint8 mNeg : 1;
 			};
-			uint8 mFlags;
+			uint8 mFlags = 0;
 		};
 	};
 

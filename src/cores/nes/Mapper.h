@@ -2,7 +2,10 @@
 #pragma once
 
 #include "common/types.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
+
+// Forward declarations
+class SaveState;
 
 // Rom info
 enum class EVRamLayout
@@ -29,7 +32,7 @@ public:
 								 EVRamLayout* outMappedLayout) const = 0;
 
 	// State saving
-	virtual void ReadState(const SaveState& ioState) {}
+	virtual void ReadState(const LoadState& ioState) {}
 	virtual void WriteState(SaveState& ioState) const {}
 
 protected:

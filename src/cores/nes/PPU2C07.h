@@ -2,7 +2,10 @@
 #pragma once
 
 #include "Rom.h"
-#include "SaveState.h"
+
+// Forward declarations
+class LoadState;
+class SaveState;
 
 class PPU2C07
 {
@@ -25,7 +28,7 @@ public:
 	void Store(uint16 inAddr, uint8 inValue);
 
 	// State saving
-	void ReadState(const SaveState& ioState);
+	void ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 private:

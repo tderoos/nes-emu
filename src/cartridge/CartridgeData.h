@@ -1,4 +1,5 @@
 #pragma once
+#include "common/SaveState.h"
 #include "common/types.h"
 #include <span>
 #include <string>
@@ -11,11 +12,20 @@ enum class CartridgeType
 };
 
 /**
+ * CartridgeData - loads a cartridge file (ROM) and manages its
+ * persistent state, stored next to the rom as <rom>.sav
  *
+ * The .sav file is a small container holding sections with
+ * different lifetimes:
+ *   - battery state:   battery-backed cart memory (auto-saved on eject)
+ *   - machine snapshot: last user save (durable, restored on request)
+ * See CartridgeData.cpp for the format.
  */
 class CartridgeData
 {
 public:
+	using RomData = std::vector<uint8>;
+
 	// Loading data
 	bool Load(const char* inFilename);
 	void Clear();
@@ -28,15 +38,25 @@ public:
 	uint32		 GetSize() const { return mData.size(); }
 	const uint8* GetData() const { return mData.data(); }
 
-	// Persistent state
-	void SetPersistentState(std::span<uint8> inState) const;
-	bool GetPersistentState(std::span<uint8>& outState) const;
-	void SavePersistentState() const;
+	// Battery state (battery-backed cartridge memory)
+	void SetPersistentState(StateDataSpan inState) const;
+	bool GetPersistentState(StateDataSpan& outState) const;
+
+	// Load/Save state
+	LoadState GetLoadState() const;
+	SaveState GetSaveState();
+
+	// Write the .sav file (battery + snapshot sections)
+	void StoreSaveData() const;
 
 private:
-	std::string				   mFilename;
-	CartridgeType			   mType = CartridgeType::Unknown;
+	// Load state from .sav
+	bool LoadSaveData();
 
-	std::vector<uint8>		   mData;
-	mutable std::vector<uint8> mPersistentState;
+	// Data
+	std::string		 mFilename;
+	CartridgeType	 mType = CartridgeType::Unknown;
+	RomData			 mData;
+	mutable StateData mBatteryState;
+	StateData		 mSnapshotState;
 };

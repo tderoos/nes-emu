@@ -1,9 +1,9 @@
 // nes-emu APU Module
 #include "APU.h"
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
+#include "common/SaveState.h"
 
-static int	 clocks = 0;
 
 void		 BREAK();
 
@@ -35,7 +35,6 @@ void APU::Tick()
 {
 	mNoise.Tick();
 
-	clocks++;
 	if (--mAPUClock == 0)
 		UpdateSequencer();
 
@@ -173,8 +172,6 @@ void APU::Store(uint16 inAddr, uint8 inValue)
 		else
 			mAPUClock = 7459 + 1;
 
-		clocks = 0;
-
 		// Clear the frame interrupt flag when the interrupt is disabled
 		if ((mMode & 0x40))
 			mInterrupt = false;
@@ -185,7 +182,7 @@ void APU::Store(uint16 inAddr, uint8 inValue)
 }
 
 // State saving
-void APU::ReadState(const SaveState& ioState) {}
+void APU::ReadState(const LoadState& ioState) {}
 void APU::WriteState(SaveState& ioState) const {}
 
 /// EnvelopeGenerator

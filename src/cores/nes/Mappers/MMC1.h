@@ -2,7 +2,7 @@
 #pragma once
 
 #include "../Mapper.h"
-#include "../SaveState.h"
+#include "common/SaveState.h"
 
 class MMC1 final : public Mapper
 {
@@ -112,7 +112,7 @@ public:
 	}
 
 	// State saving
-	void ReadState(const SaveState& ioState) override
+	void ReadState(const LoadState& ioState) override
 	{
 		ioState.Read(mShiftIndex);
 		ioState.Read(mTempReg);

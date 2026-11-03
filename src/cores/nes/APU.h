@@ -1,6 +1,9 @@
 // nes-emu APU Module
 #include "common/types.h"
-#include "SaveState.h"
+
+// Forward declarations
+class SaveState;
+class LoadState;
 
 #define SETBIT(reg, bit, value)                                                                                        \
 	{                                                                                                                  \
@@ -28,7 +31,7 @@ public:
 	void ClearInterrupt() { mInterrupt = false; }
 
 	// State saving
-	void ReadState(const SaveState& ioState);
+	void ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 private:

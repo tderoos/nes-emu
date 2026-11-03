@@ -2,8 +2,10 @@
 #pragma once
 
 #include "common/types.h"
-#include "SaveState.h"
 
+// Forward declarations
+class SaveState;
+class LoadState;
 class Ram;
 class Rom;
 class PPU2C07;
@@ -25,7 +27,7 @@ public:
 	bool NMI() const;
 
 	// State saving
-	void ReadState(const SaveState& ioState);
+	void ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
 private:

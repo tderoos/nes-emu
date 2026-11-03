@@ -2,7 +2,7 @@
 #pragma once
 
 #include "common/types.h"
-#include "SaveState.h"
+#include "common/SaveState.h"
 
 /**
  * NES Ram module - 2KiB Memory module mapped to 0x0000 - 0x07FF
@@ -19,7 +19,7 @@ public:
 	void Store(const uint16 inAddr, const uint8 inValue) { mData[inAddr & sMask] = inValue; }
 
 	// State saving
-	void ReadState(const SaveState& ioState) { ioState.Read(mData); }
+	void ReadState(const LoadState& ioState) { ioState.Read(mData); }
 	void WriteState(SaveState& ioState) const { ioState.Write(mData); }
 
 private:
