@@ -52,6 +52,13 @@
 		});
 		hint.addEventListener('click', () => input.click());
 		addEventListener('keydown', () => input.click(), { once: true });
+
+		// The page never gets a clean "exit": flush the .sav to IndexedDB
+		// whenever the tab is hidden or closed.
+		const flush = () => { if (typeof Module !== 'undefined' && Module.ccall) Module.ccall('nes_web_flush', null, [], []); };
+		addEventListener('pagehide', flush);
+		addEventListener('beforeunload', flush);
+		document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
 	</script>
 	{{{ SCRIPT }}}
 </body>

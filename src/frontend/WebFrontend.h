@@ -31,6 +31,7 @@ protected:
 private:
 	double		mFrameAccum		  = 0.0;
 	uint64		mLastTicksNS	  = 0;
+	uint32		mFramesSinceFlush = 0;
 	std::string mPendingRomPath;
 	bool		mWantFileDialog	  = false;
 };

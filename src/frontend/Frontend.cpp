@@ -253,6 +253,19 @@ void Frontend::ProcessSaveStateRequest()
 }
 
 /**
+ * @brief Flush battery state + snapshot to the .sav file immediately.
+ */
+void Frontend::FlushSaveData()
+{
+	if (mNES != nullptr)
+	{
+		mNES->StoreBatteryState();
+		mCartridge.StoreSaveData();
+		OnSaveDataStored();
+	}
+}
+
+/**
  * @brief Get data from active controller
  * @return Bitfield containing button data
  */

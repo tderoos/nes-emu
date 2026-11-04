@@ -38,11 +38,16 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 
 Rom::~Rom()
 {
-	if (mHeader->mSRamBattery)
-		mCartridge.SetPersistentState(mPRGRam);
+	StoreBatteryState();
 
 	if (mMapper)
 		delete mMapper;
+}
+
+void Rom::StoreBatteryState() const
+{
+	if (mHeader->mSRamBattery)
+		mCartridge.SetPersistentState(mPRGRam);
 }
 
 // Set VRam - allows mapper to update CHR page directly into VRam

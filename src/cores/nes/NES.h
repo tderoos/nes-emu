@@ -28,6 +28,9 @@ public:
 	bool ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
+	// Push battery-backed cart RAM to the cartridge without ejecting
+	void StoreBatteryState() const { mRom.StoreBatteryState(); }
+
 private:
 	Rom		  mRom;
 	Ram		  mRam;

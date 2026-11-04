@@ -35,6 +35,11 @@ public:
 
 	virtual SDL_AppResult OnSDLEvent(const SDL_Event& inEvent);
 
+	// Write battery state + snapshot to the .sav now (not just on eject),
+	// then run the platform flush hook. Needed on platforms without a
+	// clean exit (web: tab close).
+	void FlushSaveData();
+
 protected:
 	// Platform hooks: desktop runs the emulator on its own thread paced by
 	// the audio device; the web frontend (WebFrontend) runs single-threaded.

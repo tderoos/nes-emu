@@ -28,11 +28,13 @@ static constexpr int kMaxCatchUpFrames = 5;
 
 // Mount IDBFS at /save (NOT at '/': the root already has MEMFS mounted and
 // remounting it throws "device busy"), then populate from IndexedDB.
+// autoPersist flushes every VFS change to IndexedDB automatically, so .sav
+// writes survive even if the tab is killed without a pagehide event.
 static void sMountPersistentFS()
 {
 	EM_ASM(
 		try { FS.mkdir('/save'); } catch (e) {}
-		FS.mount(IDBFS, {}, '/save');
+		FS.mount(IDBFS, { autoPersist: true }, '/save');
 		FS.syncfs(true, function(err) { if (err) console.warn('nes-emu: IDBFS populate failed', err); });
 	);
 }
@@ -118,6 +120,14 @@ extern "C" EMSCRIPTEN_KEEPALIVE void nes_web_load_rom(const char* inPath)
 {
 	if (sWebInstance != nullptr)
 		sWebInstance->QueueRomLoad(inPath);
+}
+
+// Called from the page on pagehide/beforeunload/visibilitychange(hidden):
+// the tab may never run a clean exit, so flush the .sav to IndexedDB now.
+extern "C" EMSCRIPTEN_KEEPALIVE void nes_web_flush()
+{
+	if (sWebInstance != nullptr)
+		sWebInstance->FlushSaveData();
 }
 
 // Copy a VFS file into the persistent /save mount, so the ROM and its
@@ -300,6 +310,15 @@ SDL_AppResult WebFrontend::Iterate()
 		ProcessSaveStateRequest();
 		mFrameAccum -= kFrameDurationSec;
 		++frames;
+	}
+
+	// Periodic insurance flush (~every 10s): the page may be closed without
+	// firing pagehide, and autoPersist only covers writes that happened.
+	mFramesSinceFlush += frames;
+	if (mFramesSinceFlush >= 600)
+	{
+		mFramesSinceFlush = 0;
+		FlushSaveData();
 	}
 
 	// After a stall (hidden tab) drop the backlog rather than catch up in a burst
