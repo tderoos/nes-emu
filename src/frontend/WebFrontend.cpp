@@ -73,12 +73,14 @@ static void sFetchRomOnSuccess(emscripten_fetch_t* inFetch)
 	{
 		fwrite(inFetch->data, 1, inFetch->numBytes, fd);
 		fclose(fd);
-		app->InsertRom(path.c_str());
+		// Defer to the main loop: starting emulation re-entrantly from this
+		// XHR callback corrupts SDL's event-loop state.
+		app->QueueRomLoad(path.c_str());
 	}
 	else
 	{
 		SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Failed to write fetched ROM to VFS");
-		app->ShowFileDialog();
+		app->RequestFileDialog();
 	}
 
 	emscripten_fetch_close(inFetch);
@@ -87,7 +89,7 @@ static void sFetchRomOnSuccess(emscripten_fetch_t* inFetch)
 static void sFetchRomOnError(emscripten_fetch_t* inFetch)
 {
 	SDL_Log("ROM fetch failed, falling back to file dialog");
-	static_cast<WebFrontend*>(inFetch->userData)->ShowFileDialog();
+	static_cast<WebFrontend*>(inFetch->userData)->RequestFileDialog();
 	emscripten_fetch_close(inFetch);
 }
 
@@ -168,7 +170,41 @@ void WebFrontend::LoadInitialRom()
 	}
 #endif
 
-	ShowFileDialog();
+	// No ?rom=: browsers only open a programmatic file picker from a user
+	// gesture, so defer the dialog to the first input event.
+	RequestFileDialog();
+}
+
+/**
+ * Queue a ROM to be loaded on the next main-loop iteration.
+ */
+void WebFrontend::QueueRomLoad(const char* inPath)
+{
+	mPendingRomPath = inPath;
+}
+
+/**
+ * Ask for the file dialog on the next user input event.
+ */
+void WebFrontend::RequestFileDialog()
+{
+	mWantFileDialog = true;
+}
+
+/**
+ * @brief Defer the file dialog to the first user gesture, then pass the
+ * event on to the base implementation.
+ */
+SDL_AppResult WebFrontend::OnSDLEvent(const SDL_Event& inEvent)
+{
+	if (mWantFileDialog &&
+		(inEvent.type == SDL_EVENT_KEY_DOWN || inEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN))
+	{
+		mWantFileDialog = false;
+		ShowFileDialog();
+	}
+
+	return Frontend::OnSDLEvent(inEvent);
 }
 
 /**
@@ -230,6 +266,14 @@ SDL_AppResult WebFrontend::Iterate()
 		mLastTicksNS = now;
 	const double dt = static_cast<double>(now - mLastTicksNS) / 1e9;
 	mLastTicksNS	= now;
+
+	// Load a queued ROM from the main loop (never from a fetch callback)
+	if (!mPendingRomPath.empty())
+	{
+		const std::string path = mPendingRomPath;
+		mPendingRomPath.clear();
+		InsertRom(path.c_str());
+	}
 
 	if (mNES == nullptr)
 		return SDL_APP_CONTINUE;

@@ -33,7 +33,7 @@ public:
 	void				  RunFrame();
 	void				  Present() const;
 
-	SDL_AppResult OnSDLEvent(const SDL_Event& inEvent);
+	virtual SDL_AppResult OnSDLEvent(const SDL_Event& inEvent);
 
 protected:
 	// Platform hooks: desktop runs the emulator on its own thread paced by
