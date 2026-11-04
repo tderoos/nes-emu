@@ -2,6 +2,8 @@
 
 #include "Frontend.h"
 
+#include <memory>
+
 #include "common/SaveState.h"
 #include "cores/nes/NES.h"
 
@@ -292,12 +294,15 @@ uint8 Frontend::GetControllerData() const
  */
 void Frontend::RunFrame()
 {
-	uint8		audio_buffer[768];
-	uint32		audio_buffer_length = 0;
-	FrameBuffer pixel_buffer;
-	mNES->RunToVBlank(GetControllerData(), pixel_buffer, audio_buffer, &audio_buffer_length);
+	uint8 audio_buffer[768];
+	uint32 audio_buffer_length = 0;
 
-	OnFrameReady(pixel_buffer, audio_buffer, audio_buffer_length);
+	// Heap-allocate the 256KB frame buffer: a stack local this size
+	// overflows the (small) wasm stack on web builds.
+	auto pixel_buffer = std::make_unique<FrameBuffer>();
+	mNES->RunToVBlank(GetControllerData(), *pixel_buffer, audio_buffer, &audio_buffer_length);
+
+	OnFrameReady(*pixel_buffer, audio_buffer, audio_buffer_length);
 }
 
 /**
