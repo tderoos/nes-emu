@@ -1,6 +1,6 @@
 # The app: SDL frontend, target + packaging (bundle, icon, rpath).
 
-add_executable(NES main.cpp)
+add_executable(NES Frontend.cpp)
 target_include_directories(NES PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(NES PRIVATE LibCoreNES)
 target_link_libraries(NES PRIVATE LibCartridge)

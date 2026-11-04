@@ -1,17 +1,9 @@
 // nes-emu main
 
-#include <atomic>
-#include <cstring>
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
+#include "Frontend.h"
 
-#include "cartridge/CartridgeData.h"
-#include "common/Mutex.h"
-#include "common/RingBuffer.h"
-#include "common/Thread.h"
-#include "common/types.h"
-#include "cores/nes/NES.h"
 #include "common/SaveState.h"
+#include "cores/nes/NES.h"
 
 static constexpr int kNESSampleFrequency = 44056;
 
@@ -34,72 +26,7 @@ static void SafeDelete(taType*& ioPtr)
 /**
  *
  */
-class NESApp
-{
-public:
-	// Init exit
-	SDL_AppResult Init();
-	void		  Exit();
-	~NESApp() { Exit(); }
-
-	// Injecting / ejecting ROM
-	void InsertRom(const char* inPath);
-	void EjectRom();
-
-	// Operations
-	bool		  ShowFileDialog();
-	void		  RunFrame();
-	void		  Present() const;
-
-	SDL_AppResult OnSDLEvent(const SDL_Event& inEvent);
-
-private:
-	// Callbacks
-	static void sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, int inAdditionalAmount,
-									int inTotalAmount);
-	void		EmulatorThreadFunction();
-
-	uint8		GetControllerData() const;
-
-private:
-	enum class ESaveStateRequest
-	{
-		None,
-		Load,
-		Save
-	};
-	using LoadSaveRequest = std::atomic<ESaveStateRequest>;
-	using FrameBuffer = uint32[256 * 256];
-	using AudioBuffer = RingBuffer<uint8, 4096>;
-
-	CartridgeData	  mCartridge;
-
-	NES*			  mNES = nullptr;
-	LoadSaveRequest	  mSaveStateRequest = ESaveStateRequest::None;
-
-	Thread			  mEmulatorThread;
-	SDL_Semaphore*	  mFrameSem = nullptr;
-	SDL_Window*		  mWindow = nullptr;
-	SDL_Renderer*	  mRenderer = nullptr;
-	SDL_Texture*	  mTexture = nullptr;
-	SDL_AudioDeviceID mAudioDevice = 0;
-	SDL_AudioStream*  mAudioStream = nullptr;
-
-	SDL_Gamepad*	  mPad = nullptr;
-	Mutex			  mPadMutex;
-
-	FrameBuffer		  mFrameBuffer = {0};
-	Mutex			  mFrameBufferMutex;
-
-	AudioBuffer		  mAudioBuffer;
-	Mutex			  mAudioBufferMutex;
-};
-
-/**
- *
- * @return
- */
-SDL_AppResult NESApp::Init()
+SDL_AppResult Frontend::Init()
 {
 	// init the library, here we make a window so we only need the Video capabilities.
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS))
@@ -146,7 +73,7 @@ SDL_AppResult NESApp::Init()
 /**
  *
  */
-void NESApp::Exit()
+void Frontend::Exit()
 {
 	EjectRom();
 
@@ -163,7 +90,7 @@ void NESApp::Exit()
  *
  * @param inPath
  */
-void NESApp::InsertRom(const char* inPath)
+void Frontend::InsertRom(const char* inPath)
 {
 	if (mNES != nullptr)
 		EjectRom();
@@ -176,7 +103,7 @@ void NESApp::InsertRom(const char* inPath)
 		mEmulatorThread,
 		[](void* inAppState)
 		{
-			static_cast<NESApp*>(inAppState)->EmulatorThreadFunction();
+			static_cast<Frontend*>(inAppState)->EmulatorThreadFunction();
 			return 0;
 		},
 		"EmulatorThread", this);
@@ -185,7 +112,7 @@ void NESApp::InsertRom(const char* inPath)
 /**
  *
  */
-void NESApp::EjectRom()
+void Frontend::EjectRom()
 {
 	if (mNES != nullptr)
 	{
@@ -204,7 +131,7 @@ void NESApp::EjectRom()
  *
  * @return
  */
-bool NESApp::ShowFileDialog()
+bool Frontend::ShowFileDialog()
 {
 	// ask the user which ROM to load
 	static constexpr SDL_DialogFileFilter filters[] = {{"NES ROM", "nes"}, {"All files", "*"}};
@@ -212,7 +139,7 @@ bool NESApp::ShowFileDialog()
 	auto								  rom_selected = [](void* userdata, const char* const* filelist, int /*filter*/)
 	{
 		if (*filelist)
-			static_cast<NESApp*>(userdata)->InsertRom(*filelist);
+			static_cast<Frontend*>(userdata)->InsertRom(*filelist);
 	};
 
 	SDL_ShowOpenFileDialog(rom_selected, this, mWindow, filters, 2, nullptr, false);
@@ -226,7 +153,7 @@ bool NESApp::ShowFileDialog()
  * It is paced by the audio-buffer. The requests for audio data provide a steady clock to sync the emulator
  * that is more accurate the vsync.
  */
-void NESApp::EmulatorThreadFunction()
+void Frontend::EmulatorThreadFunction()
 {
 	// Prime the stream: run one frame immediately so the audio device
 	// has data on its very first request, and the callback never starts
@@ -282,7 +209,7 @@ void NESApp::EmulatorThreadFunction()
  * @brief Get data from active controller
  * @return Bitfield containing button data
  */
-uint8 NESApp::GetControllerData() const
+uint8 Frontend::GetControllerData() const
 {
 	uint8		  controller_input = 0;
 
@@ -319,7 +246,7 @@ uint8 NESApp::GetControllerData() const
 /**
  * @brief Run a single frame, output generated data to frame and audio buffer.
  */
-void NESApp::RunFrame()
+void Frontend::RunFrame()
 {
 	uint8		audio_buffer[768];
 	uint32		audio_buffer_length = 0;
@@ -339,7 +266,7 @@ void NESApp::RunFrame()
 /**
  * @brief Present the latest framebuffer
  */
-void NESApp::Present() const
+void Frontend::Present() const
 {
 	// Copy framebuffer to texture
 	void* pixels;
@@ -362,7 +289,7 @@ void NESApp::Present() const
  * @param inEvent Event to be processed
  * @return SDL_AppResult Returns whether the application should continue
  */
-SDL_AppResult NESApp::OnSDLEvent(const SDL_Event& inEvent)
+SDL_AppResult Frontend::OnSDLEvent(const SDL_Event& inEvent)
 {
 	const SDL_EventType event_type = static_cast<SDL_EventType>(inEvent.type);
 
@@ -428,9 +355,9 @@ SDL_AppResult NESApp::OnSDLEvent(const SDL_Event& inEvent)
  * @param inAdditionalAmount
  * @param inTotalAmount
  */
-void NESApp::sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, int inAdditionalAmount, int inTotalAmount)
+void Frontend::sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, int inAdditionalAmount, int inTotalAmount)
 {
-	NESApp& app = *static_cast<NESApp*>(inUserData);
+	Frontend& app = *static_cast<Frontend*>(inUserData);
 
 	// Get sample data
 	uint8 sample_buffer[AudioBuffer::sMaxSize];
@@ -469,7 +396,7 @@ void NESApp::sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, in
  */
 SDL_AppResult SDL_AppInit(void** inAppState, int /*argc*/, char* /*argv*/[])
 {
-	auto app = new NESApp();
+	auto app = new Frontend();
 	if (SDL_AppResult result = app->Init(); result != SDL_APP_CONTINUE)
 	{
 		delete app;
@@ -496,7 +423,7 @@ SDL_AppResult SDL_AppEvent(void* inAppState, SDL_Event* inEvent)
 	if (inEvent->type == SDL_EVENT_QUIT)
 		return SDL_APP_SUCCESS;
 
-	return static_cast<NESApp*>(inAppState)->OnSDLEvent(*inEvent);
+	return static_cast<Frontend*>(inAppState)->OnSDLEvent(*inEvent);
 }
 
 /**
@@ -506,7 +433,7 @@ SDL_AppResult SDL_AppEvent(void* inAppState, SDL_Event* inEvent)
  */
 SDL_AppResult SDL_AppIterate(void* inAppState)
 {
-	static_cast<NESApp*>(inAppState)->Present();
+	static_cast<Frontend*>(inAppState)->Present();
 	return SDL_APP_CONTINUE;
 }
 
@@ -517,7 +444,7 @@ SDL_AppResult SDL_AppIterate(void* inAppState)
  */
 void SDL_AppQuit(void* inAppState, SDL_AppResult /*inResult*/)
 {
-	if (auto* app = static_cast<NESApp*>(inAppState))
+	if (auto* app = static_cast<Frontend*>(inAppState))
 	{
 		app->Exit();
 		delete app;
