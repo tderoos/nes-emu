@@ -376,9 +376,9 @@ SDL_AppResult NESApp::OnSDLEvent(const SDL_Event& inEvent)
 	// Handle keyboard events
 	if (event_type == SDL_EVENT_KEY_UP)
 	{
-		if (inEvent.key.scancode == SDL_SCANCODE_K)
+		if (inEvent.key.scancode == SDL_SCANCODE_LEFTBRACKET)
 			mSaveStateRequest = ESaveStateRequest::Save;
-		else if (inEvent.key.scancode == SDL_SCANCODE_L)
+		else if (inEvent.key.scancode == SDL_SCANCODE_RIGHTBRACKET)
 			mSaveStateRequest = ESaveStateRequest::Load;
 	}
 	else if (event_type == SDL_EVENT_GAMEPAD_ADDED)
