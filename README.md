@@ -14,13 +14,19 @@ cmake --build build
 ## Building (web)
 
 The web build uses Emscripten + SDL3 and is single-threaded, so it runs on
-any static host (no COOP/COEP headers needed). Requires the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html):
+any static host (no COOP/COEP headers needed). Requires the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
+with `emsdk_env.sh` sourced (so `$EMSDK` is set):
 
 ```sh
 git submodule update --init
-emcmake cmake -B build-web -DCMAKE_BUILD_TYPE=Release
+cmake -B build-web -DCMAKE_BUILD_TYPE=Release -DWEB=1
 cmake --build build-web
 ```
+
+In CLion: add a CMake profile with build type `Release`, build directory
+`cmake-build-web`, and CMake options `-DWEB=1` — no toolchain path needed,
+`$EMSDK` is resolved by CMake itself (command-line `-DCMAKE_TOOLCHAIN_FILE=$ENV{...}`
+is not expanded, which is why the repo resolves it here instead).
 
 This produces `build-web/Release/NES.html` (+ `.js` / `.wasm`). Serve the
 build directory with any static file server, e.g.:
