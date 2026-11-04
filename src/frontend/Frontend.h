@@ -1,11 +1,10 @@
-// nes-emu frontend
+// Frontend
 #pragma once
 
 #include <atomic>
 #include <cstdint>
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
 
 #include "cartridge/CartridgeData.h"
 #include "common/Mutex.h"
