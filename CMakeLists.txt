@@ -28,5 +28,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # supress ZERO_BUILD
 # set(CMAKE_SUPPRESS_REGENERATION true)
 
+# Emscripten: link SDL statically. CMake 4.3.0-4.3.3 has no emscripten
+# shared-library support, and a static SDL is what a wasm build should
+# ship anyway. (SDL3 keys off SDL_SHARED/SDL_STATIC, not BUILD_SHARED_LIBS.)
+if(EMSCRIPTEN)
+	set(SDL_SHARED OFF CACHE BOOL "Build a shared version of the library" FORCE)
+	set(SDL_STATIC ON CACHE BOOL "Build a static version of the library" FORCE)
+endif()
+
 add_subdirectory(src)
 add_subdirectory(extern/SDL EXCLUDE_FROM_ALL)
