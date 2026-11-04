@@ -21,11 +21,37 @@ add_subdirectory(cartridge)
 add_subdirectory(cores/nes)
 add_subdirectory(frontend)
 
-# The app: SDL frontend, target + packaging (bundle, icon, rpath).
+# The app: SDL app callbacks (main.cpp) + frontend library, with packaging
+# (.app bundle on macOS, wasm + html shell under Emscripten).
 add_executable(NES main.cpp)
 target_include_directories(NES PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(NES PRIVATE Frontend LibCoreNES LibCartridge Common SDL3::SDL3)
 target_compile_definitions(NES PUBLIC SDL_MAIN_USE_CALLBACKS)
+
+if(EMSCRIPTEN)
+	# Web build: the WebFrontend is single-threaded, so no
+	# pthreads/SharedArrayBuffer and no COOP/COEP headers are needed -
+	# the page runs on any static host.
+	target_link_options(NES PRIVATE
+		--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/frontend/web/shell.html
+		-sENVIRONMENT=web
+		-sFILESYSTEM=1
+		-lidbfs.js
+		-sFETCH=1
+		-sALLOW_MEMORY_GROWTH=1
+		-sINITIAL_MEMORY=33554432
+		-sSTACK_SIZE=1048576
+		-sEXIT_RUNTIME=1
+		-sEXPORTED_RUNTIME_METHODS=ccall,FS)
+	# Debugging aid: stack-cookie checks + heap bounds checks, so wasm
+	# traps point at the real fault instead of corrupting silently.
+	# Combine with -DCMAKE_BUILD_TYPE=Debug for DWARF source maps in
+	# browser DevTools.
+	if(WEB_DEBUG)
+		target_link_options(NES PRIVATE -sASSERTIONS=1 -sSAFE_HEAP=1)
+	endif()
+	set_target_properties(NES PROPERTIES SUFFIX ".html")
+endif()
 
 # On macOS, build a proper .app bundle. Running a bare executable
 # makes macOS treat the process as a second-class citizen: AppKit

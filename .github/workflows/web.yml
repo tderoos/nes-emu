@@ -1,0 +1,38 @@
+name: web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+
+      - name: Configure (Emscripten)
+        run: cmake -B build-web -DCMAKE_BUILD_TYPE=Release -DWEB=1
+
+      - name: Build
+        run: cmake --build build-web
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build-web/Release
+
+      - uses: actions/deploy-pages@v4

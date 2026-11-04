@@ -2,6 +2,8 @@
 
 #include "Frontend.h"
 
+#include <memory>
+
 #include "common/SaveState.h"
 #include "cores/nes/NES.h"
 
@@ -98,7 +100,17 @@ void Frontend::InsertRom(const char* inPath)
 	if (!mCartridge.Load(inPath))
 		return;
 
-	mNES = new NES(mCartridge);
+	mNES = new NES(mCartridge.GetRom());
+	mNES->LoadPersistentState(mCartridge.GetPersistentLoadState());
+
+	StartEmulation();
+}
+
+/**
+ * Desktop: run the emulator on its own thread, paced by the audio device.
+ */
+void Frontend::StartEmulation()
+{
 	Thread::sCreateThread(
 		mEmulatorThread,
 		[](void* inAppState)
@@ -112,16 +124,25 @@ void Frontend::InsertRom(const char* inPath)
 /**
  *
  */
+void Frontend::StopEmulation()
+{
+	// Exit the emulator thread
+	mEmulatorThread.Destroy();
+}
+
+/**
+ *
+ */
 void Frontend::EjectRom()
 {
 	if (mNES != nullptr)
 	{
-		// Exit the emulator thread
-		mEmulatorThread.Destroy();
+		StopEmulation();
 		SafeDelete(mNES);
 
 		// Save persistent game-state, including the active save state (if any)
 		mCartridge.StoreSaveData();
+		OnSaveDataStored();
 	}
 
 	mCartridge.Clear();
@@ -136,14 +157,34 @@ bool Frontend::ShowFileDialog()
 	// ask the user which ROM to load
 	static constexpr SDL_DialogFileFilter filters[] = {{"NES ROM", "nes"}, {"All files", "*"}};
 
-	auto								  rom_selected = [](void* userdata, const char* const* filelist, int /*filter*/)
+	auto rom_selected = [](void* userdata, const char* const* filelist, int /*filter*/)
 	{
-		if (*filelist)
+		// filelist is NULL when the dialog is cancelled / unsupported
+		if (filelist != nullptr && *filelist != nullptr)
 			static_cast<Frontend*>(userdata)->InsertRom(*filelist);
 	};
 
 	SDL_ShowOpenFileDialog(rom_selected, this, mWindow, filters, 2, nullptr, false);
 	return true;
+}
+
+/**
+ * Desktop startup: ask the user which ROM to load.
+ */
+void Frontend::LoadInitialRom()
+{
+	ShowFileDialog();
+}
+
+/**
+ * @brief Main-loop iteration: on desktop the emulator runs on its own
+ * thread, so each iteration just presents the latest frame.
+ * @return
+ */
+SDL_AppResult Frontend::Iterate()
+{
+	Present();
+	return SDL_APP_CONTINUE;
 }
 
 /**
@@ -173,26 +214,7 @@ void Frontend::EmulatorThreadFunction()
 			RunFrame();
 
 		// Handle load/save state request
-		switch (mSaveStateRequest)
-		{
-		case ESaveStateRequest::Load:
-		{
-			LoadState load_state = mCartridge.GetLoadState();
-			if (!load_state.IsEmpty())
-				if (!mNES->ReadState(load_state))
-					SDL_Log("Failed to load save state: incompatible or corrupt core state");
-			break;
-		}
-		case ESaveStateRequest::Save:
-		{
-			SaveState save_state = mCartridge.GetSaveState();
-			mNES->WriteState(save_state);
-			break;
-		}
-		default:
-			break;
-		}
-		mSaveStateRequest = ESaveStateRequest::None;
+		ProcessSaveStateRequest();
 	}
 
 	// Pause the audio device until the emulator is running again.
@@ -203,6 +225,47 @@ void Frontend::EmulatorThreadFunction()
 
 	// Clear the audio buffer - safe since callback is disabled now.
 	mAudioBuffer.Clear();
+}
+
+/**
+ * @brief Handle a pending load/save state request, if any.
+ */
+void Frontend::ProcessSaveStateRequest()
+{
+	switch (mSaveStateRequest)
+	{
+	case ESaveStateRequest::Load:
+	{
+		LoadState load_state = mCartridge.GetLoadState();
+		if (!load_state.IsEmpty())
+			if (!mNES->ReadState(load_state))
+				SDL_Log("Failed to load save state: incompatible or corrupt core state");
+		break;
+	}
+	case ESaveStateRequest::Save:
+	{
+		SaveState save_state = mCartridge.GetSaveState();
+		mNES->WriteState(save_state);
+		break;
+	}
+	default:
+		break;
+	}
+	mSaveStateRequest = ESaveStateRequest::None;
+}
+
+/**
+ * @brief Flush battery state + snapshot to the .sav file immediately.
+ */
+void Frontend::FlushSaveData()
+{
+	if (mNES != nullptr)
+	{
+		SaveState state = mCartridge.GetPersistentSaveState();
+		mNES->StorePersistentState(state);
+		mCartridge.StoreSaveData();
+		OnSaveDataStored();
+	}
 }
 
 /**
@@ -248,18 +311,30 @@ uint8 Frontend::GetControllerData() const
  */
 void Frontend::RunFrame()
 {
-	uint8		audio_buffer[768];
-	uint32		audio_buffer_length = 0;
-	FrameBuffer pixel_buffer;
-	mNES->RunToVBlank(GetControllerData(), pixel_buffer, audio_buffer, &audio_buffer_length);
+	uint8 audio_buffer[768];
+	uint32 audio_buffer_length = 0;
 
+	// Run a single frame, writing to temp buffers
+	mNES->RunToVBlank(GetControllerData(), mBackBuffer, audio_buffer, &audio_buffer_length);
+
+	// Present the new results
+	OnFrameReady(mBackBuffer, audio_buffer, audio_buffer_length);
+}
+
+/**
+ * Desktop frame sink: queue audio for the audio callback and copy the
+ * framebuffer for presentation (both under mutex; the emulator thread
+ * produces while the main thread presents).
+ */
+void Frontend::OnFrameReady(const uint32* inPixelBuffer, const uint8* inAudioBuffer, uint32 inAudioLength)
+{
 	{
 		AutoLockMutex lock(mAudioBufferMutex);
-		mAudioBuffer.Push(audio_buffer, audio_buffer_length);
+		mAudioBuffer.Push(inAudioBuffer, inAudioLength);
 	}
 	{
 		AutoLockMutex lock(mFrameBufferMutex);
-		memcpy(mFrameBuffer, pixel_buffer, sizeof(FrameBuffer));
+		memcpy(mFrameBuffer, inPixelBuffer, sizeof(FrameBuffer));
 	}
 }
 

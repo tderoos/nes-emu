@@ -24,8 +24,6 @@ enum class CartridgeType
 class CartridgeData
 {
 public:
-	using RomData = std::vector<uint8>;
-
 	// Loading data
 	bool Load(const char* inFilename);
 	void Clear();
@@ -34,17 +32,16 @@ public:
 	const std::string& GetFilename() const { return mFilename; }
 	CartridgeType	   GetType() const { return mType; }
 
-	// Data access
-	uint32		 GetSize() const { return mData.size(); }
-	const uint8* GetData() const { return mData.data(); }
-
-	// Battery state (battery-backed cartridge memory)
-	void SetPersistentState(StateDataSpan inState) const;
-	bool GetPersistentState(StateDataSpan& outState) const;
+	// ROM Data access
+	std::span<const uint8> GetRom() const { return mData; }
 
 	// Load/Save state
 	LoadState GetLoadState() const;
 	SaveState GetSaveState();
+
+	// Persistent (battery backed) cartridge state
+	LoadState GetPersistentLoadState() const;
+	SaveState GetPersistentSaveState();
 
 	// Write the .sav file (battery + snapshot sections)
 	void StoreSaveData() const;
@@ -54,9 +51,9 @@ private:
 	bool LoadSaveData();
 
 	// Data
-	std::string		 mFilename;
-	CartridgeType	 mType = CartridgeType::Unknown;
-	RomData			 mData;
-	mutable StateData mBatteryState;
-	StateData		 mSnapshotState;
+	std::string		   mFilename;
+	CartridgeType	   mType = CartridgeType::Unknown;
+	std::vector<uint8> mData;
+	StateData		   mBatteryState;
+	StateData		   mSnapshotState;
 };

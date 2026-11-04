@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>nes-emu</title>
+	<style>
+		html, body {
+			margin: 0;
+			height: 100%;
+			background: #101014;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			overflow: hidden;
+			font-family: system-ui, sans-serif;
+			color: #888;
+		}
+		canvas {
+			image-rendering: pixelated;
+			max-width: 100vw;
+			max-height: 100vh;
+		}
+		#hint {
+			position: fixed;
+			bottom: 1em;
+			width: 100%;
+			text-align: center;
+			pointer-events: auto;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+	<input type="file" id="romfile" accept=".nes" hidden>
+	<div id="hint">click or press any key to load a ROM</div>
+	<script>
+		// SDL has no real file dialog on Emscripten (dummy backend), so the
+		// page provides its own <input type=file>: read the ROM into the VFS,
+		// then hand it to the wasm app. Needs a user gesture, hence the hint.
+		const hint = document.getElementById('hint');
+		const input = document.getElementById('romfile');
+		// A ROM may already be loading via ?rom=<url>; only open the picker
+		// if none is.
+		let romLoaded = new URLSearchParams(location.search).has('rom');
+		input.addEventListener('change', () => {
+			const file = input.files[0];
+			if (!file) return;
+			romLoaded = true;
+			file.arrayBuffer().then((buf) => {
+				FS.writeFile('/rom.nes', new Uint8Array(buf));
+				Module.ccall('nes_web_load_rom', null, ['string'], ['/rom.nes']);
+				hint.remove();
+			});
+		});
+		const openPicker = () => { if (!romLoaded) input.click(); };
+		hint.addEventListener('click', openPicker);
+		addEventListener('keydown', openPicker, { once: true });
+
+		// The page never gets a clean "exit": flush the .sav to IndexedDB
+		// whenever the tab is hidden or closed.
+		const flush = () => { if (typeof Module !== 'undefined' && Module.ccall) Module.ccall('nes_web_flush', null, [], []); };
+		addEventListener('pagehide', flush);
+		addEventListener('beforeunload', flush);
+		document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+	</script>
+	{{{ SCRIPT }}}
+</body>
+</html>

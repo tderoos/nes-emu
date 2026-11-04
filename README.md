@@ -1,2 +1,59 @@
 # nes-emu
 NES emulator I wrote a long time ago. Written for fun, not performance or accuracy. 
+
+## Building (desktop)
+
+Requires CMake and a C++20 compiler. SDL3 is pulled in as a submodule:
+
+```sh
+git submodule update --init
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+## Building (web)
+
+The web build uses Emscripten + SDL3 and is single-threaded, so it runs on
+any static host (no COOP/COEP headers needed). Requires the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
+with `emsdk_env.sh` sourced (so `$EMSDK` is set):
+
+```sh
+git submodule update --init
+cmake -B build-web -DCMAKE_BUILD_TYPE=Release -DWEB=1
+cmake --build build-web
+```
+
+In CLion: add a CMake profile with build type `Release`, build directory
+`cmake-build-web`, and CMake options `-DWEB=1` — no toolchain path needed,
+`$EMSDK` is resolved by CMake itself (command-line `-DCMAKE_TOOLCHAIN_FILE=$ENV{...}`
+is not expanded, which is why the repo resolves it here instead).
+
+### Debugging the web build
+
+```sh
+cmake -B build-web-dbg -DCMAKE_BUILD_TYPE=Debug -DWEB=1 -DWEB_DEBUG=1
+cmake --build build-web-dbg
+```
+
+`-DWEB_DEBUG=1` adds `-sASSERTIONS=1 -sSAFE_HEAP=1` (stack-cookie and heap
+bounds checks, so traps name the real fault). The `Debug` build type gives
+DWARF source maps: open the page in Chrome/Firefox DevTools and the wasm
+maps back to the C++ sources, so you can set breakpoints and step through.
+
+This produces `build-web/Release/NES.html` (+ `.js` / `.wasm`). Serve the
+build directory with any static file server, e.g.:
+
+```sh
+cd build-web/Release && python3 -m http.server
+```
+
+Open the page and pick a `.nes` ROM in the file dialog, or load one directly
+from a same-origin (or CORS-enabled) URL:
+
+```
+http://localhost:8000/NES.html?rom=mario.nes
+```
+
+Controls: `WASD` = d-pad, `K` = A, `O` = B, `Space` = Select, `Return` =
+Start, `[` = save state, `]` = load state. A gamepad works too. Battery
+saves and save states persist in IndexedDB.

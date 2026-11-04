@@ -8,3 +8,8 @@ target_link_libraries(Frontend PUBLIC SDL3::SDL3)
 target_link_libraries(Frontend PRIVATE LibCoreNES)
 target_link_libraries(Frontend PRIVATE LibCartridge)
 target_link_libraries(Frontend PRIVATE Common)
+
+# Web frontend (Emscripten only): single-threaded Frontend subclass
+if(EMSCRIPTEN)
+	target_sources(Frontend PRIVATE WebFrontend.cpp WebFrontend.h)
+endif()
