@@ -4,7 +4,7 @@
 // the desktop Frontend:
 //   - single-threaded main-loop emulation paced by a time accumulator
 //   - ROM loading via the SDL file dialog (HTML picker) or ?rom=<url>
-//   - .sav persistence through IDBFS mounted at the VFS root (IndexedDB)
+//   - .sav persistence through IDBFS mounted at /save (IndexedDB)
 
 #include "WebFrontend.h"
 
@@ -26,12 +26,13 @@ static constexpr int kMaxCatchUpFrames = 5;
 
 #ifdef __EMSCRIPTEN__
 
-// Mount IDBFS at the VFS root so all stdio file access (ROM + <rom>.sav)
-// is backed by IndexedDB, then populate from it.
+// Mount IDBFS at /save (NOT at '/': the root already has MEMFS mounted and
+// remounting it throws "device busy"), then populate from IndexedDB.
 static void sMountPersistentFS()
 {
 	EM_ASM(
-		FS.mount(IDBFS, {}, '/');
+		try { FS.mkdir('/save'); } catch (e) {}
+		FS.mount(IDBFS, {}, '/save');
 		FS.syncfs(true, function(err) { if (err) console.warn('nes-emu: IDBFS populate failed', err); });
 	);
 }
@@ -104,6 +105,53 @@ static void sLoadRomFromUrl(WebFrontend* inApp, const std::string& inUrl)
 }
 
 #endif // __EMSCRIPTEN__
+
+#ifdef __EMSCRIPTEN__
+
+// Copy a VFS file into the persistent /save mount, so the ROM and its
+// <rom>.sav are backed by IndexedDB. Returns the new path.
+static bool sCopyIntoPersistentDir(const char* inPath, std::string& outPath)
+{
+	const char* base = strrchr(inPath, '/');
+	base = base != nullptr ? base + 1 : inPath;
+	outPath = std::string("/save/") + base;
+
+	FILE* in = fopen(inPath, "rb");
+	if (in == nullptr)
+		return false;
+	FILE* out = fopen(outPath.c_str(), "wb");
+	if (out == nullptr)
+	{
+		fclose(in);
+		return false;
+	}
+
+	uint8  buffer[65536];
+	size_t count;
+	while ((count = fread(buffer, 1, sizeof(buffer), in)) > 0)
+		fwrite(buffer, 1, count, out);
+
+	fclose(in);
+	fclose(out);
+	return true;
+}
+
+#endif // __EMSCRIPTEN__
+
+/**
+ * Web: load the ROM from the persistent /save mount (copied there first),
+ * so its .sav file is persisted to IndexedDB.
+ */
+void WebFrontend::InsertRom(const char* inPath)
+{
+#ifdef __EMSCRIPTEN__
+	std::string persistent_path;
+	if (sCopyIntoPersistentDir(inPath, persistent_path))
+		inPath = persistent_path.c_str();
+#endif
+
+	Frontend::InsertRom(inPath);
+}
 
 /**
  * Web startup: persistent FS first, then load a ROM from ?rom=<url> if

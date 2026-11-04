@@ -23,8 +23,8 @@ public:
 	virtual ~Frontend() { Exit(); }
 
 	// Injecting / ejecting ROM
-	void InsertRom(const char* inPath);
-	void EjectRom();
+	virtual void InsertRom(const char* inPath);
+	void		 EjectRom();
 
 	// Operations
 	bool				  ShowFileDialog();

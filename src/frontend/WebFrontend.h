@@ -11,6 +11,7 @@ class WebFrontend : public Frontend
 public:
 	SDL_AppResult Iterate() override;
 	void		  LoadInitialRom() override;
+	void		  InsertRom(const char* inPath) override;
 
 protected:
 	void StartEmulation() override;
