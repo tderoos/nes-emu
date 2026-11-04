@@ -86,6 +86,16 @@ bool CartridgeData::Load(const char* inFilename)
 		return false;
 	}
 
+	// Validate the iNES header (16 bytes, "NES\x1A" magic). An empty or
+	// truncated file would otherwise be accepted and crash the core later
+	// (e.g. a null mapper virtual call).
+	static constexpr char sNesMagic[4] = {'N', 'E', 'S', '\x1A'};
+	if (mData.size() < 16 || memcmp(mData.data(), sNesMagic, sizeof(sNesMagic)) != 0)
+	{
+		fprintf(stderr, "'%s' is not a valid iNES ROM\n", inFilename);
+		return false;
+	}
+
 	// Store values
 	mFilename = inFilename;
 	mType = CartridgeType::NES;

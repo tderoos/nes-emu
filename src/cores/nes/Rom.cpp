@@ -49,7 +49,8 @@ Rom::~Rom()
 void Rom::SetVRam(uint8* mVRam)
 {
 	mCHRData = mVRam;
-	mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+	if (mMapper)
+		mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
 }
 
 // Store are passed on to the mapper
@@ -59,7 +60,7 @@ void Rom::Store(uint16 inAddr, uint8 inValue)
 	{
 		mPRGRam[inAddr - 0x6000] = inValue;
 	}
-	else
+	else if (mMapper)
 	{
 		mMapper->Store(inAddr, inValue);
 		if (mMapper->IsDirty())
@@ -72,10 +73,13 @@ void Rom::ReadState(const LoadState& ioState)
 	if (mHeader->mSRamBattery)
 		ioState.Read(mPRGRam);
 
-	mMapper->ReadState(ioState);
+	if (mMapper)
+	{
+		mMapper->ReadState(ioState);
 
-	// Update the mapping after restoring the state
-	mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+		// Update the mapping after restoring the state
+		mMapper->UpdateMapping(mHeader->mData, mPRGData, mCHRData, mVRamMirrorRom, &mVRamMirrorMapped);
+	}
 }
 
 void Rom::WriteState(SaveState& ioState) const
@@ -83,5 +87,6 @@ void Rom::WriteState(SaveState& ioState) const
 	if (mHeader->mSRamBattery)
 		ioState.Write(mPRGRam);
 
-	mMapper->WriteState(ioState);
+	if (mMapper)
+		mMapper->WriteState(ioState);
 }

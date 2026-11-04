@@ -21,10 +21,24 @@
 			max-width: 100vw;
 			max-height: 100vh;
 		}
+		#hint {
+			position: fixed;
+			bottom: 1em;
+			width: 100%;
+			text-align: center;
+			pointer-events: none;
+		}
 	</style>
 </head>
 <body>
 	<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+	<div id="hint">click or press any key to load a ROM</div>
+	<script>
+		// The file picker needs a user gesture; hide the hint on the first one
+		const hideHint = () => { const h = document.getElementById('hint'); if (h) h.remove(); };
+		addEventListener('keydown', hideHint, { once: true });
+		addEventListener('mousedown', hideHint, { once: true });
+	</script>
 	{{{ SCRIPT }}}
 </body>
 </html>
