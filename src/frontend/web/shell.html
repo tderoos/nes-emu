@@ -41,17 +41,22 @@
 		// then hand it to the wasm app. Needs a user gesture, hence the hint.
 		const hint = document.getElementById('hint');
 		const input = document.getElementById('romfile');
+		// A ROM may already be loading via ?rom=<url>; only open the picker
+		// if none is.
+		let romLoaded = new URLSearchParams(location.search).has('rom');
 		input.addEventListener('change', () => {
 			const file = input.files[0];
 			if (!file) return;
+			romLoaded = true;
 			file.arrayBuffer().then((buf) => {
 				FS.writeFile('/rom.nes', new Uint8Array(buf));
 				Module.ccall('nes_web_load_rom', null, ['string'], ['/rom.nes']);
 				hint.remove();
 			});
 		});
-		hint.addEventListener('click', () => input.click());
-		addEventListener('keydown', () => input.click(), { once: true });
+		const openPicker = () => { if (!romLoaded) input.click(); };
+		hint.addEventListener('click', openPicker);
+		addEventListener('keydown', openPicker, { once: true });
 
 		// The page never gets a clean "exit": flush the .sav to IndexedDB
 		// whenever the tab is hidden or closed.
