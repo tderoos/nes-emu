@@ -99,6 +99,14 @@ void Frontend::InsertRom(const char* inPath)
 		return;
 
 	mNES = new NES(mCartridge);
+	StartEmulation();
+}
+
+/**
+ * Desktop: run the emulator on its own thread, paced by the audio device.
+ */
+void Frontend::StartEmulation()
+{
 	Thread::sCreateThread(
 		mEmulatorThread,
 		[](void* inAppState)
@@ -112,16 +120,25 @@ void Frontend::InsertRom(const char* inPath)
 /**
  *
  */
+void Frontend::StopEmulation()
+{
+	// Exit the emulator thread
+	mEmulatorThread.Destroy();
+}
+
+/**
+ *
+ */
 void Frontend::EjectRom()
 {
 	if (mNES != nullptr)
 	{
-		// Exit the emulator thread
-		mEmulatorThread.Destroy();
+		StopEmulation();
 		SafeDelete(mNES);
 
 		// Save persistent game-state, including the active save state (if any)
 		mCartridge.StoreSaveData();
+		OnSaveDataStored();
 	}
 
 	mCartridge.Clear();
@@ -144,6 +161,25 @@ bool Frontend::ShowFileDialog()
 
 	SDL_ShowOpenFileDialog(rom_selected, this, mWindow, filters, 2, nullptr, false);
 	return true;
+}
+
+/**
+ * Desktop startup: ask the user which ROM to load.
+ */
+void Frontend::LoadInitialRom()
+{
+	ShowFileDialog();
+}
+
+/**
+ * @brief Main-loop iteration: on desktop the emulator runs on its own
+ * thread, so each iteration just presents the latest frame.
+ * @return
+ */
+SDL_AppResult Frontend::Iterate()
+{
+	Present();
+	return SDL_APP_CONTINUE;
 }
 
 /**
@@ -173,26 +209,7 @@ void Frontend::EmulatorThreadFunction()
 			RunFrame();
 
 		// Handle load/save state request
-		switch (mSaveStateRequest)
-		{
-		case ESaveStateRequest::Load:
-		{
-			LoadState load_state = mCartridge.GetLoadState();
-			if (!load_state.IsEmpty())
-				if (!mNES->ReadState(load_state))
-					SDL_Log("Failed to load save state: incompatible or corrupt core state");
-			break;
-		}
-		case ESaveStateRequest::Save:
-		{
-			SaveState save_state = mCartridge.GetSaveState();
-			mNES->WriteState(save_state);
-			break;
-		}
-		default:
-			break;
-		}
-		mSaveStateRequest = ESaveStateRequest::None;
+		ProcessSaveStateRequest();
 	}
 
 	// Pause the audio device until the emulator is running again.
@@ -203,6 +220,33 @@ void Frontend::EmulatorThreadFunction()
 
 	// Clear the audio buffer - safe since callback is disabled now.
 	mAudioBuffer.Clear();
+}
+
+/**
+ * @brief Handle a pending load/save state request, if any.
+ */
+void Frontend::ProcessSaveStateRequest()
+{
+	switch (mSaveStateRequest)
+	{
+	case ESaveStateRequest::Load:
+	{
+		LoadState load_state = mCartridge.GetLoadState();
+		if (!load_state.IsEmpty())
+			if (!mNES->ReadState(load_state))
+				SDL_Log("Failed to load save state: incompatible or corrupt core state");
+		break;
+	}
+	case ESaveStateRequest::Save:
+	{
+		SaveState save_state = mCartridge.GetSaveState();
+		mNES->WriteState(save_state);
+		break;
+	}
+	default:
+		break;
+	}
+	mSaveStateRequest = ESaveStateRequest::None;
 }
 
 /**
@@ -253,13 +297,23 @@ void Frontend::RunFrame()
 	FrameBuffer pixel_buffer;
 	mNES->RunToVBlank(GetControllerData(), pixel_buffer, audio_buffer, &audio_buffer_length);
 
+	OnFrameReady(pixel_buffer, audio_buffer, audio_buffer_length);
+}
+
+/**
+ * Desktop frame sink: queue audio for the audio callback and copy the
+ * framebuffer for presentation (both under mutex; the emulator thread
+ * produces while the main thread presents).
+ */
+void Frontend::OnFrameReady(const uint32* inPixelBuffer, const uint8* inAudioBuffer, uint32 inAudioLength)
+{
 	{
 		AutoLockMutex lock(mAudioBufferMutex);
-		mAudioBuffer.Push(audio_buffer, audio_buffer_length);
+		mAudioBuffer.Push(inAudioBuffer, inAudioLength);
 	}
 	{
 		AutoLockMutex lock(mFrameBufferMutex);
-		memcpy(mFrameBuffer, pixel_buffer, sizeof(FrameBuffer));
+		memcpy(mFrameBuffer, inPixelBuffer, sizeof(FrameBuffer));
 	}
 }
 

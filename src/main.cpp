@@ -1,19 +1,29 @@
 // nes-emu - SDL application entry point
+//
+// Instantiates the platform frontend: the threaded desktop Frontend or,
+// under Emscripten, the single-threaded WebFrontend.
 
 #include <SDL3/SDL_main.h>
+
+#ifdef __EMSCRIPTEN__
+#include "frontend/WebFrontend.h"
+using AppFrontend = WebFrontend;
+#else
 #include "frontend/Frontend.h"
+using AppFrontend = Frontend;
+#endif
 
 SDL_AppResult SDL_AppInit(void** inAppState, int /*argc*/, char* /*argv*/[])
 {
-	auto app = new Frontend();
+	auto app = new AppFrontend();
 	if (SDL_AppResult result = app->Init(); result != SDL_APP_CONTINUE)
 	{
 		delete app;
 		return result;
 	}
 
-	// Open the file dialog
-	app->ShowFileDialog();
+	// Load the initial ROM (platform-specific: file dialog or ?rom=<url>)
+	app->LoadInitialRom();
 
 	// Set the app the the SDL app state and continue execution
 	*inAppState = app;
@@ -26,18 +36,17 @@ SDL_AppResult SDL_AppEvent(void* inAppState, SDL_Event* inEvent)
 	if (inEvent->type == SDL_EVENT_QUIT)
 		return SDL_APP_SUCCESS;
 
-	return static_cast<Frontend*>(inAppState)->OnSDLEvent(*inEvent);
+	return static_cast<AppFrontend*>(inAppState)->OnSDLEvent(*inEvent);
 }
 
 SDL_AppResult SDL_AppIterate(void* inAppState)
 {
-	static_cast<Frontend*>(inAppState)->Present();
-	return SDL_APP_CONTINUE;
+	return static_cast<AppFrontend*>(inAppState)->Iterate();
 }
 
 void SDL_AppQuit(void* inAppState, SDL_AppResult /*inResult*/)
 {
-	if (auto* app = static_cast<Frontend*>(inAppState))
+	if (auto* app = static_cast<AppFrontend*>(inAppState))
 	{
 		app->Exit();
 		delete app;

@@ -20,20 +20,31 @@ public:
 	// Init exit
 	SDL_AppResult Init();
 	void		  Exit();
-	~Frontend() { Exit(); }
+	virtual ~Frontend() { Exit(); }
 
 	// Injecting / ejecting ROM
 	void InsertRom(const char* inPath);
 	void EjectRom();
 
 	// Operations
-	bool		  ShowFileDialog();
-	void		  RunFrame();
-	void		  Present() const;
+	bool				  ShowFileDialog();
+	virtual void		  LoadInitialRom();
+	virtual SDL_AppResult Iterate();
+	void				  RunFrame();
+	void				  Present() const;
 
 	SDL_AppResult OnSDLEvent(const SDL_Event& inEvent);
 
-private:
+protected:
+	// Platform hooks: desktop runs the emulator on its own thread paced by
+	// the audio device; the web frontend (WebFrontend) runs single-threaded.
+	virtual void StartEmulation();
+	virtual void StopEmulation();
+	virtual void OnFrameReady(const uint32* inPixelBuffer, const uint8* inAudioBuffer, uint32 inAudioLength);
+	virtual void OnSaveDataStored() {}
+
+	void ProcessSaveStateRequest();
+
 	// Callbacks
 	static void sAudioDataRequested(void* inUserData, SDL_AudioStream* inStream, int inAdditionalAmount,
 									int inTotalAmount);
@@ -41,7 +52,7 @@ private:
 
 	uint8		GetControllerData() const;
 
-private:
+protected:
 	enum class ESaveStateRequest
 	{
 		None,
