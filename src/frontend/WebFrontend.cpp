@@ -5,17 +5,15 @@
 //   - single-threaded main-loop emulation paced by a time accumulator
 //   - ROM loading via the SDL file dialog (HTML picker) or ?rom=<url>
 //   - .sav persistence through IDBFS mounted at /save (IndexedDB)
-
 #include "WebFrontend.h"
+
+#ifdef __EMSCRIPTEN__
 
 #include <cstdlib>
 #include <cstring>
 #include <string>
-
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/fetch.h>
-#endif
 
 // NTSC NES frame rate: 1789773 / 29780.5 ≈ 60.0988 fps
 static constexpr double kFrameDurationSec = 1.0 / 60.0988;
@@ -24,7 +22,6 @@ static constexpr double kFrameDurationSec = 1.0 / 60.0988;
 // stall (hidden tab) the backlog is dropped instead of spiraling.
 static constexpr int kMaxCatchUpFrames = 5;
 
-#ifdef __EMSCRIPTEN__
 
 // Mount IDBFS at /save (NOT at '/': the root already has MEMFS mounted and
 // remounting it throws "device busy"), then populate from IndexedDB.
@@ -108,9 +105,6 @@ static void sLoadRomFromUrl(WebFrontend* inApp, const std::string& inUrl)
 	emscripten_fetch(&attr, inUrl.c_str());
 }
 
-#endif // __EMSCRIPTEN__
-
-#ifdef __EMSCRIPTEN__
 
 static WebFrontend* sWebInstance = nullptr;
 
@@ -160,19 +154,15 @@ static bool sCopyIntoPersistentDir(const char* inPath, std::string& outPath)
 	return true;
 }
 
-#endif // __EMSCRIPTEN__
-
 /**
  * Web: load the ROM from the persistent /save mount (copied there first),
  * so its .sav file is persisted to IndexedDB.
  */
 void WebFrontend::InsertRom(const char* inPath)
 {
-#ifdef __EMSCRIPTEN__
 	std::string persistent_path;
 	if (sCopyIntoPersistentDir(inPath, persistent_path))
 		inPath = persistent_path.c_str();
-#endif
 
 	Frontend::InsertRom(inPath);
 }
@@ -183,7 +173,6 @@ void WebFrontend::InsertRom(const char* inPath)
  */
 void WebFrontend::LoadInitialRom()
 {
-#ifdef __EMSCRIPTEN__
 	sWebInstance = this;
 	sMountPersistentFS();
 	if (const std::string rom_url = sGetQueryRomUrl(); !rom_url.empty())
@@ -191,7 +180,6 @@ void WebFrontend::LoadInitialRom()
 		sLoadRomFromUrl(this, rom_url);
 		return;
 	}
-#endif
 
 	// No ?rom=: browsers only open a programmatic file picker from a user
 	// gesture, so defer the dialog to the first input event.
@@ -271,9 +259,7 @@ void WebFrontend::OnFrameReady(const uint32* inPixelBuffer, const uint8* inAudio
  */
 void WebFrontend::OnSaveDataStored()
 {
-#ifdef __EMSCRIPTEN__
 	sSyncPersistentFS();
-#endif
 }
 
 /**
@@ -330,3 +316,5 @@ SDL_AppResult WebFrontend::Iterate()
 
 	return SDL_APP_CONTINUE;
 }
+
+#endif

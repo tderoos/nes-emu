@@ -1,16 +1,15 @@
 // nes-emu Rom module
 #include "Rom.h"
 
-#include "cartridge/CartridgeData.h"
 #include "Mapper.h"
 
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 
-Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
+Rom::Rom(std::span<const uint8> inRom)
 {
-	mHeader = reinterpret_cast<const RomHeader*>(inCartridge.GetData());
+	mHeader = reinterpret_cast<const RomHeader*>(inRom.data());
 
 	// Determine name-table mapping
 	if (mHeader->mAlternativeNameTable == 0)
@@ -22,32 +21,28 @@ Rom::Rom(const CartridgeData& inCartridge) : mCartridge(inCartridge)
 	const uint8 mapper_id = mHeader->mMapperIDLo | mHeader->mMapperIDHi << 4;
 	mMapper = Mapper::sCreate(mapper_id, mHeader->mNumPRG, mHeader->mNumCHR);
 
-	printf("Loaded %s (PRG:%d CHR:%d MAP:%d VRM:%d SRB:%d)\n", mCartridge.GetFilename().c_str(), mHeader->mNumPRG,
+	printf("NES Rom loaded (PRG:%d CHR:%d MAP:%d VRM:%d SRB:%d)\n", mHeader->mNumPRG,
 		   mHeader->mNumCHR, mapper_id, static_cast<int>(GetVRamMirroring()), mHeader->mSRamBattery ? 1 : 0);
 
-	// Load savegame
+	// Clear persistent state savegame
 	memset(mPRGRam, 0, 0x2000);
-
-	if (mHeader->mSRamBattery)
-	{
-		StateDataSpan persistent_state;
-		if (mCartridge.GetPersistentState(persistent_state) && persistent_state.size() == sizeof(mPRGRam))
-			memcpy(mPRGRam, persistent_state.data(),  sizeof(mPRGRam));
-	}
 }
 
 Rom::~Rom()
 {
-	StoreBatteryState();
-
-	if (mMapper)
-		delete mMapper;
+	delete mMapper;
 }
 
-void Rom::StoreBatteryState() const
+void Rom::LoadPersistentState(const LoadState& inState) const
 {
 	if (mHeader->mSRamBattery)
-		mCartridge.SetPersistentState(mPRGRam);
+		inState.Read(mPRGRam);
+}
+
+void Rom::StorePersistentState(SaveState& outState) const
+{
+	if (mHeader->mSRamBattery)
+		outState.Write(mPRGRam);
 }
 
 // Set VRam - allows mapper to update CHR page directly into VRam

@@ -11,7 +11,7 @@ using StateDataSpan = std::span<const uint8>;
 /**
  * LoadState interface
  */
-class LoadState
+class [[nodiscard]] LoadState
 {
 public:
 	explicit LoadState(const StateDataSpan inState) : mState(inState) {}
@@ -25,7 +25,7 @@ public:
 		if (sizeof(taType) > mState.size() - mOffset)
 			return false;
 
-		memcpy(&outValue, &mState[mOffset], sizeof(taType));
+		memcpy((void*) &outValue, &mState[mOffset], sizeof(taType));
 		mOffset += sizeof(taType);
 		return true;
 	}
@@ -38,7 +38,7 @@ private:
 /**
  * SaveState interface
  */
-class SaveState
+class [[nodiscard]] SaveState
 {
 public:
 	explicit SaveState(StateData& inState) : mState(inState) {}

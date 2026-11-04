@@ -100,7 +100,9 @@ void Frontend::InsertRom(const char* inPath)
 	if (!mCartridge.Load(inPath))
 		return;
 
-	mNES = new NES(mCartridge);
+	mNES = new NES(mCartridge.GetRom());
+	mNES->LoadPersistentState(mCartridge.GetPersistentLoadState());
+
 	StartEmulation();
 }
 
@@ -259,7 +261,8 @@ void Frontend::FlushSaveData()
 {
 	if (mNES != nullptr)
 	{
-		mNES->StoreBatteryState();
+		SaveState state = mCartridge.GetPersistentSaveState();
+		mNES->StorePersistentState(state);
 		mCartridge.StoreSaveData();
 		OnSaveDataStored();
 	}
@@ -311,14 +314,11 @@ void Frontend::RunFrame()
 	uint8 audio_buffer[768];
 	uint32 audio_buffer_length = 0;
 
-	// Heap-allocate the 256KB frame buffer: a stack local this size
-	// overflows the (small) wasm stack on web builds. Note: make_unique
-	// needs the unbounded array form - make_unique<FrameBuffer>() is
-	// ill-formed because FrameBuffer is a bounded C array type.
-	auto pixel_buffer = std::make_unique<uint32[]>(256 * 256);
-	mNES->RunToVBlank(GetControllerData(), pixel_buffer.get(), audio_buffer, &audio_buffer_length);
+	// Run a single frame, writing to temp buffers
+	mNES->RunToVBlank(GetControllerData(), mBackBuffer, audio_buffer, &audio_buffer_length);
 
-	OnFrameReady(pixel_buffer.get(), audio_buffer, audio_buffer_length);
+	// Present the new results
+	OnFrameReady(mBackBuffer, audio_buffer, audio_buffer_length);
 }
 
 /**

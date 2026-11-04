@@ -49,7 +49,7 @@ class Rom
 {
 public:
 	// Construct and load
-	explicit Rom(const CartridgeData& inCartridge);
+	explicit Rom(std::span<const uint8> inRom);
 	~Rom();
 
 	void SetVRam(uint8* mVRam);
@@ -75,13 +75,11 @@ public:
 	void ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
-	// Battery-backed SRAM: push the current contents to the cartridge
-	// without tearing down (used for periodic flushes on platforms that
-	// may not get a clean exit, e.g. the web build)
-	void StoreBatteryState() const;
+	// Load/store persistent (battery backed) state
+	void LoadPersistentState(const LoadState& inState) const;
+	void StorePersistentState(SaveState& outState) const;
 
 private:
-	const CartridgeData& mCartridge;
 	const RomHeader*	 mHeader;
 
 	EVRamLayout			 mVRamMirrorRom;

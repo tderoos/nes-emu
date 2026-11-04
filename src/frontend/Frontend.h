@@ -84,6 +84,7 @@ protected:
 	SDL_Gamepad*	  mPad = nullptr;
 	Mutex			  mPadMutex;
 
+	FrameBuffer		  mBackBuffer = {0};
 	FrameBuffer		  mFrameBuffer = {0};
 	Mutex			  mFrameBufferMutex;
 

@@ -1,8 +1,8 @@
 // NES Emulator Core
 #include "NES.h"
 
-NES::NES(const CartridgeData& inCartridge)
-	: mRom(inCartridge), mPPU(&mRom), mIO(&mRam, &mRom, &mPPU, &mAPU), mCPU(&mIO)
+NES::NES(std::span<const uint8> inRom)
+	: mRom(inRom), mPPU(&mRom), mIO(&mRam, &mRom, &mPPU, &mAPU), mCPU(&mIO)
 {
 }
 
@@ -23,6 +23,16 @@ void NES::RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudio
 
 	if (ioSampleCount)
 		*ioSampleCount = mAPU.GetSampleCount();
+}
+
+void NES::LoadPersistentState(const LoadState& inState) const
+{
+	mRom.LoadPersistentState(inState);
+}
+
+void NES::StorePersistentState(SaveState& outState) const
+{
+	mRom.StorePersistentState(outState);
 }
 
 // 7458.333333333333333

@@ -22,6 +22,16 @@ static constexpr uint32 sVersion = 1;
 static constexpr uint32 sFlagBattery = 1 << 0;
 static constexpr uint32 sFlagSnapshot = 1 << 1;
 
+static CartridgeType sGetCartridgeType(std::span<const uint8> inData)
+{
+	// Validate the iNES header (16 bytes header, "NES\x1A" magic).
+	static constexpr char sNesMagic[4] = {'N', 'E', 'S', '\x1A'};
+	if (inData.size() >= 16 && memcmp(inData.data(), sNesMagic, sizeof(sNesMagic)) == 0)
+		return CartridgeType::NES;
+
+	return CartridgeType::Unknown;
+}
+
 struct SaveDataHeader
 {
 	SaveDataHeader()
@@ -80,45 +90,29 @@ bool CartridgeData::Load(const char* inFilename)
 	// Clear old data
 	Clear();
 
+	fprintf(stderr, "Loading %s", inFilename);
+
 	if (!sReadFile(inFilename, mData))
 	{
 		fprintf(stderr, "Failed to load '%s'\n", mFilename.c_str());
 		return false;
 	}
 
-	// Validate the iNES header (16 bytes, "NES\x1A" magic). An empty or
-	// truncated file would otherwise be accepted and crash the core later
-	// (e.g. a null mapper virtual call).
-	static constexpr char sNesMagic[4] = {'N', 'E', 'S', '\x1A'};
-	if (mData.size() < 16 || memcmp(mData.data(), sNesMagic, sizeof(sNesMagic)) != 0)
-	{
-		fprintf(stderr, "'%s' is not a valid iNES ROM\n", inFilename);
-		return false;
-	}
-
 	// Store values
 	mFilename = inFilename;
-	mType = CartridgeType::NES;
+	mType = sGetCartridgeType(mData);
+
+	if (mType == CartridgeType::Unknown)
+	{
+		fprintf(stderr, "'%s' is not a support ROM format\n", inFilename);
+		return false;
+	}
 
 	// Try to read persistent state data. A missing .sav is fine; a corrupt
 	// or incompatible one is logged but must not fail loading the cartridge.
 	if (!LoadSaveData())
 		fprintf(stderr, "Failed to load '%s.sav' (corrupt or unsupported), ignoring it\n", mFilename.c_str());
 
-	return true;
-}
-
-void CartridgeData::SetPersistentState(StateDataSpan inState) const
-{
-	mBatteryState.assign(inState.begin(), inState.end());
-}
-
-bool CartridgeData::GetPersistentState(StateDataSpan& outState) const
-{
-	if (mBatteryState.empty())
-		return false;
-
-	outState = mBatteryState;
 	return true;
 }
 
@@ -131,6 +125,18 @@ SaveState CartridgeData::GetSaveState()
 {
 	mSnapshotState.clear();
 	return SaveState(mSnapshotState);
+}
+
+// Persistent (memory backed) cartridge state
+LoadState CartridgeData::GetPersistentLoadState() const
+{
+	return LoadState(mBatteryState);
+}
+
+SaveState CartridgeData::GetPersistentSaveState()
+{
+	mBatteryState.clear();
+	return SaveState(mBatteryState);
 }
 
 void CartridgeData::StoreSaveData() const

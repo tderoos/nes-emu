@@ -3,10 +3,11 @@
 // threads/SharedArrayBuffer, so no COOP/COEP headers are needed and the
 // page runs on any static host.
 #pragma once
+#include "Frontend.h"
+
+#ifdef __EMSCRIPTEN__
 
 #include <string>
-
-#include "Frontend.h"
 
 class WebFrontend : public Frontend
 {
@@ -35,3 +36,5 @@ private:
 	std::string mPendingRomPath;
 	bool		mWantFileDialog	  = false;
 };
+
+#endif

@@ -10,14 +10,13 @@
 #include "Rom.h"
 
 // Forward declarations
-class CartridgeData;
 class SaveState;
 class LoadState;
 
 class NES
 {
 public:
-	explicit NES(const CartridgeData& inCartridge);
+	explicit NES(std::span<const uint8> inRom);
 
 	void RunToVBlank(uint8 inButtonState, uint32* ioFrameBuffer, uint8* ioAudioBuffer, uint32* ioSampleCount);
 
@@ -25,11 +24,13 @@ public:
 	// reject or migrate snapshots written by an incompatible core version.
 	static constexpr uint32 sStateVersion = 1;
 
+	// Load/store system state
 	bool ReadState(const LoadState& ioState);
 	void WriteState(SaveState& ioState) const;
 
-	// Push battery-backed cart RAM to the cartridge without ejecting
-	void StoreBatteryState() const { mRom.StoreBatteryState(); }
+	// Load/store persistent (battery backed) state
+	void LoadPersistentState(const LoadState& inState) const;
+	void StorePersistentState(SaveState& outState) const;
 
 private:
 	Rom		  mRom;
