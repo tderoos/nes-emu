@@ -28,6 +28,18 @@ In CLion: add a CMake profile with build type `Release`, build directory
 `$EMSDK` is resolved by CMake itself (command-line `-DCMAKE_TOOLCHAIN_FILE=$ENV{...}`
 is not expanded, which is why the repo resolves it here instead).
 
+### Debugging the web build
+
+```sh
+cmake -B build-web-dbg -DCMAKE_BUILD_TYPE=Debug -DWEB=1 -DWEB_DEBUG=1
+cmake --build build-web-dbg
+```
+
+`-DWEB_DEBUG=1` adds `-sASSERTIONS=1 -sSAFE_HEAP=1` (stack-cookie and heap
+bounds checks, so traps name the real fault). The `Debug` build type gives
+DWARF source maps: open the page in Chrome/Firefox DevTools and the wasm
+maps back to the C++ sources, so you can set breakpoints and step through.
+
 This produces `build-web/Release/NES.html` (+ `.js` / `.wasm`). Serve the
 build directory with any static file server, e.g.:
 

@@ -43,6 +43,13 @@ if(EMSCRIPTEN)
 		-sSTACK_SIZE=1048576
 		-sEXIT_RUNTIME=1
 		-sEXPORTED_RUNTIME_METHODS=ccall,FS)
+	# Debugging aid: stack-cookie checks + heap bounds checks, so wasm
+	# traps point at the real fault instead of corrupting silently.
+	# Combine with -DCMAKE_BUILD_TYPE=Debug for DWARF source maps in
+	# browser DevTools.
+	if(WEB_DEBUG)
+		target_link_options(NES PRIVATE -sASSERTIONS=1 -sSAFE_HEAP=1)
+	endif()
 	set_target_properties(NES PROPERTIES SUFFIX ".html")
 endif()
 
