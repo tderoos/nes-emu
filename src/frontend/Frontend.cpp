@@ -155,9 +155,10 @@ bool Frontend::ShowFileDialog()
 	// ask the user which ROM to load
 	static constexpr SDL_DialogFileFilter filters[] = {{"NES ROM", "nes"}, {"All files", "*"}};
 
-	auto								  rom_selected = [](void* userdata, const char* const* filelist, int /*filter*/)
+	auto rom_selected = [](void* userdata, const char* const* filelist, int /*filter*/)
 	{
-		if (*filelist)
+		// filelist is NULL when the dialog is cancelled / unsupported
+		if (filelist != nullptr && *filelist != nullptr)
 			static_cast<Frontend*>(userdata)->InsertRom(*filelist);
 	};
 

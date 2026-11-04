@@ -26,18 +26,32 @@
 			bottom: 1em;
 			width: 100%;
 			text-align: center;
-			pointer-events: none;
+			pointer-events: auto;
+			cursor: pointer;
 		}
 	</style>
 </head>
 <body>
 	<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+	<input type="file" id="romfile" accept=".nes" hidden>
 	<div id="hint">click or press any key to load a ROM</div>
 	<script>
-		// The file picker needs a user gesture; hide the hint on the first one
-		const hideHint = () => { const h = document.getElementById('hint'); if (h) h.remove(); };
-		addEventListener('keydown', hideHint, { once: true });
-		addEventListener('mousedown', hideHint, { once: true });
+		// SDL has no real file dialog on Emscripten (dummy backend), so the
+		// page provides its own <input type=file>: read the ROM into the VFS,
+		// then hand it to the wasm app. Needs a user gesture, hence the hint.
+		const hint = document.getElementById('hint');
+		const input = document.getElementById('romfile');
+		input.addEventListener('change', () => {
+			const file = input.files[0];
+			if (!file) return;
+			file.arrayBuffer().then((buf) => {
+				FS.writeFile('/rom.nes', new Uint8Array(buf));
+				Module.ccall('nes_web_load_rom', null, ['string'], ['/rom.nes']);
+				hint.remove();
+			});
+		});
+		hint.addEventListener('click', () => input.click());
+		addEventListener('keydown', () => input.click(), { once: true });
 	</script>
 	{{{ SCRIPT }}}
 </body>

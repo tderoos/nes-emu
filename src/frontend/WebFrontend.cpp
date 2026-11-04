@@ -110,6 +110,16 @@ static void sLoadRomFromUrl(WebFrontend* inApp, const std::string& inUrl)
 
 #ifdef __EMSCRIPTEN__
 
+static WebFrontend* sWebInstance = nullptr;
+
+// Called from the page's HTML file input (shell.html) via Module.ccall:
+// write the picked ROM into the VFS from JS, then load it here.
+extern "C" EMSCRIPTEN_KEEPALIVE void nes_web_load_rom(const char* inPath)
+{
+	if (sWebInstance != nullptr)
+		sWebInstance->QueueRomLoad(inPath);
+}
+
 // Copy a VFS file into the persistent /save mount, so the ROM and its
 // <rom>.sav are backed by IndexedDB. Returns the new path.
 static bool sCopyIntoPersistentDir(const char* inPath, std::string& outPath)
@@ -164,6 +174,7 @@ void WebFrontend::InsertRom(const char* inPath)
 void WebFrontend::LoadInitialRom()
 {
 #ifdef __EMSCRIPTEN__
+	sWebInstance = this;
 	sMountPersistentFS();
 	if (const std::string rom_url = sGetQueryRomUrl(); !rom_url.empty())
 	{
