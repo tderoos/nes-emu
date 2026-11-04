@@ -298,11 +298,13 @@ void Frontend::RunFrame()
 	uint32 audio_buffer_length = 0;
 
 	// Heap-allocate the 256KB frame buffer: a stack local this size
-	// overflows the (small) wasm stack on web builds.
-	auto pixel_buffer = std::make_unique<FrameBuffer>();
-	mNES->RunToVBlank(GetControllerData(), *pixel_buffer, audio_buffer, &audio_buffer_length);
+	// overflows the (small) wasm stack on web builds. Note: make_unique
+	// needs the unbounded array form - make_unique<FrameBuffer>() is
+	// ill-formed because FrameBuffer is a bounded C array type.
+	auto pixel_buffer = std::make_unique<uint32[]>(256 * 256);
+	mNES->RunToVBlank(GetControllerData(), pixel_buffer.get(), audio_buffer, &audio_buffer_length);
 
-	OnFrameReady(*pixel_buffer, audio_buffer, audio_buffer_length);
+	OnFrameReady(pixel_buffer.get(), audio_buffer, audio_buffer_length);
 }
 
 /**
