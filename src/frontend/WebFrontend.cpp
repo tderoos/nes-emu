@@ -128,7 +128,9 @@ static bool sCopyIntoPersistentDir(const char* inPath, std::string& outPath)
 		return false;
 	}
 
-	uint8  buffer[65536];
+	// Small stack buffer on purpose: the wasm stack is tiny (64KB default),
+	// a large local here smashes it (stack cookie overwrite).
+	uint8  buffer[4096];
 	size_t count;
 	while ((count = fread(buffer, 1, sizeof(buffer), in)) > 0)
 		fwrite(buffer, 1, count, out);
